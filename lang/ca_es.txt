@@ -1,0 +1,31 @@
+# Truck Dirt: texts in ca_es (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Català
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Prem {key} per rentar el camió ({price})
+wash.hint_free = Prem {key} per rentar el camió (gratuït)
+wash.prompt = Rentar el camió
+wash.stop_first = Atura el camió per rentar-lo
+wash.parking_brake = Posa el fre de mà per rentar
+wash.already_clean = El camió ja és net
+wash.no_money = No tens prou diners per al rentat ({price})
+wash.charge_failed = El pagament ha fallat: el camió no s'ha rentat
+wash.washing = Rentant el camió
+wash.washed = El camió és net
+wash.ended_early = El rentat ha acabat abans d'hora
+wash.unknown_station = Reposta aquí un cop per poder rentar aquí
+
+menu.title = Truck Dirt: tecles
+menu.wash_key = Rentar el camió
+menu.panel_key = Tauler de prova
+menu.not_set = (sense assignar)
+menu.press_key = Prem la tecla nova ({key}: enrere)
+menu.help = {move}: triar, {edit}: canviar, {default}: per defecte, {close}: tancar
+menu.saved = Desat
+menu.taken = Ja s'utilitza: {name}
+menu.unsupported = Aquesta tecla no es pot fer servir

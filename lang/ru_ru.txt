@@ -1,0 +1,30 @@
+# Truck Dirt: texts in ru_ru (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = Русский
+_script = cyrillic
+_review = ok
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Нажмите {key}, чтобы помыть грузовик ({price})
+wash.hint_free = Нажмите {key}, чтобы помыть грузовик (бесплатно)
+wash.prompt = Помыть грузовик
+wash.stop_first = Остановите грузовик, чтобы помыть его
+wash.parking_brake = Включите стояночный тормоз для мойки
+wash.already_clean = Грузовик уже чистый
+wash.no_money = Недостаточно денег на мойку ({price})
+wash.charge_failed = Оплата не прошла: грузовик не помыт
+wash.washing = Мойка грузовика
+wash.washed = Грузовик чистый
+wash.ended_early = Мойка закончилась досрочно
+wash.unknown_station = Заправьтесь здесь один раз, чтобы здесь можно было мыть
+
+menu.title = Truck Dirt: клавиши
+menu.wash_key = Помыть грузовик
+menu.panel_key = Тестовая панель
+menu.not_set = (не задана)
+menu.press_key = Нажмите новую клавишу ({key}: отмена)
+menu.help = {move}: выбор, {edit}: изменить, {default}: по умолчанию, {close}: закрыть
+menu.saved = Сохранено
+menu.taken = Уже занята: {name}
+menu.unsupported = Эту клавишу нельзя использовать

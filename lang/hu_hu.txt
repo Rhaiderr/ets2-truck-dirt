@@ -1,0 +1,31 @@
+# Truck Dirt: texts in hu_hu (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Magyar
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Nyomd meg a(z) {key} gombot a kamion lemosásához ({price})
+wash.hint_free = Nyomd meg a(z) {key} gombot a kamion lemosásához (ingyenes)
+wash.prompt = Kamion lemosása
+wash.stop_first = Állj meg a kamionnal a mosáshoz
+wash.parking_brake = Húzd be a kéziféket a mosáshoz
+wash.already_clean = A kamion már tiszta
+wash.no_money = Nincs elég pénzed a mosásra ({price})
+wash.charge_failed = Sikertelen fizetés: a kamion nem lett lemosva
+wash.washing = A kamion mosása
+wash.washed = A kamion tiszta
+wash.ended_early = A mosás idő előtt véget ért
+wash.unknown_station = Tankolj itt egyszer, hogy itt moshass
+
+menu.title = Truck Dirt: billentyűk
+menu.wash_key = Kamion lemosása
+menu.panel_key = Tesztpanel
+menu.not_set = (nincs beállítva)
+menu.press_key = Nyomd meg az új billentyűt ({key}: mégse)
+menu.help = {move}: választás, {edit}: módosítás, {default}: alapértelmezett, {close}: bezárás
+menu.saved = Mentve
+menu.taken = Már használt: {name}
+menu.unsupported = Ez a billentyű nem használható

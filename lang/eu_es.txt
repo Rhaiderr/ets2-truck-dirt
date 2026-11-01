@@ -1,0 +1,31 @@
+# Truck Dirt: texts in eu_es (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Euskara
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Sakatu {key} kamioia garbitzeko ({price})
+wash.hint_free = Sakatu {key} kamioia garbitzeko (doan)
+wash.prompt = Kamioia garbitu
+wash.stop_first = Gelditu kamioia garbitzeko
+wash.parking_brake = Jarri esku-balazta garbitzeko
+wash.already_clean = Kamioia garbi dago jada
+wash.no_money = Ez dago diru nahikorik garbiketarako ({price})
+wash.charge_failed = Ordainketak huts egin du: kamioia ez da garbitu
+wash.washing = Kamioia garbitzen
+wash.washed = Kamioia garbi dago
+wash.ended_early = Garbiketa lehenago amaitu da
+wash.unknown_station = Erregaia hartu hemen behin, hemen garbitu ahal izateko
+
+menu.title = Truck Dirt: teklak
+menu.wash_key = Kamioia garbitu
+menu.panel_key = Proba-panela
+menu.not_set = (esleitu gabe)
+menu.press_key = Sakatu tekla berria ({key}: utzi)
+menu.help = {move}: aukeratu, {edit}: aldatu, {default}: lehenetsia, {close}: itxi
+menu.saved = Gordeta
+menu.taken = Erabilita: {name}
+menu.unsupported = Tekla hau ezin da erabili

@@ -1,0 +1,31 @@
+# Truck Dirt: texts in bg_bg (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Български
+_script = cyrillic
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Натиснете {key}, за да измиете камиона ({price})
+wash.hint_free = Натиснете {key}, за да измиете камиона (безплатно)
+wash.prompt = Измий камиона
+wash.stop_first = Спрете камиона, за да го измиете
+wash.parking_brake = Дръпнете ръчната спирачка, за да измиете
+wash.already_clean = Камионът вече е чист
+wash.no_money = Нямате достатъчно пари за измиването ({price})
+wash.charge_failed = Плащането не бе успешно: камионът не е измит
+wash.washing = Измиване на камиона
+wash.washed = Камионът е чист
+wash.ended_early = Измиването приключи по-рано
+wash.unknown_station = Заредете гориво тук веднъж, за да можете да миете тук
+
+menu.title = Truck Dirt: клавиши
+menu.wash_key = Измий камиона
+menu.panel_key = Тестов панел
+menu.not_set = (не е зададен)
+menu.press_key = Натиснете новия клавиш ({key}: отказ)
+menu.help = {move}: избор, {edit}: промяна, {default}: по подразбиране, {close}: затваряне
+menu.saved = Запазено
+menu.taken = Вече се използва: {name}
+menu.unsupported = Този клавиш не може да се използва

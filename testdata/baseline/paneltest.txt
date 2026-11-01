@@ -1,0 +1,125 @@
+ok   model: nothing forced by default                               0.631
+ok   model: a forced layer is shown                                 0.200
+ok   model: ... only on its unit (the trailer keeps its mud)        0.631
+ok   model: a forced trailer layer covers its front too             0.900
+ok   model: forced dust, one unit                                   0.600
+ok   model: forced reach, only on the forced layers                 0.750
+ok   model: Real() is the simulation, without the forced levels     0.631
+ok   model: the simulation keeps running under a forced layer       0.079
+ok   model: Forced{} gives the real levels back                     0.079
+ok   model: forced dust wins over [dust] level                      0.800
+ok   model: a forced layer wins over the INI override               0.100
+ok   model: Real() ignores the INI overrides                        0.000
+ok   off ([test] panel = 0): the key does nothing                   0.000
+ok   enabled: starts closed                                         0.000
+ok   closed: the other keys do nothing                              0.000
+ok   the panel key opens it                                         0.000
+ok   starts on the dust, truck + trailer                            1.000
+ok   one row per item, the selected one marked                      12.000
+ok   up from the first row wraps to the last                        11.000
+ok   down from the last row wraps to the first                      0.000
+ok   right on the unit: the next unit                               0.000
+ok   left on the unit wraps                                         2.000
+ok   enter on the unit: the next one too                            0.000
+ok   the panel key closes it (no badge: nothing forced)             0.000
+ok   right: +0.1 from the shown level, both units                   0.100
+ok   the top is 1                                                   1.000
+ok   right at 1: nothing changes                                    0.000
+ok   fine left: -0.01 each                                          0.970
+ok   left from 0.97: the grid below, 0.9                            0.900
+ok   the bottom is 0 (forced, not real)                             0.000
+ok   left at 0: nothing changes                                     0.000
+ok   end: 1 directly                                                1.000
+ok   home: 0 directly                                               0.000
+ok   100 fine steps from 0: exactly 1                               1.000
+ok   delete: the row is real again                                  -1.000
+ok   from a real level: the next 0.1 on the grid                    0.700
+ok   trailer only: the truck stays real                             0.631
+ok   both, different values: "truck/trailer", marked forced         0.000
+ok   both: the same value                                           1.000
+ok   wet + dry mud <= 1: dry 0.6 lowers wet to 0.4                  0.400
+ok   dry mud 1: wet mud 0                                           0.000
+ok   spray + film under 1: both stay                                0.500
+ok   film 1: spray 0                                                0.000
+ok   the real wet mud is forced down too                            0.631
+ok   real on dry mud: the forced wet mud stays                      0.000
+ok   clean all                                                      0.000
+ok   clean all: every layer of both units shows 0                   0.000
+ok   clean all: the simulation keeps its mud                        0.631
+ok   reach: "auto" while real                                       0.000
+ok   reach: the first step sets the middle, 0.5                     0.500
+ok   reach: the top is 1                                            1.000
+ok   closed with forced levels: they stay, with a badge             0.000
+ok   ... and stay in the model                                      0.000
+ok   all real: nothing forced                                       0.000
+ok   all real: the real levels are shown again                      0.631
+ok   all real twice: nothing changes                                0.000
+ok   closed, nothing forced: no badge                               0.000
+ok   hotkey: ctrl+f9                                                0.000
+ok   hotkey: spaces and case, back to text                          0.000
+ok   hotkey: f24                                                    0.000
+ok   hotkey: alt+numpad5                                            0.000
+ok   hotkey: control+pgdn                                           0.000
+ok   hotkey: bad text is refused and leaves the old one             0.000
+ok   hotkey: ctrl+f9 only (not ctrl+f8, f9, ctrl+shift+f9)          0.000
+ok   keys: ctrl + arrows, home, end, delete, enter                  0.000
+ok   keys: without ctrl, with alt or another key: nothing           0.000
+ok   repeat: one press when the key goes down                       1.000
+ok   repeat: nothing more for 400 ms                                1.000
+ok   repeat: then about every 60 ms                                 11.000
+ok   repeat: a long frame gives one press, not a burst              1.000
+ok   repeat: released and pressed again: a new press                0.000
+ok   font: 'A' as in font8x8                                        0.000
+ok   font: 127 is solid, space is empty                             64.000
+ok   scale: 1 at 720p, 2 at 1080p and 1440p, 4 at 4K                2.000
+ok   layout: closed and nothing forced: nothing drawn               0.000
+ok   layout: open panel inside the screen, 720p to 4K               305.000
+ok   layout: glyphs on whole pixels at the font's scale             0.000
+ok   view: label, value, bar and forced mark of a row               0.400
+ok   view: "wet mud", not forced                                    0.000
+ok   layout: closed with forced levels: the badge only              39.000
+ok   notice: "drive ~1 m" names the wheels-only units               0.000
+ok   layout: the badge with the notice, one more line               49.000
+ok   layout: the open panel with the notice, inside and crisp       39.000
+-- V6: the keys menu
+ok   hotkey labels: F8, Ctrl+Shift+PageDown                         0.000
+ok   read: f8 by default, ctrl+f10 from the INI                     0.000
+ok   closed: keys do nothing                                        0.000
+ok   ctrl+f8 opens it on the first row                              0.000
+ok   a plain arrow does nothing while the game gets the keys        0.000
+ok   ctrl+down: the next row                                        0.000
+ok   a plain arrow works with the game's keys held back             0.000
+ok   ctrl+up from the first row: the last (wraps)                   0.000
+ok   ctrl+enter: waits for the new key                              0.000
+ok   a modifier alone: still waiting                                0.000
+ok   G: [test] panel_key = g written                                0.000
+ok   F8 for the panel: refused, the wash has it                     0.000
+ok   ctrl+f8 for the panel: refused, the menu has it                0.000
+ok   a key the INI cannot name: refused                             0.000
+ok   esc while waiting: cancelled, menu still open                  0.000
+ok   shift+f9 for the wash: [wash] key = shift+f9                   0.000
+ok   ctrl+del: the wash back to f8                                  0.000
+ok   ctrl+del on the panel: back to ctrl+f9                         0.000
+ok   the view: labels, values, the selected row, the status         0.000
+ok   the help line names the keys (with Ctrl while the game gets them) 0.000
+ok   the help line without Ctrl when the game's keys are held back  0.000
+ok   esc does not close while the game gets the keys                0.000
+ok   ctrl+f8 closes it                                              0.000
+ok   esc closes it with the game's keys held back                   0.000
+ok   the hook keeps arrows, Esc, letters, Ctrl+F8                   0.000
+ok   never Ctrl, Windows, Alt+Tab, Alt+F4, Ctrl+Esc, Print Screen   0.000
+-- D5: the overlay's layout
+ok   text width: 16 glyphs of 10 px (UTF-8 decoded)                 0.000
+ok   a missing glyph is measured as '?'                             0.000
+ok   font size (D11h): as the game's notice, 14 px per 1440 of height (11 at 1080p, 21 at 4K), at least 9 0.000
+ok   nothing to show: no quad                                       0.000
+ok   the hint: its rounded box, lines and 7 glyphs, on the screen   48.000
+ok   D11g: its bottom edge at 82% of the height (hint_y)            886.000
+ok   D11c: with a key and a price: the keycap, its 2 glyphs and the price's 4 56.000
+ok   the wash: the whole screen black first                         2710.000
+ok   the animation depends on its progress only (the same picture twice) 0.000
+ok   half dark: the black at half alpha                             128.000
+ok   D11f: the visit centred on the screen                          960.000
+ok   D11f: the lime bar grows with the progress (3x from 25% to 75%) 3.083
+ok   D11f: the visit fades in (nothing but the black at 0)          0.000
+done (0 failures)

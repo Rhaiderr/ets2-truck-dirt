@@ -1,0 +1,31 @@
+# Truck Dirt: texts in hr_hr (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Hrvatski
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Pritisnite {key} za pranje kamiona ({price})
+wash.hint_free = Pritisnite {key} za pranje kamiona (besplatno)
+wash.prompt = Operi kamion
+wash.stop_first = Zaustavite kamion da biste ga oprali
+wash.parking_brake = Povucite ručnu kočnicu za pranje
+wash.already_clean = Kamion je već čist
+wash.no_money = Nemate dovoljno novca za pranje ({price})
+wash.charge_failed = Plaćanje nije uspjelo: kamion nije opran
+wash.washing = Pranje kamiona
+wash.washed = Kamion je čist
+wash.ended_early = Pranje je završilo ranije
+wash.unknown_station = Natočite gorivo ovdje jednom da biste ovdje mogli prati
+
+menu.title = Truck Dirt: tipke
+menu.wash_key = Operi kamion
+menu.panel_key = Testna ploča
+menu.not_set = (nije postavljeno)
+menu.press_key = Pritisnite novu tipku ({key}: odustani)
+menu.help = {move}: odaberi, {edit}: promijeni, {default}: zadano, {close}: zatvori
+menu.saved = Spremljeno
+menu.taken = Već se koristi: {name}
+menu.unsupported = Ova se tipka ne može koristiti

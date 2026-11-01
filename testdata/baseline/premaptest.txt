@@ -1,0 +1,16 @@
+table: 6 pieces taken (of 9 lines; 3 not pieces)
+another format: 0
+144/74 at the ext_model's box: int_ext
+144/74 at the interior model's box: int
+3717/1440, 1 mm off: int_ext
+3717/1440, 1 cm off: none
+3717 with another vertex count: none
+1212/366 matching two kinds: none
+96/36, an outside piece: ext
+1182/534 moved 0.60 up, 0.36 back: cargo
+  by size: 1
+2463/1135 moved, its size also another kind's: none
+144/74 int_ext's size, moved (only a cargo goes by size): none
+2463/1135 at the model's box: cargo
+after Clear: none
+ok

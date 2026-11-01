@@ -1,0 +1,118 @@
+-- price and INI
+ok   default: 120 the truck alone, 180 with a trailer                   120 / 180
+ok   D11f: the visit's times by default: 0.8 s, 5 s, 0.8 s              
+ok   D11f: the visit shows what this wash costs (base 120, shown x1.5)  120 / 180
+ok   INI options read (spaces trimmed, no locale)                       
+ok   bad values rejected, the settings unchanged                        11 rejected
+ok   the reason, for the log                                            price_truck = "abc": expected a whole number from 0 to 1000000
+-- conditions to start
+ok   out of the area: no hint                                           
+ok   key out of the area: no wash, refuel here first (D4y)              unknown_station
+ok   ... the message goes                                               
+ok   in the area, stopped: hint with the price                          120
+ok   with a trailer: the rig's price                                    180
+ok   moving in the area: the hint already (D11c)                        
+ok   key while moving: stop first                                       stop_first
+ok   the message stays 4 s                                              
+ok   then goes: the hint again, still moving in the area (D11c)         
+ok   rolling back under 0.5 km/h counts as stopped                      
+ok   key in the pause menu: ignored, no hint                            
+ok   already clean (dirtiest layer under 0.02): refused, not charged    
+ok   balance 179 < 180: no money, not charged                           
+ok   balance 180 = price: charged                                       180
+ok   balance unknown: the charge decides                                120
+-- a full wash (trace)
+     t=  0.016 idle     dark=0.000 show=0.000 msg=hint          price=180
+     t=  0.033 darken   dark=0.000 show=0.000 msg=-             price=0 charge 180
+     t=  1.033 show     dark=1.000 show=0.000 msg=-             price=0
+     t=  7.049 lighten  dark=0.983 show=1.000 msg=-             price=0 clean 3
+     t=  8.049 idle     dark=0.000 show=0.000 msg=washed        price=0
+     t= 12.049 idle     dark=0.000 show=0.000 msg=hint          price=180
+ok   charged once, the rig's price                                      180
+ok   cleaned once: truck and trailer                                    3
+ok   clean at the end of darken + show (7 s), screen black              7.017 s, dark 1.000
+ok   darken 1 s + show 6 s + lighten 1 s                                8.017 s
+ok   after the message, the hint again (still in the area)              
+ok   darken: half way at 0.5 s                                          0.500
+ok   show: black, the animation half way at 4 s                         0.500
+ok   creeping under 2 km/h does not end it                              
+ok   truck alone: washed, only the truck cleaned                        1
+ok   the key during the wash does not start or charge another           
+-- moved, ends early (trace)
+     t=  0.017 darken   dark=0.000 show=0.000 msg=-             price=0 charge 120
+     t=  1.017 show     dark=1.000 show=0.000 msg=-             price=0
+     t=  3.033 lighten  dark=0.983 show=0.333 msg=-             price=0 clean 1
+     t=  4.033 idle     dark=0.000 show=0.000 msg=ended_early   price=0
+ok   moved in the show: cleaned at once, from black                     0.017
+ok   lighten takes the full 1 s                                         1.017 s
+ok   ended early, still paid                                            
+     t=  0.017 darken   dark=0.000 show=0.000 msg=-             price=0 charge 120
+     t=  0.433 lighten  dark=0.383 show=0.000 msg=-             price=0 clean 1
+     t=  0.833 idle     dark=0.000 show=0.000 msg=ended_early   price=0
+ok   left the area while darkening: cleaned at the darkness reached     0.400
+ok   lightens from there at the same speed (0.4 s)                      0.417 s
+ok   ended early                                                        
+ok   the key again in the show: ends early                              
+ok   in lighten                                                         
+ok   moving or the key while lightening: nothing changes, washed        
+-- the charge
+ok   charge refused: no wash, charge failed                             
+ok   no answer yet: waiting, the game visible                           
+ok   no answer in 3 s: charge failed                                    
+ok   a late answer is ignored                                           
+ok   charge = 0: the hint shows no price                                
+ok   charge = 0: free, with no money                                    
+ok   price 0: washed without a charge                                   
+-- real time: pause, frame rate, hitches
+ok   paused 60 s in the show: frozen, not ended early                   0.333
+ok   after the pause, the rest (4 + 1 s)                                5.017 s
+ok   20 to 300 fps: 8 s, clean at 7 s, within a frame                   8.050 8.033 8.017 8.000 8.003 
+ok   uneven frames (4 to 64 ms): the same 8 s                           8.018 s
+ok   a 5 s frame counts as 0.25 s: no phase skipped                     0.250
+ok   the clock going back counts as 0                                   0.250
+ok   every time 0: washed in the frame after the charge                 
+-- parking brake and currency
+ok   stopped in the area, parking brake off: the hint already (D11c)    
+ok   parking brake on: the hint shows                                   
+ok   key stopped, parking brake off: asked for it, not charged          parking_brake
+ok   parking brake on: the wash starts                                  
+ok   brake released in darken, not moving: the wash goes on             
+ok   moved anyway: everything cleaned, the full price paid              120, clean 1
+ok   display_rate read                                                  
+ok   display_rate 0 or negative: rejected                               display_rate = "-1": expected a number from 0 to 1000000
+ok   hint: 180 in the base currency shown as 155 (rate 0.86)            180 -> 155
+ok   the charge stays in the base currency                              180
+ok   balance negative (a loan): no money, not charged                   120
+-- L7: service stations learnt at a refuel
+ok   stopped, parking brake, fuel rising 20 l: the spot is learnt       1
+ok   the same stop learns once                                          1
+ok   22 m away, 1 m up: in the area                                     
+ok   30 m away: not in the area                                         
+ok   10 m above (a bridge): not in the area                             
+ok   the parking brake off: not learnt (the user's rule)                
+ok   moving: not learnt                                                 
+ok   a jump of 400 l in one frame (a truck change): not a refuel        
+ok   20 l in one frame, then still: not a refuel (one rise)             
+ok   2 l: below the 3 l of a refuel                                     
+ok   the rise counts from the lowest fuel of the stop (4 l in all)      1
+ok   a pause in the middle: still one spot                              1
+ok   3 l over two places 3 m apart: not learnt (each stop counts its own) 
+ok   then 13 l in the second place: learnt                              
+ok   15 fps: learnt as at 60                                            1
+ok   144 fps: learnt as at 60                                           1
+ok   a spot within 25 m of a known one is the same station              
+ok   past max_spots the oldest goes                                     
+ok   saved and read back (2 decimals)                                   2
+     file:
+truck_dirt_wash_spots 1
+# Truck Dirt: the service stations where the truck was refuelled (wash at the station, L7).
+# One per line: spot x y z (metres, the game's world). Delete a line to forget a station.
+spot -18189.25 52.50 18389.75
+spot 1234.50 -3.00 -98765.13
+ok   BOM, CRLF, bad lines skipped and reported                          3 errors
+     line 3: expected "spot x y z", got "spot 1 2"
+     line 4: expected "spot x y z", got "spot a b c"
+     line 5: expected "spot x y z", got "pump 1 2 3"
+ok   no header: nothing read, the spots kept                            line 1: not a wash_spots file ("spot 1 2 3")
+ok   empty file: the spots kept                                         
+all passed

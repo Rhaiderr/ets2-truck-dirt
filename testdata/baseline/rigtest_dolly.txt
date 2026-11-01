@@ -1,0 +1,22 @@
+testdata/rig_dolly/ats_d4m_capture_001.csv: 2011 draws
+view 0: 2011 draws | truck found 95 members at (0.00 -1.79 -31.37) | trailer found 60 members at (1.04 -3.06 -25.61)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 28/20 frame 3 95/60
+  cab check: the offset moves the cab 0.0 cm; draws at the cab's frame 53, at the chassis' 0
+  wheel reach (cm): truck 2 2 0 0 0 0; trailer 0 0 0 0
+  unit behind (N24): the trailer's box ends at z 8.43; trailer claims 60, 0 of them past it
+  promoted 107, held 0, cab claims 0, missed 49, handed 0, shared 0
+testdata/rig_dolly/ats_d4m_capture_003.csv: 2180 draws
+view 0: 2180 draws | truck found 92 members at (0.72 -1.63 -33.92) | trailer found 60 members at (1.82 -1.93 -28.23)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 28/20 frame 3 92/60
+  cab check: the offset moves the cab 0.0 cm; draws at the cab's frame 53, at the chassis' 0
+  wheel reach (cm): truck 2 2 0 0 0 0; trailer 0 0 0 0
+  unit behind (N24): the trailer's box ends at z 8.43; trailer claims 60, 0 of them past it
+  promoted 211, held 0, cab claims 0, missed 138, handed 0, shared 0
+testdata/rig_dolly/ats_d4m_capture_008.csv: 1702 draws
+view 0: 1702 draws | truck found 86 members at (0.63 -1.56 -26.95) | trailer found 66 members at (3.14 -1.80 -21.45)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 28/20 frame 3 86/66
+  cab check: the offset moves the cab 0.0 cm; draws at the cab's frame 53, at the chassis' 0
+  wheel reach (cm): truck 2 2 0 0 0 0; trailer 0 0 0 0
+  unit behind (N24): the trailer's box ends at z 8.43; trailer claims 66, 0 of them past it
+  promoted 315, held 0, cab claims 0, missed 185, handed 0, shared 0
+done

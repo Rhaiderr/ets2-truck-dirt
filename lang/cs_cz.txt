@@ -1,0 +1,30 @@
+# Truck Dirt: texts in cs_cz (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = Čeština
+_script = latin
+_review = ok
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Stiskněte {key} pro umytí kamionu ({price})
+wash.hint_free = Stiskněte {key} pro umytí kamionu (zdarma)
+wash.prompt = Umýt kamion
+wash.stop_first = Zastavte kamion, abyste ho mohli umýt
+wash.parking_brake = Zatáhněte parkovací brzdu pro umytí
+wash.already_clean = Kamion je už čistý
+wash.no_money = Nedostatek peněz na mytí ({price})
+wash.charge_failed = Platba se nezdařila: kamion nebyl umyt
+wash.washing = Mytí kamionu
+wash.washed = Kamion je čistý
+wash.ended_early = Mytí skončilo předčasně
+wash.unknown_station = Jednou zde natankujte, abyste tu mohli mýt
+
+menu.title = Truck Dirt: klávesy
+menu.wash_key = Umýt kamion
+menu.panel_key = Testovací panel
+menu.not_set = (nenastaveno)
+menu.press_key = Stiskněte novou klávesu ({key}: zrušit)
+menu.help = {move}: vybrat, {edit}: změnit, {default}: výchozí, {close}: zavřít
+menu.saved = Uloženo
+menu.taken = Již použito: {name}
+menu.unsupported = Tuto klávesu nelze použít

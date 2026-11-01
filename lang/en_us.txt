@@ -1,0 +1,30 @@
+# Truck Dirt: texts in en_us (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = English (US)
+_script = latin
+_review = ok
+_price = {currency}{amount}
+_thousands = ,
+
+wash.hint = Press {key} to wash the truck ({price})
+wash.hint_free = Press {key} to wash the truck (free)
+wash.prompt = Wash the truck
+wash.stop_first = Stop the truck to wash it
+wash.parking_brake = Set the parking brake to wash the truck
+wash.already_clean = The truck is already clean
+wash.no_money = Not enough money for the wash ({price})
+wash.charge_failed = Payment failed: the truck was not washed
+wash.washing = Washing the truck
+wash.washed = The truck is clean
+wash.ended_early = The wash ended early
+wash.unknown_station = Refuel here once to be able to wash here
+
+menu.title = Truck Dirt: keys
+menu.wash_key = Wash the truck
+menu.panel_key = Test panel
+menu.not_set = (not set)
+menu.press_key = Press the new key ({key}: cancel)
+menu.help = {move}: choose, {edit}: change, {default}: default, {close}: close
+menu.saved = Saved
+menu.taken = Already used: {name}
+menu.unsupported = This key cannot be used

@@ -1,0 +1,146 @@
+run1_capture_001.csv -> run1_capture_001.csv
+  map: truck 59 parts, trailer 34
+  draws claimed (truck/trailer): drive 116/180, parked 32/48, parked with the map 116/180
+  restored 98, map parts found 59/59 and 34/34, wrong claims 0, made-up claims 0 of 432
+  written back: truck 59 parts
+run1_capture_001.csv -> run2_capture_001.csv
+  map: truck 59 parts, trailer 34
+  draws claimed (truck/trailer): drive 200/188, parked 32/54, parked with the map 116/188
+  restored 98, map parts found 59/59 and 34/34, wrong claims 0, made-up claims 0 of 604
+  written back: truck 60 parts
+run1_capture_002.csv -> run1_capture_002.csv
+  map: truck 59 parts, trailer 34
+  draws claimed (truck/trailer): drive 116/180, parked 32/48, parked with the map 116/180
+  restored 98, map parts found 59/59 and 34/34, wrong claims 0, made-up claims 0 of 432
+  written back: truck 59 parts
+run1_capture_002.csv -> run2_capture_002.csv
+  map: truck 59 parts, trailer 34
+  draws claimed (truck/trailer): drive 200/188, parked 32/54, parked with the map 116/170
+  restored 92, map parts found 59/59 and 28/34, wrong claims 0, made-up claims 0 of 604
+  written back: truck 60 parts
+run1_capture_003.csv -> run1_capture_003.csv
+  map: truck 60 parts, trailer 34
+  draws claimed (truck/trailer): drive 116/188, parked 32/54, parked with the map 116/188
+  restored 98, map parts found 59/60 and 34/34, wrong claims 0, made-up claims 0 of 436
+  written back: truck 60 parts
+run1_capture_003.csv -> run2_capture_003.csv
+  map: truck 60 parts, trailer 34
+  draws claimed (truck/trailer): drive 97/147, parked 28/45, parked with the map 97/132
+  restored 84, map parts found 52/60 and 28/34, wrong claims 0, made-up claims 0 of 342
+  written back: truck 63 parts
+run1_capture_004.csv -> run1_capture_004.csv
+  map: truck 59 parts, trailer 34
+  draws claimed (truck/trailer): drive 116/188, parked 32/54, parked with the map 116/188
+  restored 98, map parts found 59/59 and 34/34, wrong claims 0, made-up claims 0 of 436
+  written back: truck 59 parts
+run1_capture_004.csv -> run2_capture_004.csv
+  map: truck 59 parts, trailer 34
+  draws claimed (truck/trailer): drive 200/188, parked 32/54, parked with the map 116/170
+  restored 92, map parts found 59/59 and 28/34, wrong claims 0, made-up claims 0 of 604
+  written back: truck 59 parts
+run1_capture_005.csv -> run1_capture_005.csv
+  map: truck 60 parts, trailer 34
+  draws claimed (truck/trailer): drive 116/188, parked 32/54, parked with the map 116/188
+  restored 98, map parts found 59/60 and 34/34, wrong claims 0, made-up claims 0 of 436
+  written back: truck 60 parts
+run1_capture_005.csv -> run2_capture_005.csv
+  map: truck 60 parts, trailer 34
+  draws claimed (truck/trailer): drive 78/53, parked 16/18, parked with the map 23/45
+  restored 34, map parts found 7/60 and 27/34, wrong claims 0, made-up claims 0 of 194
+  written back: truck 60 parts
+run1_capture_006.csv -> run1_capture_006.csv
+  map: truck 60 parts, trailer 34
+  draws claimed (truck/trailer): drive 116/184, parked 32/51, parked with the map 116/184
+  restored 98, map parts found 59/60 and 34/34, wrong claims 0, made-up claims 0 of 434
+  written back: truck 60 parts
+run1_capture_006.csv -> run2_capture_006.csv
+  map: truck 60 parts, trailer 34
+  draws claimed (truck/trailer): drive 200/212, parked 32/72, parked with the map 112/180
+  restored 89, map parts found 58/60 and 27/34, wrong claims 0, made-up claims 0 of 616
+  written back: truck 61 parts
+run1_capture_007.csv -> run1_capture_007.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+run1_capture_007.csv -> run2_capture_007.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 37/0, parked 12/0, parked with the map 18/0
+  restored 6, map parts found 6/71 and 0/38, wrong claims 0, made-up claims 0 of 50
+  written back: truck 71 parts
+run1_capture_008.csv -> run1_capture_008.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+run1_capture_008.csv -> run2_capture_008.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 0/0, parked 0/0, parked with the map 0/0
+  restored 0, map parts found 0/71 and 0/38, wrong claims 0, made-up claims 0 of 0
+  written back: truck 71 parts
+run1_capture_009.csv -> run1_capture_009.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+run1_capture_009.csv -> run2_capture_009.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 97/0, parked 24/0, parked with the map 96/0
+  restored 72, map parts found 68/71 and 0/38, wrong claims 0, made-up claims 0 of 146
+  written back: truck 71 parts
+run1_capture_010.csv -> run1_capture_010.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+run1_capture_010.csv -> run2_capture_010.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 97/0, parked 24/0, parked with the map 96/0
+  restored 72, map parts found 68/71 and 0/38, wrong claims 0, made-up claims 0 of 146
+  written back: truck 71 parts
+run1_capture_011.csv -> run1_capture_011.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+run1_capture_011.csv -> run2_capture_011.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 97/0, parked 24/0, parked with the map 96/0
+  restored 72, map parts found 68/71 and 0/38, wrong claims 0, made-up claims 0 of 146
+  written back: truck 71 parts
+run1_capture_012.csv -> run1_capture_012.csv
+  map: truck 87 parts, trailer 34
+  draws claimed (truck/trailer): drive 200/188, parked 32/54, parked with the map 200/188
+  restored 125, map parts found 86/87 and 34/34, wrong claims 0, made-up claims 0 of 604
+  written back: truck 87 parts
+run1_capture_012.csv -> run2_capture_012.csv
+  map: truck 87 parts, trailer 34
+  draws claimed (truck/trailer): drive 97/0, parked 24/0, parked with the map 34/0
+  restored 10, map parts found 7/87 and 0/34, wrong claims 0, made-up claims 0 of 146
+  written back: truck 87 parts
+run1_capture_013.csv -> run1_capture_013.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+run1_capture_013.csv -> run2_capture_013.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 97/0, parked 24/0, parked with the map 96/0
+  restored 72, map parts found 68/71 and 0/38, wrong claims 0, made-up claims 0 of 146
+  written back: truck 71 parts
+run1_capture_014.csv -> run1_capture_014.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+run1_capture_015.csv -> run1_capture_015.csv
+  map: truck 71 parts, trailer 38
+  draws claimed (truck/trailer): drive 101/57, parked 24/18, parked with the map 101/57
+  restored 116, map parts found 71/71 and 38/38, wrong claims 0, made-up claims 0 of 232
+  written back: truck 71 parts
+reloads: truck learnt 79 members (116 draws claimed), 84 box draws in a new buffer every 4 frames for 120 frames: known 184 after 5 rounds, at most 184 after, reloaded 2520, restored 0, rounds with draws lost 0
+reloads (opened with the map, parked): truck learnt 79 members (116 draws claimed), 84 box draws in a new buffer every 4 frames for 120 frames: known 184 after 5 rounds, at most 184 after, reloaded 0, restored 2520, rounds with draws lost 0
+cab inside (N55): 13 parts drawn with ref 2, 0 left without dust outside (of 12; D14d: 0), the mirror's one unit 0; inside parts 12 of 13 seen; main view looks 3, placed 3 (D14c: the truck not tracked there)
+cab inside (N55): 13 inside lines in the map; opened with it, 0 of 12 without dust (D14d: 0)
+maps read: 1 part(s) of 2 lines, another key 0, another format 0
+ok

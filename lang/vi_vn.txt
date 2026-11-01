@@ -1,0 +1,32 @@
+# Truck Dirt: texts in vi_vn (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+# Needs the Vietnamese letters (U+1EA0..U+1EF9) in the font.
+
+_name = Tiếng Việt
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Nhấn {key} để rửa xe tải ({price})
+wash.hint_free = Nhấn {key} để rửa xe tải (miễn phí)
+wash.prompt = Rửa xe tải
+wash.stop_first = Hãy dừng xe tải để rửa
+wash.parking_brake = Kéo phanh tay để rửa xe
+wash.already_clean = Xe tải đã sạch rồi
+wash.no_money = Không đủ tiền để rửa xe ({price})
+wash.charge_failed = Thanh toán thất bại: xe tải chưa được rửa
+wash.washing = Đang rửa xe tải
+wash.washed = Xe tải đã sạch
+wash.ended_early = Việc rửa xe đã kết thúc sớm
+wash.unknown_station = Hãy đổ nhiên liệu ở đây một lần để có thể rửa xe ở đây
+
+menu.title = Truck Dirt: phím
+menu.wash_key = Rửa xe tải
+menu.panel_key = Bảng thử nghiệm
+menu.not_set = (chưa đặt)
+menu.press_key = Nhấn phím mới ({key}: hủy)
+menu.help = {move}: chọn, {edit}: đổi, {default}: mặc định, {close}: đóng
+menu.saved = Đã lưu
+menu.taken = Đã được dùng: {name}
+menu.unsupported = Không thể dùng phím này

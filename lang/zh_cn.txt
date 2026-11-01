@@ -1,0 +1,32 @@
+# Truck Dirt: texts in zh_cn (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+# Needs a Simplified Chinese font.
+
+_name = 简体中文
+_script = cjk
+_review = estimate
+_price = {currency}{amount}
+_thousands = ,
+
+wash.hint = 按 {key} 清洗卡车（{price}）
+wash.hint_free = 按 {key} 清洗卡车（免费）
+wash.prompt = 清洗卡车
+wash.stop_first = 请先停车再洗车
+wash.parking_brake = 请拉起驻车制动再洗车
+wash.already_clean = 卡车已经很干净了
+wash.no_money = 资金不足，无法洗车（{price}）
+wash.charge_failed = 付款失败：卡车未清洗
+wash.washing = 正在清洗卡车
+wash.washed = 卡车已清洗干净
+wash.ended_early = 洗车提前结束
+wash.unknown_station = 在这里加油一次后即可在此洗车
+
+menu.title = Truck Dirt: 按键
+menu.wash_key = 清洗卡车
+menu.panel_key = 测试面板
+menu.not_set = (未设置)
+menu.press_key = 按下新按键 ({key}: 取消)
+menu.help = {move}: 选择, {edit}: 更改, {default}: 默认, {close}: 关闭
+menu.saved = 已保存
+menu.taken = 已被使用: {name}
+menu.unsupported = 此按键无法使用

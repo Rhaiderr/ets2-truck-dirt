@@ -1,0 +1,31 @@
+# Truck Dirt: texts in uk_uk (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Українська
+_script = cyrillic
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Натисніть {key}, щоб помити вантажівку ({price})
+wash.hint_free = Натисніть {key}, щоб помити вантажівку (безкоштовно)
+wash.prompt = Помити вантажівку
+wash.stop_first = Зупиніть вантажівку, щоб помити її
+wash.parking_brake = Увімкніть стоянкове гальмо для миття
+wash.already_clean = Вантажівка вже чиста
+wash.no_money = Недостатньо грошей на миття ({price})
+wash.charge_failed = Оплата не пройшла: вантажівку не помито
+wash.washing = Миття вантажівки
+wash.washed = Вантажівка чиста
+wash.ended_early = Миття закінчилося достроково
+wash.unknown_station = Заправтеся тут один раз, щоб тут можна було мити
+
+menu.title = Truck Dirt: клавіші
+menu.wash_key = Помити вантажівку
+menu.panel_key = Тестова панель
+menu.not_set = (не задано)
+menu.press_key = Натисніть нову клавішу ({key}: скасувати)
+menu.help = {move}: вибір, {edit}: змінити, {default}: типово, {close}: закрити
+menu.saved = Збережено
+menu.taken = Уже зайнята: {name}
+menu.unsupported = Цю клавішу не можна використати

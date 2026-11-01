@@ -1,0 +1,32 @@
+# Truck Dirt: texts in ka_ge (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+# Needs a Georgian font.
+
+_name = ქართული
+_script = georgian
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = დააჭირეთ {key}-ს სატვირთოს გასარეცხად ({price})
+wash.hint_free = დააჭირეთ {key}-ს სატვირთოს გასარეცხად (უფასოდ)
+wash.prompt = სატვირთოს გარეცხვა
+wash.stop_first = გააჩერეთ სატვირთო გასარეცხად
+wash.parking_brake = ჩართეთ ხელის მუხრუჭი გასარეცხად
+wash.already_clean = სატვირთო უკვე სუფთაა
+wash.no_money = რეცხვისთვის საკმარისი თანხა არ გაქვთ ({price})
+wash.charge_failed = გადახდა ვერ მოხერხდა: სატვირთო არ გაირეცხა
+wash.washing = სატვირთო ირეცხება
+wash.washed = სატვირთო სუფთაა
+wash.ended_early = რეცხვა ადრე დასრულდა
+wash.unknown_station = ერთხელ აქ ჩაასხით საწვავი, რომ აქ რეცხვა შეძლოთ
+
+menu.title = Truck Dirt: ღილაკები
+menu.wash_key = სატვირთოს გარეცხვა
+menu.panel_key = სატესტო პანელი
+menu.not_set = (არ არის მითითებული)
+menu.press_key = დააჭირეთ ახალ ღილაკს ({key}: გაუქმება)
+menu.help = {move}: არჩევა, {edit}: შეცვლა, {default}: ნაგულისხმევი, {close}: დახურვა
+menu.saved = შენახულია
+menu.taken = უკვე გამოიყენება: {name}
+menu.unsupported = ამ ღილაკის გამოყენება შეუძლებელია

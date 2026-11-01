@@ -1,0 +1,31 @@
+# Truck Dirt: texts in sl_sl (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Slovenščina
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Pritisnite {key} za pranje tovornjaka ({price})
+wash.hint_free = Pritisnite {key} za pranje tovornjaka (brezplačno)
+wash.prompt = Operi tovornjak
+wash.stop_first = Ustavite tovornjak, da ga operete
+wash.parking_brake = Zategnite ročno zavoro za pranje
+wash.already_clean = Tovornjak je že čist
+wash.no_money = Premalo denarja za pranje ({price})
+wash.charge_failed = Plačilo ni uspelo: tovornjak ni opran
+wash.washing = Pranje tovornjaka
+wash.washed = Tovornjak je čist
+wash.ended_early = Pranje se je končalo predčasno
+wash.unknown_station = Enkrat tukaj natočite gorivo, da boste lahko tukaj prali
+
+menu.title = Truck Dirt: tipke
+menu.wash_key = Operi tovornjak
+menu.panel_key = Testna plošča
+menu.not_set = (ni nastavljeno)
+menu.press_key = Pritisnite novo tipko ({key}: prekliči)
+menu.help = {move}: izberi, {edit}: spremeni, {default}: privzeto, {close}: zapri
+menu.saved = Shranjeno
+menu.taken = Že v uporabi: {name}
+menu.unsupported = Te tipke ni mogoče uporabiti

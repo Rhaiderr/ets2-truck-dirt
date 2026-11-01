@@ -1,0 +1,87 @@
+-- file format
+ok   BOM, CRLF, comments and blank lines                                3
+ok   spaces around key and text trimmed                                 "x y"
+ok   \n and \\ escapes                                                  
+ok   \s is a no-break space, kept at the ends                           
+ok   bad lines reported                                                 line 2: a: twice (the first one stays) | line 3: no '=' | line 4: bad key "B" | line 5: bad: bad escape (only \n, \s and \\) | line 6: not UTF-8
+ok   the first of a key twice stays, the rest read                      
+ok   UTF-8 of 1 to 4 bytes                                              
+ok   overlong, surrogate, past U+10FFFF, cut, stray: rejected           7 of 7
+-- placeholders, reserve and price
+ok   Fill: known filled, unknown kept                                   
+ok   Fill: an unclosed brace is text                                    
+ok   Placeholders in order                                              
+ok   the language, else the reserve, else the key                       
+ok   price: the language's pattern and separator                        1 234 567 EUR
+ok   price: under 1000, negative, zero                                  CHF-1,500
+ok   price: an empty separator is kept                                  Ft70000
+ok   Pick: the code itself                                              
+ok   Pick: the same language, in kCodes order                           
+ok   Pick: else the reserve                                             
+-- lang files (42 codes)
+ok   every code has a file that reads without a problem                 42 of 42
+ok   no file for a code the game does not have                          
+ok   en_gb: a text for every wash::Message and the meta keys            
+ok   en_gb: {key} and {price} in the hint, {price} in no_money          
+ok   every language has every key of en_gb, none empty                  26 keys
+ok   no language has a key en_gb does not have                          
+ok   the same placeholders as en_gb everywhere (no {price} or {key} lost) 
+ok   no fixed currency in a text                                        
+ok   _script and _review valid; every glyph in its script               
+     to check by a speaker [estimate] (29): bg_bg, ca_es, da_dk, el_gr, es_la, et_ee, eu_es, fi_fi, gl_es, hr_hr, hu_hu, ja_jp, ka_ge, ko_kr, lt_lt, lv_lv, mk_mk, no_no, pl_si, ro_ro, sk_sk, sl_sl, sr_sp, sr_sr, tr_tr, uk_uk, vi_vn, zh_cn, zh_tw
+     need another font (5): ja_jp, ka_ge, ko_kr, zh_cn, zh_tw
+-- every language (script, review, distinct non-ASCII glyphs, the hint filled in)
+     bg_bg cyrillic estimate  37  Натиснете F8, за да измиете камиона (1 180 €)
+     ca_es latin    estimate   6  Prem F8 per rentar el camió (1.180 €)
+     cs_cz latin    ok        10  Stiskněte F8 pro umytí kamionu (1 180 €)
+     da_dk latin    estimate   5  Tryk på F8 for at vaske lastbilen (1.180 €)
+     de_de latin    ok         5  Drücke F8, um den Lkw zu waschen (1.180 €)
+     el_gr greek    estimate  39  Πατήστε F8 για να πλύνετε το φορτηγό (1.180 €)
+     en_gb latin    ok         0  Press F8 to wash the truck (€1,180)
+     en_us latin    ok         0  Press F8 to wash the truck (€1,180)
+     es_es latin    ok         6  Pulsa F8 para lavar el camión (1.180 €)
+     es_la latin    estimate   6  Presiona F8 para lavar el camión (€ 1,180)
+     et_ee latin    estimate   4  Veoki pesemiseks vajuta F8 (1 180 €)
+     eu_es latin    estimate   1  Sakatu F8 kamioia garbitzeko (1.180 €)
+     fi_fi latin    estimate   3  Paina F8 pestäksesi rekan (1 180 €)
+     fr_fr latin    ok         7  Appuyez sur F8 pour laver le camion (1 180 €)
+     gl_es latin    estimate   5  Preme F8 para lavar o camión (1.180 €)
+     hr_hr latin    estimate   5  Pritisnite F8 za pranje kamiona (1.180 €)
+     hu_hu latin    estimate   9  Nyomd meg a(z) F8 gombot a kamion lemosásához (1 180 €)
+     it_it latin    ok         4  Premi F8 per lavare il camion (1.180 €)
+     ja_jp cjk      estimate  88  F8キーでトラックを洗車 (€1,180)
+     ka_ge georgian estimate  30  დააჭირეთ F8-ს სატვირთოს გასარეცხად (1 180 €)
+     ko_kr cjk      estimate  85  F8 키를 눌러 트럭 세차 (€1,180)
+     lt_lt latin    estimate  10  Paspauskite F8, kad nuplautumėte sunkvežimį (1 180 €)
+     lv_lv latin    estimate   7  Nospied F8, lai nomazgātu kravas auto (1 180 €)
+     mk_mk cyrillic estimate  34  Притиснете F8 за да го измиете камионот (1.180 €)
+     nl_nl latin    ok         2  Druk op F8 om de vrachtwagen te wassen (€ 1.180)
+     no_no latin    estimate   3  Trykk F8 for å vaske lastebilen (1 180 €)
+     pl_pl latin    ok         9  Naciśnij F8, aby umyć ciężarówkę (1 180 €)
+     pl_si latin    estimate  12  Naciśnij F8, aby umyć ciężarówkę (1 180 €)
+     pt_br latin    ok         5  Pressione F8 para lavar o caminhão (€ 1.180)
+     pt_pt latin    ok         5  Prima F8 para lavar o camião (1 180 €)
+     ro_ro latin    estimate   6  Apasă F8 pentru a spăla camionul (1.180 €)
+     ru_ru cyrillic ok        40  Нажмите F8, чтобы помыть грузовик (1 180 €)
+     sk_sk latin    estimate  12  Stlačte F8 na umytie kamióna (1 180 €)
+     sl_sl latin    estimate   5  Pritisnite F8 za pranje tovornjaka (1.180 €)
+     sr_sp latin    estimate   5  Pritisnite F8 da operete kamion (1.180 €)
+     sr_sr cyrillic estimate  35  Притисните F8 да оперете камион (1.180 €)
+     sv_se latin    ok         4  Tryck på F8 för att tvätta lastbilen (1 180 €)
+     tr_tr latin    estimate   7  Tırı yıkamak için F8 tuşuna basın (1.180 €)
+     uk_uk cyrillic estimate  38  Натисніть F8, щоб помити вантажівку (1 180 €)
+     vi_vn latin    estimate  36  Nhấn F8 để rửa xe tải (1.180 €)
+     zh_cn cjk      estimate  81  按 F8 清洗卡车（€1,180）
+     zh_tw cjk      estimate  79  按 F8 清洗卡車（€1,180）
+-- the game's language (game.log.txt, config.cfg) and the font
+ok   game.log: the profile's g_lang wins over the start                 de_de
+ok   game.log: no g_lang yet: the language selected at the start        
+ok   game.log: the last g_lang                                          
+ok   game.log: none: ""                                                 
+ok   game.log: g_lang_init is not g_lang                                
+ok   config.cfg: g_lang_init when there is no g_lang                    pt_br
+ok   config.cfg: g_lang wins                                            
+ok   config.cfg: an empty value: ""                                     
+ok   the overlay's font: English for cjk (Georgian: by its glyphs)      ja_jp, ko_kr, zh_cn, zh_tw
+ok   the glyphs of pt_br's texts: sorted, once each, no meta key        225 227 231 
+all passed

@@ -1,0 +1,201 @@
+testdata/rig/run1_capture_001.csv: 1626 draws
+view 0: 533 draws | truck found 161 members at (2.69 2.23 -1.17) | trailer found 53 members at (6.42 2.24 -6.99)
+  age: main view 0, known (truck/trailer) 79/53, after 52 km 33/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 33/53 frame 1306 33/53
+  view 2 claimed (truck/trailer): frame 3 32/45 frame 1306 32/45
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 1306 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 1306 28/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 271 (limit 4096), main view truck claims 33
+  promoted 12872, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_002.csv: 1615 draws
+view 0: 537 draws | truck found 161 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.42 2.25 -6.99)
+  age: main view 0, known (truck/trailer) 79/53, after 52 km 33/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 33/53 frame 1306 33/53
+  view 2 claimed (truck/trailer): frame 3 32/45 frame 1306 32/45
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 1306 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 1306 28/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 271 (limit 4096), main view truck claims 33
+  promoted 25744, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_003.csv: 1342 draws
+view 0: 478 draws | truck found 161 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.63 2.24 -6.85)
+  age: main view 0, known (truck/trailer) 79/53, after 52 km 33/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 33/53 frame 1306 33/53
+  view 2 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 1306 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 1306 28/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 271 (limit 4096), main view truck claims 33
+  promoted 38616, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_004.csv: 1686 draws
+view 2: 410 draws | truck found 161 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.62 2.23 -6.86)
+  age: main view 2, known (truck/trailer) 79/53, after 52 km 33/53 (46 forgotten)
+  view 1 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 2 claimed (truck/trailer): frame 3 33/53 frame 1306 33/53
+  view 3 claimed (truck/trailer): frame 3 28/41 frame 1306 28/41
+  view 4 claimed (truck/trailer): frame 3 23/41 frame 1306 23/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 271 (limit 4096), main view truck claims 33
+  promoted 51488, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_005.csv: 1971 draws
+view 1: 576 draws | truck predicted 161 members at (2.68 2.23 -1.16) | trailer found 53 members at (6.63 2.22 -6.85)
+  age: main view 1, known (truck/trailer) 79/53, after 52 km 33/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 1 claimed (truck/trailer): frame 3 33/53 frame 1306 33/53
+  view 3 claimed (truck/trailer): frame 3 28/41 frame 1306 28/41
+  view 4 claimed (truck/trailer): frame 3 23/41 frame 1306 23/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 271 (limit 4096), main view truck claims 33
+  promoted 64360, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_006.csv: 2014 draws
+view 1: 672 draws | truck found 161 members at (2.69 2.24 -1.16) | trailer found 53 members at (6.51 2.25 -6.93)
+  age: main view 1, known (truck/trailer) 79/53, after 52 km 33/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/49 frame 1306 32/49
+  view 1 claimed (truck/trailer): frame 3 33/53 frame 1306 33/53
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 1306 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 1306 28/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 271 (limit 4096), main view truck claims 33
+  promoted 77232, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_007.csv: 910 draws
+view 0: 1102 draws | truck found 229 members at (-0.39 -0.99 -18.33) | trailer found 57 members at (-2.29 1.08 -24.66)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 90084, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_008.csv: 455 draws
+view 0: 647 draws | truck found 229 members at (-0.14 -1.89 -27.82) | trailer found 57 members at (-0.67 -4.04 -21.28)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 102936, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_009.csv: 416 draws
+view 0: 608 draws | truck found 229 members at (-0.41 -1.90 -25.95) | trailer found 57 members at (-2.32 -4.11 -19.67)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 115788, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_010.csv: 524 draws
+view 0: 716 draws | truck found 229 members at (-0.44 -1.91 -26.11) | trailer found 57 members at (-2.48 -4.18 -19.90)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 128640, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_011.csv: 788 draws
+view 0: 980 draws | truck found 229 members at (1.15 -1.77 -20.19) | trailer found 57 members at (6.55 -3.74 -16.34)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 141492, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_012.csv: 1893 draws
+view 1: 518 draws | truck found 189 members at (2.69 2.24 -1.16) | trailer found 53 members at (6.55 2.29 -6.90)
+  age: main view 1, known (truck/trailer) 106/53, after 52 km 60/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 1306 61/53
+  view 3 claimed (truck/trailer): frame 3 56/41 frame 1306 56/41
+  view 4 claimed (truck/trailer): frame 3 51/41 frame 1306 51/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 298 (limit 4096), main view truck claims 61
+  promoted 154391, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_013.csv: 615 draws
+view 0: 807 draws | truck found 229 members at (1.23 -1.51 -4.85) | trailer found 57 members at (6.93 -1.51 -8.77)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 167243, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_014.csv: 500 draws
+view 0: 692 draws | truck found 229 members at (0.17 -1.17 -11.76) | trailer found 57 members at (0.95 0.25 -18.49)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 180095, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_015.csv: 516 draws
+view 0: 708 draws | truck found 229 members at (0.17 -1.17 -11.76) | trailer found 57 members at (0.94 0.25 -18.49)
+  age: main view 0, known (truck/trailer) 101/57, after 52 km 101/57 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 1306 101/57
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 293 (limit 4096), main view truck claims 101
+  promoted 192947, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_001.csv: 1604 draws
+view 1: 487 draws | truck found 189 members at (2.69 2.24 -1.17) | trailer found 53 members at (6.62 2.21 -6.87)
+  age: main view 1, known (truck/trailer) 104/53, after 52 km 58/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 1306 61/53
+  view 2 claimed (truck/trailer): frame 3 56/41 frame 1306 56/41
+  view 3 claimed (truck/trailer): frame 3 51/41 frame 1306 51/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 296 (limit 4096), main view truck claims 61
+  promoted 205844, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_002.csv: 1767 draws
+view 1: 494 draws | truck found 189 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.60 2.18 -6.88)
+  age: main view 1, known (truck/trailer) 105/53, after 52 km 59/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 1306 61/53
+  view 3 claimed (truck/trailer): frame 3 56/41 frame 1306 56/41
+  view 4 claimed (truck/trailer): frame 3 51/41 frame 1306 51/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 297 (limit 4096), main view truck claims 61
+  promoted 218742, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_003.csv: 2226 draws
+view 1: 586 draws | truck found 165 members at (2.68 2.24 -1.16) | trailer found 41 members at (7.39 2.23 -6.20)
+  age: main view 1, known (truck/trailer) 75/53, after 52 km 37/41 (50 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 1 claimed (truck/trailer): frame 3 37/41 frame 1306 37/41
+  view 3 claimed (truck/trailer): frame 3 28/53 frame 1306 28/53
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 267 (limit 4096), main view truck claims 37
+  promoted 231601, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_004.csv: 1824 draws
+view 1: 631 draws | truck found 189 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.59 2.24 -6.88)
+  age: main view 1, known (truck/trailer) 104/53, after 52 km 58/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 1306 61/53
+  view 2 claimed (truck/trailer): frame 3 56/41 frame 1306 56/41
+  view 3 claimed (truck/trailer): frame 3 51/41 frame 1306 51/41
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 296 (limit 4096), main view truck claims 61
+  promoted 244498, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_005.csv: 632 draws
+view 0: 824 draws | truck found 206 members at (-1.86 -1.23 -1.72) | trailer found 53 members at (1.28 0.53 -7.63)
+  age: main view 0, known (truck/trailer) 78/53, after 52 km 78/53 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 78/53 frame 1306 78/53
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 270 (limit 4096), main view truck claims 78
+  promoted 257331, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_006.csv: 2407 draws
+view 1: 765 draws | truck found 189 members at (2.68 2.23 -1.15) | trailer found 53 members at (73.62 1.30 -96.44)
+  age: main view 1, known (truck/trailer) 105/53, after 52 km 59/53 (46 forgotten)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 1306 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 1306 61/53
+  view 3 claimed (truck/trailer): frame 3 56/53 frame 1306 56/53
+  view 4 claimed (truck/trailer): frame 3 51/53 frame 1306 51/53
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 297 (limit 4096), main view truck claims 61
+  promoted 270229, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_007.csv: 1328 draws
+view 1: 393 draws | truck found 165 members at (2.68 2.23 -1.16) | trailer - 0 members at (0.00 0.00 0.00)
+  age: main view 1, known (truck/trailer) 37/0, after 52 km 37/0 (0 forgotten)
+  view 1 claimed (truck/trailer): frame 3 37/0 frame 1306 37/0
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 229 (limit 4096), main view truck claims 37
+  promoted 282990, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_008.csv: 1272 draws
+view 0: 223 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  age: the truck is in no view, nothing to test
+testdata/rig/run2_capture_009.csv: 461 draws
+view 0: 653 draws | truck found 225 members at (-0.07 -1.74 -8.79) | trailer - 0 members at (0.00 0.00 0.00)
+  age: main view 0, known (truck/trailer) 97/0, after 52 km 97/0 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 1306 97/0
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 289 (limit 4096), main view truck claims 97
+  promoted 295799, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_010.csv: 471 draws
+view 0: 663 draws | truck found 225 members at (-0.99 -1.34 -11.31) | trailer - 0 members at (0.00 0.00 0.00)
+  age: main view 0, known (truck/trailer) 97/0, after 52 km 97/0 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 1306 97/0
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 289 (limit 4096), main view truck claims 97
+  promoted 308608, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_011.csv: 536 draws
+view 0: 728 draws | truck found 225 members at (-0.81 -1.81 -9.25) | trailer - 0 members at (0.00 0.00 0.00)
+  age: main view 0, known (truck/trailer) 97/0, after 52 km 97/0 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 1306 97/0
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 289 (limit 4096), main view truck claims 97
+  promoted 321417, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_012.csv: 704 draws
+view 0: 896 draws | truck found 225 members at (-0.64 -1.83 -9.13) | trailer - 0 members at (0.00 0.00 0.00)
+  age: main view 0, known (truck/trailer) 97/0, after 52 km 97/0 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 1306 97/0
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 289 (limit 4096), main view truck claims 97
+  promoted 334226, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_013.csv: 498 draws
+view 0: 690 draws | truck found 225 members at (-0.22 -1.80 -8.90) | trailer - 0 members at (0.00 0.00 0.00)
+  age: main view 0, known (truck/trailer) 97/0, after 52 km 97/0 (0 forgotten)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 1306 97/0
+  new meshes: 12800, 12672 claims of them (0 inherited), known members at most 289 (limit 4096), main view truck claims 97
+  promoted 347035, held 0, cab claims 0, missed 0, handed 0, shared 0
+done

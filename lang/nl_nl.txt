@@ -1,0 +1,30 @@
+# Truck Dirt: texts in nl_nl (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = Nederlands
+_script = latin
+_review = ok
+_price = {currency}\s{amount}
+_thousands = .
+
+wash.hint = Druk op {key} om de vrachtwagen te wassen ({price})
+wash.hint_free = Druk op {key} om de vrachtwagen te wassen (gratis)
+wash.prompt = Vrachtwagen wassen
+wash.stop_first = Stop de vrachtwagen om hem te wassen
+wash.parking_brake = Zet de handrem aan om te wassen
+wash.already_clean = De vrachtwagen is al schoon
+wash.no_money = Niet genoeg geld voor de wasbeurt ({price})
+wash.charge_failed = Betaling mislukt: de vrachtwagen is niet gewassen
+wash.washing = Vrachtwagen wordt gewassen
+wash.washed = De vrachtwagen is schoon
+wash.ended_early = De wasbeurt is eerder gestopt
+wash.unknown_station = Tank hier één keer om hier te kunnen wassen
+
+menu.title = Truck Dirt: toetsen
+menu.wash_key = Vrachtwagen wassen
+menu.panel_key = Testpaneel
+menu.not_set = (niet ingesteld)
+menu.press_key = Druk op de nieuwe toets ({key}: annuleren)
+menu.help = {move}: kiezen, {edit}: wijzigen, {default}: standaard, {close}: sluiten
+menu.saved = Opgeslagen
+menu.taken = Al in gebruik: {name}
+menu.unsupported = Deze toets kan niet worden gebruikt

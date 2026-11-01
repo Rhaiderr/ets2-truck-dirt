@@ -1,0 +1,30 @@
+# Truck Dirt: texts in fr_fr (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = Français
+_script = latin
+_review = ok
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Appuyez sur {key} pour laver le camion ({price})
+wash.hint_free = Appuyez sur {key} pour laver le camion (gratuit)
+wash.prompt = Laver le camion
+wash.stop_first = Arrêtez le camion pour le laver
+wash.parking_brake = Serrez le frein à main pour laver
+wash.already_clean = Le camion est déjà propre
+wash.no_money = Pas assez d'argent pour le lavage ({price})
+wash.charge_failed = Échec du paiement\s: le camion n'a pas été lavé
+wash.washing = Lavage du camion
+wash.washed = Le camion est propre
+wash.ended_early = Le lavage s'est terminé plus tôt
+wash.unknown_station = Faites le plein ici une fois pour pouvoir laver ici
+
+menu.title = Truck Dirt : touches
+menu.wash_key = Laver le camion
+menu.panel_key = Panneau de test
+menu.not_set = (non défini)
+menu.press_key = Appuyez sur la nouvelle touche ({key} : annuler)
+menu.help = {move} : choisir, {edit} : modifier, {default} : par défaut, {close} : fermer
+menu.saved = Enregistré
+menu.taken = Déjà utilisée : {name}
+menu.unsupported = Cette touche ne peut pas être utilisée

@@ -1,0 +1,3 @@
+minhook v1.3.4 (TsudaKageyu/minhook, BSD-2) sha256(tar.gz)=1aebeae4ca898330c507860acc2fca2eb335fe446a3a2b8444c3bf8b2660a14e
+font8x8_basic.h (dhepper/font8x8, master, public domain) sha256=49d8df366296b203ca3211bc0672cf2a762135bf12710735b6292756b19dffd5 -> src/generated/font8x8.inc (ASCII 32..126)
+phosphor-icons/core (main, 30/10/2026, MIT) assets/light/truck-trailer-light.svg sha256=5a7245ce71d9b8f4294aa634f283b72529c2198ebe4695013297a239aeff2d21 -> src/truck_icon.h (tools/icons/truck_icon.py)

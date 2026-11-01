@@ -1,0 +1,32 @@
+# Truck Dirt: texts in ja_jp (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+# Needs a Japanese font (kana and kanji).
+
+_name = 日本語
+_script = cjk
+_review = estimate
+_price = {currency}{amount}
+_thousands = ,
+
+wash.hint = {key}キーでトラックを洗車 ({price})
+wash.hint_free = {key}キーでトラックを洗車 (無料)
+wash.prompt = トラックを洗車
+wash.stop_first = 洗車するにはトラックを停止してください
+wash.parking_brake = 洗車するにはパーキングブレーキをかけてください
+wash.already_clean = トラックはすでにきれいです
+wash.no_money = 洗車の料金が足りません ({price})
+wash.charge_failed = 支払いに失敗しました：トラックは洗車されませんでした
+wash.washing = トラックを洗車中
+wash.washed = トラックがきれいになりました
+wash.ended_early = 洗車が途中で終了しました
+wash.unknown_station = ここで一度給油すると洗車できるようになります
+
+menu.title = Truck Dirt: キー
+menu.wash_key = トラックを洗車
+menu.panel_key = テストパネル
+menu.not_set = (未設定)
+menu.press_key = 新しいキーを押す ({key}: キャンセル)
+menu.help = {move}: 選択, {edit}: 変更, {default}: 初期値, {close}: 閉じる
+menu.saved = 保存しました
+menu.taken = 使用中: {name}
+menu.unsupported = このキーは使えません

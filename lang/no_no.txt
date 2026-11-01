@@ -1,0 +1,31 @@
+# Truck Dirt: texts in no_no (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Norsk
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Trykk {key} for å vaske lastebilen ({price})
+wash.hint_free = Trykk {key} for å vaske lastebilen (gratis)
+wash.prompt = Vask lastebilen
+wash.stop_first = Stans lastebilen for å vaske den
+wash.parking_brake = Sett på parkeringsbremsen for å vaske
+wash.already_clean = Lastebilen er allerede ren
+wash.no_money = Ikke nok penger til vasken ({price})
+wash.charge_failed = Betalingen mislyktes: lastebilen ble ikke vasket
+wash.washing = Vasker lastebilen
+wash.washed = Lastebilen er ren
+wash.ended_early = Vasken ble avsluttet tidlig
+wash.unknown_station = Fyll drivstoff her én gang for å kunne vaske her
+
+menu.title = Truck Dirt: taster
+menu.wash_key = Vask lastebilen
+menu.panel_key = Testpanel
+menu.not_set = (ikke angitt)
+menu.press_key = Trykk den nye tasten ({key}: avbryt)
+menu.help = {move}: velg, {edit}: endre, {default}: standard, {close}: lukk
+menu.saved = Lagret
+menu.taken = Brukes allerede: {name}
+menu.unsupported = Denne tasten kan ikke brukes

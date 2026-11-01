@@ -1,0 +1,22 @@
+picked up on a dirty trailer: new 1
+  cargo dust: 0.000
+  cargo film: 0.000
+  cargo soot: 0.000
+  road wetness (the trailer's): 0.200
+  soot reach (the trailer's): 0.900
+a dirt road later:
+  cargo dust: 0.200
+  cargo film: 0.200
+  cargo film, front: 0.100
+  cargo soot: 0.050
+the trailer washed:
+  cargo dust: 0.000
+  then 0.1 more: 0.100
+delivered (no cargo): key kept 'excavator|quarry|site|1000'
+  cargo dust: 0.300
+saved and read back: 1, key 'excavator|quarry|site|1000'
+  base level: 0.000
+a new cargo: new 1
+  cargo dust: 0.000
+another format: 0
+ok

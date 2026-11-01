@@ -1,0 +1,31 @@
+# Truck Dirt: texts in lv_lv (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Latviešu
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Nospied {key}, lai nomazgātu kravas auto ({price})
+wash.hint_free = Nospied {key}, lai nomazgātu kravas auto (bez maksas)
+wash.prompt = Nomazgāt kravas auto
+wash.stop_first = Apturi kravas auto, lai to nomazgātu
+wash.parking_brake = Ievelc stāvbremzi, lai mazgātu
+wash.already_clean = Kravas auto jau ir tīrs
+wash.no_money = Nepietiek naudas mazgāšanai ({price})
+wash.charge_failed = Maksājums neizdevās: kravas auto netika nomazgāts
+wash.washing = Kravas auto mazgāšana
+wash.washed = Kravas auto ir tīrs
+wash.ended_early = Mazgāšana beidzās priekšlaicīgi
+wash.unknown_station = Vienreiz uzpildiet degvielu šeit, lai šeit varētu mazgāt
+
+menu.title = Truck Dirt: taustiņi
+menu.wash_key = Nomazgāt kravas auto
+menu.panel_key = Testa panelis
+menu.not_set = (nav iestatīts)
+menu.press_key = Nospied jauno taustiņu ({key}: atcelt)
+menu.help = {move}: izvēlēties, {edit}: mainīt, {default}: noklusējums, {close}: aizvērt
+menu.saved = Saglabāts
+menu.taken = Jau aizņemts: {name}
+menu.unsupported = Šo taustiņu nevar izmantot

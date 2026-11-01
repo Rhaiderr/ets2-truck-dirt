@@ -1,0 +1,30 @@
+# Truck Dirt: texts in es_es (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = Español (España)
+_script = latin
+_review = ok
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Pulsa {key} para lavar el camión ({price})
+wash.hint_free = Pulsa {key} para lavar el camión (gratis)
+wash.prompt = Lavar el camión
+wash.stop_first = Detén el camión para lavarlo
+wash.parking_brake = Echa el freno de mano para lavar
+wash.already_clean = El camión ya está limpio
+wash.no_money = No tienes dinero suficiente para el lavado ({price})
+wash.charge_failed = Error en el pago: el camión no se ha lavado
+wash.washing = Lavando el camión
+wash.washed = El camión está limpio
+wash.ended_early = El lavado terminó antes de tiempo
+wash.unknown_station = Reposta aquí una vez para poder lavar aquí
+
+menu.title = Truck Dirt: teclas
+menu.wash_key = Lavar el camión
+menu.panel_key = Panel de prueba
+menu.not_set = (sin asignar)
+menu.press_key = Pulsa la nueva tecla ({key}: cancelar)
+menu.help = {move}: elegir, {edit}: cambiar, {default}: por defecto, {close}: cerrar
+menu.saved = Guardado
+menu.taken = Ya en uso: {name}
+menu.unsupported = Esta tecla no se puede usar

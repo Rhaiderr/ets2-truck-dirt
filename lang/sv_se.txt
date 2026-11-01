@@ -1,0 +1,30 @@
+# Truck Dirt: texts in sv_se (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = Svenska
+_script = latin
+_review = ok
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Tryck på {key} för att tvätta lastbilen ({price})
+wash.hint_free = Tryck på {key} för att tvätta lastbilen (gratis)
+wash.prompt = Tvätta lastbilen
+wash.stop_first = Stanna lastbilen för att tvätta den
+wash.parking_brake = Dra åt parkeringsbromsen för att tvätta
+wash.already_clean = Lastbilen är redan ren
+wash.no_money = Inte tillräckligt med pengar för tvätten ({price})
+wash.charge_failed = Betalningen misslyckades: lastbilen tvättades inte
+wash.washing = Tvättar lastbilen
+wash.washed = Lastbilen är ren
+wash.ended_early = Tvätten avslutades i förtid
+wash.unknown_station = Tanka här en gång för att kunna tvätta här
+
+menu.title = Truck Dirt: tangenter
+menu.wash_key = Tvätta lastbilen
+menu.panel_key = Testpanel
+menu.not_set = (inte inställd)
+menu.press_key = Tryck på den nya tangenten ({key}: avbryt)
+menu.help = {move}: välj, {edit}: ändra, {default}: standard, {close}: stäng
+menu.saved = Sparat
+menu.taken = Används redan: {name}
+menu.unsupported = Den här tangenten kan inte användas

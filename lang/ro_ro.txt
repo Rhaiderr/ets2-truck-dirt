@@ -1,0 +1,31 @@
+# Truck Dirt: texts in ro_ro (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Română
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Apasă {key} pentru a spăla camionul ({price})
+wash.hint_free = Apasă {key} pentru a spăla camionul (gratuit)
+wash.prompt = Spală camionul
+wash.stop_first = Oprește camionul pentru a-l spăla
+wash.parking_brake = Trage frâna de mână pentru spălare
+wash.already_clean = Camionul este deja curat
+wash.no_money = Bani insuficienți pentru spălare ({price})
+wash.charge_failed = Plata a eșuat: camionul nu a fost spălat
+wash.washing = Spălarea camionului
+wash.washed = Camionul este curat
+wash.ended_early = Spălarea s-a încheiat mai devreme
+wash.unknown_station = Alimentează aici o dată pentru a putea spăla aici
+
+menu.title = Truck Dirt: taste
+menu.wash_key = Spală camionul
+menu.panel_key = Panou de test
+menu.not_set = (nesetat)
+menu.press_key = Apasă tasta nouă ({key}: anulare)
+menu.help = {move}: alege, {edit}: schimbă, {default}: implicit, {close}: închide
+menu.saved = Salvat
+menu.taken = Deja folosită: {name}
+menu.unsupported = Această tastă nu poate fi folosită

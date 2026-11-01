@@ -1,0 +1,32 @@
+# Truck Dirt: texts in pl_si (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+# The Polish texts for now: a Silesian speaker should translate them.
+
+_name = Ślōnskŏ gŏdka
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Naciśnij {key}, aby umyć ciężarówkę ({price})
+wash.hint_free = Naciśnij {key}, aby umyć ciężarówkę (bezpłatnie)
+wash.prompt = Umyj ciężarówkę
+wash.stop_first = Zatrzymaj ciężarówkę, aby ją umyć
+wash.parking_brake = Zaciągnij hamulec postojowy, aby umyć
+wash.already_clean = Ciężarówka jest już czysta
+wash.no_money = Za mało pieniędzy na mycie ({price})
+wash.charge_failed = Płatność nieudana: ciężarówka nie została umyta
+wash.washing = Mycie ciężarówki
+wash.washed = Ciężarówka jest czysta
+wash.ended_early = Mycie zakończyło się przedwcześnie
+wash.unknown_station = Zatankuj tu raz, aby móc tu myć
+
+menu.title = Truck Dirt: klawisze
+menu.wash_key = Umyj ciężarówkę
+menu.panel_key = Panel testowy
+menu.not_set = (nieustawiony)
+menu.press_key = Naciśnij nowy klawisz ({key}: anuluj)
+menu.help = {move}: wybierz, {edit}: zmień, {default}: domyślny, {close}: zamknij
+menu.saved = Zapisano
+menu.taken = Już używany: {name}
+menu.unsupported = Tego klawisza nie można użyć

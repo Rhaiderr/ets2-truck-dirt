@@ -1,0 +1,31 @@
+# Truck Dirt: texts in mk_mk (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Македонски
+_script = cyrillic
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Притиснете {key} за да го измиете камионот ({price})
+wash.hint_free = Притиснете {key} за да го измиете камионот (бесплатно)
+wash.prompt = Измиј го камионот
+wash.stop_first = Запрете го камионот за да го измиете
+wash.parking_brake = Повлечете ја рачната сопирачка за миење
+wash.already_clean = Камионот е веќе чист
+wash.no_money = Немате доволно пари за миење ({price})
+wash.charge_failed = Плаќањето не успеа: камионот не е измиен
+wash.washing = Миење на камионот
+wash.washed = Камионот е чист
+wash.ended_early = Миењето заврши предвреме
+wash.unknown_station = Наполнете гориво тука еднаш за да можете да миете тука
+
+menu.title = Truck Dirt: копчиња
+menu.wash_key = Измиј го камионот
+menu.panel_key = Тест панел
+menu.not_set = (не е поставено)
+menu.press_key = Притиснете ново копче ({key}: откажи)
+menu.help = {move}: избери, {edit}: промени, {default}: стандардно, {close}: затвори
+menu.saved = Зачувано
+menu.taken = Веќе се користи: {name}
+menu.unsupported = Ова копче не може да се користи

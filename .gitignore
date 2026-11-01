@@ -1,0 +1,16 @@
+# Build output
+/build/
+# SCS SDK headers: redistribution licence not confirmed (same rule as ets2-tire-wear)
+/third_party/scs_sdk/
+# Files extracted from the game for study (game data, not ours)
+/probe/
+# Copies of installed DLLs (binaries)
+/backups/
+
+# Release zips and their staging folders (tools/release/make_release.sh); the INI template stays tracked
+/dist/*
+!/dist/ets2_truck_dirt.ini
+
+# Python bytecode
+__pycache__/
+*.pyc

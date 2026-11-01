@@ -1,0 +1,257 @@
+testdata/rig/run1_capture_001.csv: 1626 draws
+view 0: 342 draws | truck found 34 members at (2.69 2.23 -1.17) | trailer found 53 members at (6.42 2.24 -6.99)
+view 1: 102 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 199 draws | truck found 33 members at (-2.57 2.36 -1.02) | trailer found 45 members at (-6.75 2.71 -6.52)
+view 3: 249 draws | truck found 24 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.38 1.77 -9.08)
+view 4: 177 draws | truck found 29 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.50 1.83 -9.04)
+view 5: 471 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 33/53 frame 4 33/53 frame 5 33/53 frame 6 33/53 frame 7 33/53 frame 8 33/53 frame 9 33/53 frame 10 33/53 frame 11 33/53 frame 12 33/53 frame 13 33/53 frame 14 33/53 frame 15 33/53 frame 16 33/53 frame 17 33/53 frame 18 33/53
+  view 2 claimed (truck/trailer): frame 1 0/0 frame 2 8/12 frame 3 32/45 frame 4 32/45 frame 5 32/45 frame 6 32/45 frame 7 32/45 frame 8 32/45 frame 9 32/45 frame 10 32/45 frame 11 32/45 frame 12 32/45 frame 13 32/45 frame 14 32/45 frame 15 32/45 frame 16 32/45 frame 17 32/45 frame 18 32/45
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 23/41 frame 4 23/41 frame 5 23/41 frame 6 23/41 frame 7 23/41 frame 8 23/41 frame 9 23/41 frame 10 23/41 frame 11 23/41 frame 12 23/41 frame 13 23/41 frame 14 23/41 frame 15 23/41 frame 16 23/41 frame 17 23/41 frame 18 23/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 28/41 frame 4 28/41 frame 5 28/41 frame 6 28/41 frame 7 28/41 frame 8 28/41 frame 9 28/41 frame 10 28/41 frame 11 28/41 frame 12 28/41 frame 13 28/41 frame 14 28/41 frame 15 28/41 frame 16 28/41 frame 17 28/41 frame 18 28/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRRRRTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1620, claimed 0
+  promoted 101, held 0, cab claims 0, missed 0, handed 2, shared 0
+testdata/rig/run1_capture_002.csv: 1615 draws
+view 0: 346 draws | truck found 34 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.42 2.25 -6.99)
+view 1: 97 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 199 draws | truck found 33 members at (-2.57 2.36 -1.02) | trailer found 45 members at (-6.75 2.72 -6.51)
+view 3: 253 draws | truck found 24 members at (2.03 2.44 -2.32) | trailer found 41 members at (3.38 1.78 -9.08)
+view 4: 177 draws | truck found 29 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.50 1.83 -9.04)
+view 5: 459 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 33/53 frame 4 33/53 frame 5 33/53 frame 6 33/53 frame 7 33/53 frame 8 33/53 frame 9 33/53 frame 10 33/53 frame 11 33/53 frame 12 33/53 frame 13 33/53 frame 14 33/53 frame 15 33/53 frame 16 33/53 frame 17 33/53 frame 18 33/53
+  view 2 claimed (truck/trailer): frame 1 0/0 frame 2 8/12 frame 3 32/45 frame 4 32/45 frame 5 32/45 frame 6 32/45 frame 7 32/45 frame 8 32/45 frame 9 32/45 frame 10 32/45 frame 11 32/45 frame 12 32/45 frame 13 32/45 frame 14 32/45 frame 15 32/45 frame 16 32/45 frame 17 32/45 frame 18 32/45
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 23/41 frame 4 23/41 frame 5 23/41 frame 6 23/41 frame 7 23/41 frame 8 23/41 frame 9 23/41 frame 10 23/41 frame 11 23/41 frame 12 23/41 frame 13 23/41 frame 14 23/41 frame 15 23/41 frame 16 23/41 frame 17 23/41 frame 18 23/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 28/41 frame 4 28/41 frame 5 28/41 frame 6 28/41 frame 7 28/41 frame 8 28/41 frame 9 28/41 frame 10 28/41 frame 11 28/41 frame 12 28/41 frame 13 28/41 frame 14 28/41 frame 15 28/41 frame 16 28/41 frame 17 28/41 frame 18 28/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRRRRTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1584, claimed 0
+  promoted 202, held 0, cab claims 0, missed 0, handed 4, shared 0
+testdata/rig/run1_capture_003.csv: 1342 draws
+view 0: 287 draws | truck found 34 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.63 2.24 -6.85)
+view 1: 96 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 153 draws | truck found 33 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.55 2.71 -6.66)
+view 3: 213 draws | truck found 24 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.63 1.78 -9.02)
+view 4: 159 draws | truck found 29 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.25 1.82 -9.09)
+view 5: 350 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 33/53 frame 4 33/53 frame 5 33/53 frame 6 33/53 frame 7 33/53 frame 8 33/53 frame 9 33/53 frame 10 33/53 frame 11 33/53 frame 12 33/53 frame 13 33/53 frame 14 33/53 frame 15 33/53 frame 16 33/53 frame 17 33/53 frame 18 33/53
+  view 2 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 23/41 frame 4 23/41 frame 5 23/41 frame 6 23/41 frame 7 23/41 frame 8 23/41 frame 9 23/41 frame 10 23/41 frame 11 23/41 frame 12 23/41 frame 13 23/41 frame 14 23/41 frame 15 23/41 frame 16 23/41 frame 17 23/41 frame 18 23/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 28/41 frame 4 28/41 frame 5 28/41 frame 6 28/41 frame 7 28/41 frame 8 28/41 frame 9 28/41 frame 10 28/41 frame 11 28/41 frame 12 28/41 frame 13 28/41 frame 14 28/41 frame 15 28/41 frame 16 28/41 frame 17 28/41 frame 18 28/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1584, claimed 0
+  promoted 302, held 0, cab claims 0, missed 4, handed 5, shared 0
+testdata/rig/run1_capture_004.csv: 1686 draws
+view 0: 117 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 1: 191 draws | truck found 33 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.56 2.71 -6.66)
+view 2: 219 draws | truck found 34 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.62 2.23 -6.86)
+view 3: 187 draws | truck found 29 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.27 1.82 -9.09)
+view 4: 156 draws | truck found 24 members at (2.03 2.44 -2.32) | trailer found 41 members at (3.61 1.77 -9.03)
+view 5: 729 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 2 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 33/53 frame 4 33/53 frame 5 33/53 frame 6 33/53 frame 7 33/53 frame 8 33/53 frame 9 33/53 frame 10 33/53 frame 11 33/53 frame 12 33/53 frame 13 33/53 frame 14 33/53 frame 15 33/53 frame 16 33/53 frame 17 33/53 frame 18 33/53
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 28/41 frame 4 28/41 frame 5 28/41 frame 6 28/41 frame 7 28/41 frame 8 28/41 frame 9 28/41 frame 10 28/41 frame 11 28/41 frame 12 28/41 frame 13 28/41 frame 14 28/41 frame 15 28/41 frame 16 28/41 frame 17 28/41 frame 18 28/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 23/41 frame 4 23/41 frame 5 23/41 frame 6 23/41 frame 7 23/41 frame 8 23/41 frame 9 23/41 frame 10 23/41 frame 11 23/41 frame 12 23/41 frame 13 23/41 frame 14 23/41 frame 15 23/41 frame 16 23/41 frame 17 23/41 frame 18 23/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 1, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1638, claimed 0
+  promoted 402, held 0, cab claims 0, missed 8, handed 6, shared 0
+testdata/rig/run1_capture_005.csv: 1971 draws
+view 0: 298 draws | truck predicted 33 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.55 2.69 -6.67)
+view 1: 385 draws | truck predicted 34 members at (2.68 2.23 -1.16) | trailer found 53 members at (6.63 2.22 -6.85)
+view 2: 118 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 232 draws | truck predicted 29 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.26 1.80 -9.09)
+view 4: 274 draws | truck predicted 24 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.62 1.76 -9.03)
+view 5: 570 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 33/53 frame 4 33/53 frame 5 33/53 frame 6 33/53 frame 7 33/53 frame 8 33/53 frame 9 33/53 frame 10 33/53 frame 11 33/53 frame 12 33/53 frame 13 33/53 frame 14 33/53 frame 15 33/53 frame 16 33/53 frame 17 33/53 frame 18 33/53
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 28/41 frame 4 28/41 frame 5 28/41 frame 6 28/41 frame 7 28/41 frame 8 28/41 frame 9 28/41 frame 10 28/41 frame 11 28/41 frame 12 28/41 frame 13 28/41 frame 14 28/41 frame 15 28/41 frame 16 28/41 frame 17 28/41 frame 18 28/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 23/41 frame 4 23/41 frame 5 23/41 frame 6 23/41 frame 7 23/41 frame 8 23/41 frame 9 23/41 frame 10 23/41 frame 11 23/41 frame 12 23/41 frame 13 23/41 frame 14 23/41 frame 15 23/41 frame 16 23/41 frame 17 23/41 frame 18 23/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1764, claimed 0
+  promoted 502, held 0, cab claims 0, missed 12, handed 7, shared 0
+testdata/rig/run1_capture_006.csv: 2014 draws
+view 0: 393 draws | truck found 33 members at (-2.57 2.36 -1.02) | trailer found 49 members at (-6.67 2.72 -6.58)
+view 1: 481 draws | truck found 34 members at (2.69 2.24 -1.16) | trailer found 53 members at (6.51 2.25 -6.93)
+view 2: 82 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 309 draws | truck found 24 members at (2.04 2.44 -2.32) | trailer found 41 members at (3.48 1.79 -9.06)
+view 4: 235 draws | truck found 29 members at (-1.92 2.45 -2.33) | trailer found 41 members at (-3.40 1.84 -9.06)
+view 5: 421 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/15 frame 3 32/49 frame 4 32/49 frame 5 32/49 frame 6 32/49 frame 7 32/49 frame 8 32/49 frame 9 32/49 frame 10 32/49 frame 11 32/49 frame 12 32/49 frame 13 32/49 frame 14 32/49 frame 15 32/49 frame 16 32/49 frame 17 32/49 frame 18 32/49
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 33/53 frame 4 33/53 frame 5 33/53 frame 6 33/53 frame 7 33/53 frame 8 33/53 frame 9 33/53 frame 10 33/53 frame 11 33/53 frame 12 33/53 frame 13 33/53 frame 14 33/53 frame 15 33/53 frame 16 33/53 frame 17 33/53 frame 18 33/53
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 23/41 frame 4 23/41 frame 5 23/41 frame 6 23/41 frame 7 23/41 frame 8 23/41 frame 9 23/41 frame 10 23/41 frame 11 23/41 frame 12 23/41 frame 13 23/41 frame 14 23/41 frame 15 23/41 frame 16 23/41 frame 17 23/41 frame 18 23/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 28/41 frame 4 28/41 frame 5 28/41 frame 6 28/41 frame 7 28/41 frame 8 28/41 frame 9 28/41 frame 10 28/41 frame 11 28/41 frame 12 28/41 frame 13 28/41 frame 14 28/41 frame 15 28/41 frame 16 28/41 frame 17 28/41 frame 18 28/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRRRTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1746, claimed 0
+  promoted 603, held 0, cab claims 0, missed 12, handed 9, shared 0
+testdata/rig/run1_capture_007.csv: 910 draws
+view 0: 911 draws | truck found 102 members at (-0.39 -0.99 -18.33) | trailer found 57 members at (-2.29 1.08 -24.66)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 721, held 0, cab claims 0, missed 13, handed 10, shared 0
+testdata/rig/run1_capture_008.csv: 455 draws
+view 0: 456 draws | truck found 102 members at (-0.14 -1.89 -27.82) | trailer found 57 members at (-0.67 -4.04 -21.28)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 839, held 0, cab claims 0, missed 13, handed 11, shared 0
+testdata/rig/run1_capture_009.csv: 416 draws
+view 0: 417 draws | truck found 102 members at (-0.41 -1.90 -25.95) | trailer found 57 members at (-2.32 -4.11 -19.67)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 957, held 0, cab claims 0, missed 14, handed 12, shared 0
+testdata/rig/run1_capture_010.csv: 524 draws
+view 0: 525 draws | truck found 102 members at (-0.44 -1.91 -26.11) | trailer found 57 members at (-2.48 -4.18 -19.90)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 1075, held 0, cab claims 0, missed 15, handed 13, shared 0
+testdata/rig/run1_capture_011.csv: 788 draws
+view 0: 789 draws | truck found 102 members at (1.15 -1.77 -20.19) | trailer found 57 members at (6.55 -3.74 -16.34)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 1193, held 0, cab claims 0, missed 15, handed 14, shared 0
+testdata/rig/run1_capture_012.csv: 1893 draws
+view 0: 294 draws | truck found 33 members at (-2.57 2.37 -1.02) | trailer found 53 members at (-6.62 2.77 -6.60)
+view 1: 327 draws | truck found 62 members at (2.69 2.24 -1.16) | trailer found 53 members at (6.55 2.29 -6.90)
+view 2: 123 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 250 draws | truck found 57 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.35 1.88 -9.07)
+view 4: 263 draws | truck found 52 members at (2.03 2.45 -2.32) | trailer found 41 members at (3.53 1.83 -9.05)
+view 5: 538 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 61/53 frame 4 61/53 frame 5 61/53 frame 6 61/53 frame 7 61/53 frame 8 61/53 frame 9 61/53 frame 10 61/53 frame 11 61/53 frame 12 61/53 frame 13 61/53 frame 14 61/53 frame 15 61/53 frame 16 61/53 frame 17 61/53 frame 18 61/53
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 56/41 frame 4 56/41 frame 5 56/41 frame 6 56/41 frame 7 56/41 frame 8 56/41 frame 9 56/41 frame 10 56/41 frame 11 56/41 frame 12 56/41 frame 13 56/41 frame 14 56/41 frame 15 56/41 frame 16 56/41 frame 17 56/41 frame 18 56/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 51/41 frame 4 51/41 frame 5 51/41 frame 6 51/41 frame 7 51/41 frame 8 51/41 frame 9 51/41 frame 10 51/41 frame 11 51/41 frame 12 51/41 frame 13 51/41 frame 14 51/41 frame 15 51/41 frame 16 51/41 frame 17 51/41 frame 18 51/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRRRTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1836, claimed 0
+  promoted 1321, held 0, cab claims 0, missed 15, handed 16, shared 0
+testdata/rig/run1_capture_013.csv: 615 draws
+view 0: 616 draws | truck found 102 members at (1.23 -1.51 -4.85) | trailer found 57 members at (6.93 -1.51 -8.77)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 1439, held 0, cab claims 0, missed 16, handed 17, shared 0
+testdata/rig/run1_capture_014.csv: 500 draws
+view 0: 501 draws | truck found 102 members at (0.17 -1.17 -11.76) | trailer found 57 members at (0.95 0.25 -18.49)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 1557, held 0, cab claims 0, missed 17, handed 18, shared 0
+testdata/rig/run1_capture_015.csv: 516 draws
+view 0: 517 draws | truck found 102 members at (0.17 -1.17 -11.76) | trailer found 57 members at (0.94 0.25 -18.49)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/18 frame 3 101/57 frame 4 101/57 frame 5 101/57 frame 6 101/57 frame 7 101/57 frame 8 101/57 frame 9 101/57 frame 10 101/57 frame 11 101/57 frame 12 101/57 frame 13 101/57 frame 14 101/57 frame 15 101/57 frame 16 101/57 frame 17 101/57 frame 18 101/57
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 1675, held 0, cab claims 0, missed 18, handed 19, shared 0
+testdata/rig/run2_capture_001.csv: 1604 draws
+view 0: 263 draws | truck found 33 members at (-2.57 2.37 -1.02) | trailer found 53 members at (-6.57 2.69 -6.66)
+view 1: 296 draws | truck found 62 members at (2.69 2.24 -1.17) | trailer found 53 members at (6.62 2.21 -6.87)
+view 2: 225 draws | truck found 57 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.28 1.79 -9.09)
+view 3: 238 draws | truck found 52 members at (2.03 2.44 -2.33) | trailer found 41 members at (3.61 1.75 -9.03)
+view 4: 484 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 61/53 frame 4 61/53 frame 5 61/53 frame 6 61/53 frame 7 61/53 frame 8 61/53 frame 9 61/53 frame 10 61/53 frame 11 61/53 frame 12 61/53 frame 13 61/53 frame 14 61/53 frame 15 61/53 frame 16 61/53 frame 17 61/53 frame 18 61/53
+  view 2 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 56/41 frame 4 56/41 frame 5 56/41 frame 6 56/41 frame 7 56/41 frame 8 56/41 frame 9 56/41 frame 10 56/41 frame 11 56/41 frame 12 56/41 frame 13 56/41 frame 14 56/41 frame 15 56/41 frame 16 56/41 frame 17 56/41 frame 18 56/41
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 51/41 frame 4 51/41 frame 5 51/41 frame 6 51/41 frame 7 51/41 frame 8 51/41 frame 9 51/41 frame 10 51/41 frame 11 51/41 frame 12 51/41 frame 13 51/41 frame 14 51/41 frame 15 51/41 frame 16 51/41 frame 17 51/41 frame 18 51/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1836, claimed 0
+  promoted 1800, held 0, cab claims 0, missed 22, handed 20, shared 0
+testdata/rig/run2_capture_002.csv: 1767 draws
+view 0: 266 draws | truck found 33 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.58 2.65 -6.65)
+view 1: 303 draws | truck found 62 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.60 2.18 -6.88)
+view 2: 159 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 224 draws | truck found 57 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.29 1.76 -9.09)
+view 4: 241 draws | truck found 52 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.59 1.72 -9.03)
+view 5: 477 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 61/53 frame 4 61/53 frame 5 61/53 frame 6 61/53 frame 7 61/53 frame 8 61/53 frame 9 61/53 frame 10 61/53 frame 11 61/53 frame 12 61/53 frame 13 61/53 frame 14 61/53 frame 15 61/53 frame 16 61/53 frame 17 61/53 frame 18 61/53
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 56/41 frame 4 56/41 frame 5 56/41 frame 6 56/41 frame 7 56/41 frame 8 56/41 frame 9 56/41 frame 10 56/41 frame 11 56/41 frame 12 56/41 frame 13 56/41 frame 14 56/41 frame 15 56/41 frame 16 56/41 frame 17 56/41 frame 18 56/41
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 51/41 frame 4 51/41 frame 5 51/41 frame 6 51/41 frame 7 51/41 frame 8 51/41 frame 9 51/41 frame 10 51/41 frame 11 51/41 frame 12 51/41 frame 13 51/41 frame 14 51/41 frame 15 51/41 frame 16 51/41 frame 17 51/41 frame 18 51/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRR-TTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1818, claimed 0
+  promoted 1926, held 0, cab claims 0, missed 26, handed 21, shared 0
+testdata/rig/run2_capture_003.csv: 2226 draws
+view 0: 585 draws | truck predicted 33 members at (-2.57 2.36 -1.01) | trailer found 53 members at (-5.68 2.73 -7.15)
+view 1: 395 draws | truck found 38 members at (2.68 2.24 -1.16) | trailer found 41 members at (7.39 2.23 -6.20)
+view 2: 114 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 394 draws | truck predicted 29 members at (-1.93 2.45 -2.33) | trailer found 53 members at (-2.26 1.82 -9.18)
+view 4: 285 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 5: 347 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 12/9 frame 3 37/41 frame 4 37/41 frame 5 37/41 frame 6 37/41 frame 7 37/41 frame 8 37/41 frame 9 37/41 frame 10 37/41 frame 11 37/41 frame 12 37/41 frame 13 37/41 frame 14 37/41 frame 15 37/41 frame 16 37/41 frame 17 37/41 frame 18 37/41
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 28/53 frame 4 28/53 frame 5 28/53 frame 6 28/53 frame 7 28/53 frame 8 28/53 frame 9 28/53 frame 10 28/53 frame 11 28/53 frame 12 28/53 frame 13 28/53 frame 14 28/53 frame 15 28/53 frame 16 28/53 frame 17 28/53 frame 18 28/53
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1962, claimed 0
+  promoted 2017, held 0, cab claims 0, missed 26, handed 21, shared 0
+testdata/rig/run2_capture_004.csv: 1824 draws
+view 0: 311 draws | truck found 33 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.59 2.71 -6.64)
+view 1: 440 draws | truck found 62 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.59 2.24 -6.88)
+view 2: 252 draws | truck found 57 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.30 1.82 -9.08)
+view 3: 300 draws | truck found 52 members at (2.03 2.44 -2.32) | trailer found 41 members at (3.58 1.78 -9.03)
+view 4: 425 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 61/53 frame 4 61/53 frame 5 61/53 frame 6 61/53 frame 7 61/53 frame 8 61/53 frame 9 61/53 frame 10 61/53 frame 11 61/53 frame 12 61/53 frame 13 61/53 frame 14 61/53 frame 15 61/53 frame 16 61/53 frame 17 61/53 frame 18 61/53
+  view 2 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 56/41 frame 4 56/41 frame 5 56/41 frame 6 56/41 frame 7 56/41 frame 8 56/41 frame 9 56/41 frame 10 56/41 frame 11 56/41 frame 12 56/41 frame 13 56/41 frame 14 56/41 frame 15 56/41 frame 16 56/41 frame 17 56/41 frame 18 56/41
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/9 frame 3 51/41 frame 4 51/41 frame 5 51/41 frame 6 51/41 frame 7 51/41 frame 8 51/41 frame 9 51/41 frame 10 51/41 frame 11 51/41 frame 12 51/41 frame 13 51/41 frame 14 51/41 frame 15 51/41 frame 16 51/41 frame 17 51/41 frame 18 51/41
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRRRTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1800, claimed 0
+  promoted 2143, held 0, cab claims 0, missed 26, handed 23, shared 0
+testdata/rig/run2_capture_005.csv: 632 draws
+view 0: 633 draws | truck found 79 members at (-1.86 -1.23 -1.72) | trailer found 53 members at (1.28 0.53 -7.63)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 16/18 frame 3 78/53 frame 4 78/53 frame 5 78/53 frame 6 78/53 frame 7 78/53 frame 8 78/53 frame 9 78/53 frame 10 78/53 frame 11 78/53 frame 12 78/53 frame 13 78/53 frame 14 78/53 frame 15 78/53 frame 16 78/53 frame 17 78/53 frame 18 78/53
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --RRRRRTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 2243, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_006.csv: 2407 draws
+view 0: 495 draws | truck found 33 members at (-2.56 2.36 -1.00) | trailer found 53 members at (-67.64 7.44 -100.26)
+view 1: 574 draws | truck found 62 members at (2.68 2.23 -1.15) | trailer found 53 members at (73.62 1.30 -96.44)
+view 2: 161 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 310 draws | truck found 57 members at (-1.92 2.44 -2.31) | trailer found 53 members at (-20.81 -9.27 -119.02)
+view 4: 362 draws | truck found 52 members at (2.03 2.43 -2.31) | trailer found 53 members at (33.24 -9.65 -116.30)
+view 5: 391 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 32/53 frame 4 32/53 frame 5 32/53 frame 6 32/53 frame 7 32/53 frame 8 32/53 frame 9 32/53 frame 10 32/53 frame 11 32/53 frame 12 32/53 frame 13 32/53 frame 14 32/53 frame 15 32/53 frame 16 32/53 frame 17 32/53 frame 18 32/53
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 61/53 frame 4 61/53 frame 5 61/53 frame 6 61/53 frame 7 61/53 frame 8 61/53 frame 9 61/53 frame 10 61/53 frame 11 61/53 frame 12 61/53 frame 13 61/53 frame 14 61/53 frame 15 61/53 frame 16 61/53 frame 17 61/53 frame 18 61/53
+  view 3 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 56/53 frame 4 56/53 frame 5 56/53 frame 6 56/53 frame 7 56/53 frame 8 56/53 frame 9 56/53 frame 10 56/53 frame 11 56/53 frame 12 56/53 frame 13 56/53 frame 14 56/53 frame 15 56/53 frame 16 56/53 frame 17 56/53 frame 18 56/53
+  view 4 claimed (truck/trailer): frame 1 0/0 frame 2 8/18 frame 3 51/53 frame 4 51/53 frame 5 51/53 frame 6 51/53 frame 7 51/53 frame 8 51/53 frame 9 51/53 frame 10 51/53 frame 11 51/53 frame 12 51/53 frame 13 51/53 frame 14 51/53 frame 15 51/53 frame 16 51/53 frame 17 51/53 frame 18 51/53
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 2124, claimed 0
+  promoted 2368, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_007.csv: 1328 draws
+view 0: 250 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 1: 202 draws | truck found 38 members at (2.68 2.23 -1.16) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 84 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 222 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 4: 120 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 5: 356 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 12/0 frame 3 37/0 frame 4 37/0 frame 5 37/0 frame 6 37/0 frame 7 37/0 frame 8 37/0 frame 9 37/0 frame 10 37/0 frame 11 37/0 frame 12 37/0 frame 13 37/0 frame 14 37/0 frame 15 37/0 frame 16 37/0 frame 17 37/0 frame 18 37/0
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 1, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  interior draws 1710, claimed 0
+  promoted 2394, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_008.csv: 1272 draws
+view 0: 223 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 1: 85 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 108 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 159 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 4: 106 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 5: 503 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view -1, frames 2-18; T truck, R trailer) ; the trailer's frame off by 0.0 cm at most
+  interior draws 1584, claimed 0
+  promoted 2394, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_009.csv: 461 draws
+view 0: 462 draws | truck found 98 members at (-0.07 -1.74 -8.79) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/0 frame 3 97/0 frame 4 97/0 frame 5 97/0 frame 6 97/0 frame 7 97/0 frame 8 97/0 frame 9 97/0 frame 10 97/0 frame 11 97/0 frame 12 97/0 frame 13 97/0 frame 14 97/0 frame 15 97/0 frame 16 97/0 frame 17 97/0 frame 18 97/0
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 2468, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_010.csv: 471 draws
+view 0: 472 draws | truck found 98 members at (-0.99 -1.34 -11.31) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/0 frame 3 97/0 frame 4 97/0 frame 5 97/0 frame 6 97/0 frame 7 97/0 frame 8 97/0 frame 9 97/0 frame 10 97/0 frame 11 97/0 frame 12 97/0 frame 13 97/0 frame 14 97/0 frame 15 97/0 frame 16 97/0 frame 17 97/0 frame 18 97/0
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 2542, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_011.csv: 536 draws
+view 0: 537 draws | truck found 98 members at (-0.81 -1.81 -9.25) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/0 frame 3 97/0 frame 4 97/0 frame 5 97/0 frame 6 97/0 frame 7 97/0 frame 8 97/0 frame 9 97/0 frame 10 97/0 frame 11 97/0 frame 12 97/0 frame 13 97/0 frame 14 97/0 frame 15 97/0 frame 16 97/0 frame 17 97/0 frame 18 97/0
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 2616, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_012.csv: 704 draws
+view 0: 705 draws | truck found 98 members at (-0.64 -1.83 -9.13) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/0 frame 3 97/0 frame 4 97/0 frame 5 97/0 frame 6 97/0 frame 7 97/0 frame 8 97/0 frame 9 97/0 frame 10 97/0 frame 11 97/0 frame 12 97/0 frame 13 97/0 frame 14 97/0 frame 15 97/0 frame 16 97/0 frame 17 97/0 frame 18 97/0
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 2690, held 0, cab claims 0, missed 26, handed 25, shared 0
+testdata/rig/run2_capture_013.csv: 498 draws
+view 0: 499 draws | truck found 98 members at (-0.22 -1.80 -8.90) | trailer - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 24/0 frame 3 97/0 frame 4 97/0 frame 5 97/0 frame 6 97/0 frame 7 97/0 frame 8 97/0 frame 9 97/0 frame 10 97/0 frame 11 97/0 frame 12 97/0 frame 13 97/0 frame 14 97/0 frame 15 97/0 frame 16 97/0 frame 17 97/0 frame 18 97/0
+  artic test: up to 12 degrees, draws claimed by the other unit 0, made-up part (view 0, frames 2-18; T truck, R trailer) --TTTTTTTTTTTTTTT; the trailer's frame off by 0.0 cm at most
+  promoted 2764, held 0, cab claims 0, missed 26, handed 25, shared 0
+done

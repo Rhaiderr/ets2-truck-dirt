@@ -1,0 +1,21 @@
+testdata/rig_road/ats_d4s_capture_004.csv: 1035 draws
+view 0: 1035 draws | truck found 94 members at (-1.12 -1.13 -11.91) | trailer found 66 members at (-5.60 0.09 -15.79) | trailer.1 predicted 10 members at (-12.60 2.00 -21.89) | trailer.2 found 61 members at (-15.57 2.85 -24.57)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 28/20 frame 3 94/66
+  cab check: the offset moves the cab 0.0 cm; draws at the cab's frame 61, at the chassis' 0
+  wheel reach (cm): truck 2 2 0 0 0 0; trailer 0 0 0 0; trailer 0 0; trailer 0 0 0 0
+  road train (N21): trailer.0 claims 66 in 1 view(s); trailer.1 claims 10 in 1 view(s); trailer.2 claims 61 in 1 view(s); units at one place 0
+  promoted 153, held 0, cab claims 0, missed 4, handed 0, shared 0
+testdata/rig_road/ats_d4s_capture_007.csv: 2270 draws
+view 0: 356 draws | truck found 48 members at (2.97 1.56 -2.83) | trailer found 49 members at (4.78 1.06 -8.38) | trailer.1 predicted 10 members at (5.49 0.17 -17.79) | trailer.2 found 52 members at (5.29 -0.23 -21.85)
+view 1: 516 draws | truck found 71 members at (2.22 1.48 -2.10) | trailer found 52 members at (2.43 0.28 -7.84) | trailer.1 predicted 10 members at (0.52 -1.43 -16.96) | trailer.2 found 52 members at (-0.78 -2.10 -20.78)
+view 2: 359 draws | truck found 49 members at (1.98 2.27 -1.90) | trailer found 52 members at (1.91 2.18 -7.76) | trailer.1 predicted 10 members at (-0.45 2.05 -16.94) | trailer.2 found 52 members at (-1.95 2.00 -20.74)
+view 3: 925 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00) | trailer.1 - 0 members at (0.00 0.00 0.00) | trailer.2 - 0 members at (0.00 0.00 0.00)
+  view 0 claimed (truck/trailer): frame 1 0/0 frame 2 10/20 frame 3 48/49
+  view 1 claimed (truck/trailer): frame 1 0/0 frame 2 20/20 frame 3 71/52
+  view 2 claimed (truck/trailer): frame 1 0/0 frame 2 10/20 frame 3 49/52
+  cab check: the offset moves the cab 0.0 cm; draws at the cab's frame 110, at the chassis' 0
+  wheel reach (cm): truck 0 0 0 0 0 0; trailer 0 0 0 0; trailer 0 0; trailer 0 0 0 0
+  road train (N21): trailer.0 claims 153 in 3 view(s); trailer.1 claims 30 in 3 view(s); trailer.2 claims 156 in 3 view(s); units at one place 0
+  interior draws 342, claimed 0
+  promoted 325, held 0, cab claims 0, missed 4, handed 0, shared 0
+done

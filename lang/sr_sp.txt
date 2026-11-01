@@ -1,0 +1,32 @@
+# Truck Dirt: texts in sr_sp (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+# Assumed Latin (sr_sr Cyrillic): check against the game's own locale files.
+
+_name = Srpski
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Pritisnite {key} da operete kamion ({price})
+wash.hint_free = Pritisnite {key} da operete kamion (besplatno)
+wash.prompt = Operi kamion
+wash.stop_first = Zaustavite kamion da biste ga oprali
+wash.parking_brake = Povucite ručnu kočnicu da biste oprali
+wash.already_clean = Kamion je već čist
+wash.no_money = Nemate dovoljno novca za pranje ({price})
+wash.charge_failed = Plaćanje nije uspelo: kamion nije opran
+wash.washing = Pranje kamiona
+wash.washed = Kamion je čist
+wash.ended_early = Pranje je završeno ranije
+wash.unknown_station = Natočite gorivo ovde jednom da biste ovde mogli da perete
+
+menu.title = Truck Dirt: tasteri
+menu.wash_key = Operi kamion
+menu.panel_key = Test panel
+menu.not_set = (nije podešeno)
+menu.press_key = Pritisnite novi taster ({key}: otkaži)
+menu.help = {move}: izaberi, {edit}: promeni, {default}: podrazumevano, {close}: zatvori
+menu.saved = Sačuvano
+menu.taken = Već se koristi: {name}
+menu.unsupported = Ovaj taster ne može da se koristi

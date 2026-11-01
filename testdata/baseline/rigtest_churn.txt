@@ -1,0 +1,180 @@
+testdata/rig/run1_capture_001.csv: 1626 draws
+view 0: 349 draws | truck found 33 members at (2.69 2.23 -1.17) | trailer found 53 members at (6.42 2.24 -6.99)
+view 1: 102 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 198 draws | truck found 32 members at (-2.57 2.36 -1.02) | trailer found 45 members at (-6.75 2.71 -6.52)
+view 3: 248 draws | truck found 23 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.38 1.77 -9.08)
+view 4: 176 draws | truck found 28 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.50 1.83 -9.04)
+view 5: 471 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 79/53 learnt, at most 174/124, 294 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 98, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_002.csv: 1615 draws
+view 0: 353 draws | truck found 33 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.42 2.25 -6.99)
+view 1: 97 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 198 draws | truck found 32 members at (-2.57 2.36 -1.02) | trailer found 45 members at (-6.75 2.72 -6.51)
+view 3: 252 draws | truck found 23 members at (2.03 2.44 -2.32) | trailer found 41 members at (3.38 1.78 -9.08)
+view 4: 176 draws | truck found 28 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.50 1.83 -9.04)
+view 5: 459 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 79/53 learnt, at most 174/124, 294 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 196, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_003.csv: 1342 draws
+view 0: 294 draws | truck found 33 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.63 2.24 -6.85)
+view 1: 96 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 152 draws | truck found 32 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.55 2.71 -6.66)
+view 3: 212 draws | truck found 23 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.63 1.78 -9.02)
+view 4: 158 draws | truck found 28 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.25 1.82 -9.09)
+view 5: 350 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 79/53 learnt, at most 174/124, 294 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 294, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_004.csv: 1686 draws
+view 0: 117 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 1: 190 draws | truck found 32 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.56 2.71 -6.66)
+view 2: 226 draws | truck found 33 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.62 2.23 -6.86)
+view 3: 186 draws | truck found 28 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.27 1.82 -9.09)
+view 4: 155 draws | truck found 23 members at (2.03 2.44 -2.32) | trailer found 41 members at (3.61 1.77 -9.03)
+view 5: 729 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 2, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 79/53 learnt, at most 174/124, 294 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 392, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_005.csv: 1971 draws
+view 0: 297 draws | truck predicted 32 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.55 2.69 -6.67)
+view 1: 392 draws | truck predicted 33 members at (2.68 2.23 -1.16) | trailer found 53 members at (6.63 2.22 -6.85)
+view 2: 118 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 231 draws | truck predicted 28 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.26 1.80 -9.09)
+view 4: 273 draws | truck predicted 23 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.62 1.76 -9.03)
+view 5: 570 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 79/53 learnt, at most 174/124, 294 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 490, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_006.csv: 2014 draws
+view 0: 392 draws | truck found 32 members at (-2.57 2.36 -1.02) | trailer found 49 members at (-6.67 2.72 -6.58)
+view 1: 488 draws | truck found 33 members at (2.69 2.24 -1.16) | trailer found 53 members at (6.51 2.25 -6.93)
+view 2: 82 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 308 draws | truck found 23 members at (2.04 2.44 -2.32) | trailer found 41 members at (3.48 1.79 -9.06)
+view 4: 234 draws | truck found 28 members at (-1.92 2.45 -2.33) | trailer found 41 members at (-3.40 1.84 -9.06)
+view 5: 421 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 79/53 learnt, at most 174/124, 294 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 588, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_007.csv: 910 draws
+view 0: 918 draws | truck found 101 members at (-0.39 -0.99 -18.33) | trailer found 57 members at (-2.29 1.08 -24.66)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 704, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_008.csv: 455 draws
+view 0: 463 draws | truck found 101 members at (-0.14 -1.89 -27.82) | trailer found 57 members at (-0.67 -4.04 -21.28)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 820, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_009.csv: 416 draws
+view 0: 424 draws | truck found 101 members at (-0.41 -1.90 -25.95) | trailer found 57 members at (-2.32 -4.11 -19.67)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 936, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_010.csv: 524 draws
+view 0: 532 draws | truck found 101 members at (-0.44 -1.91 -26.11) | trailer found 57 members at (-2.48 -4.18 -19.90)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1052, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_011.csv: 788 draws
+view 0: 796 draws | truck found 101 members at (1.15 -1.77 -20.19) | trailer found 57 members at (6.55 -3.74 -16.34)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1168, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_012.csv: 1893 draws
+view 0: 293 draws | truck found 32 members at (-2.57 2.37 -1.02) | trailer found 53 members at (-6.62 2.77 -6.60)
+view 1: 334 draws | truck found 61 members at (2.69 2.24 -1.16) | trailer found 53 members at (6.55 2.29 -6.90)
+view 2: 123 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 249 draws | truck found 56 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.35 1.88 -9.07)
+view 4: 262 draws | truck found 51 members at (2.03 2.45 -2.32) | trailer found 41 members at (3.53 1.83 -9.05)
+view 5: 538 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 106/53 learnt, at most 228/124, 375 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1293, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_013.csv: 615 draws
+view 0: 623 draws | truck found 101 members at (1.23 -1.51 -4.85) | trailer found 57 members at (6.93 -1.51 -8.77)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1409, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_014.csv: 500 draws
+view 0: 508 draws | truck found 101 members at (0.17 -1.17 -11.76) | trailer found 57 members at (0.95 0.25 -18.49)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1525, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_015.csv: 516 draws
+view 0: 524 draws | truck found 101 members at (0.17 -1.17 -11.76) | trailer found 57 members at (0.94 0.25 -18.49)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 101/57 learnt, at most 226/132, 348 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1641, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_001.csv: 1604 draws
+view 0: 262 draws | truck found 32 members at (-2.57 2.37 -1.02) | trailer found 53 members at (-6.57 2.69 -6.66)
+view 1: 303 draws | truck found 61 members at (2.69 2.24 -1.17) | trailer found 53 members at (6.62 2.21 -6.87)
+view 2: 224 draws | truck found 56 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.28 1.79 -9.09)
+view 3: 237 draws | truck found 51 members at (2.03 2.44 -2.33) | trailer found 41 members at (3.61 1.75 -9.03)
+view 4: 484 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 104/53 learnt, at most 224/124, 369 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1764, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_002.csv: 1767 draws
+view 0: 265 draws | truck found 32 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.58 2.65 -6.65)
+view 1: 310 draws | truck found 61 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.60 2.18 -6.88)
+view 2: 159 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 223 draws | truck found 56 members at (-1.93 2.44 -2.33) | trailer found 41 members at (-3.29 1.76 -9.09)
+view 4: 240 draws | truck found 51 members at (2.03 2.43 -2.32) | trailer found 41 members at (3.59 1.72 -9.03)
+view 5: 477 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 105/53 learnt, at most 226/124, 372 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1888, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_003.csv: 2226 draws
+view 0: 584 draws | truck predicted 32 members at (-2.57 2.36 -1.01) | trailer found 53 members at (-5.68 2.73 -7.15)
+view 1: 402 draws | truck found 37 members at (2.68 2.24 -1.16) | trailer found 41 members at (7.39 2.23 -6.20)
+view 2: 114 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 393 draws | truck predicted 28 members at (-1.93 2.45 -2.33) | trailer found 53 members at (-2.26 1.82 -9.18)
+view 4: 285 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 5: 347 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 75/53 learnt, at most 170/124, 270 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 1978, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_004.csv: 1824 draws
+view 0: 310 draws | truck found 32 members at (-2.57 2.36 -1.02) | trailer found 53 members at (-6.59 2.71 -6.64)
+view 1: 447 draws | truck found 61 members at (2.69 2.23 -1.16) | trailer found 53 members at (6.59 2.24 -6.88)
+view 2: 251 draws | truck found 56 members at (-1.93 2.45 -2.33) | trailer found 41 members at (-3.30 1.82 -9.08)
+view 3: 299 draws | truck found 51 members at (2.03 2.44 -2.32) | trailer found 41 members at (3.58 1.78 -9.03)
+view 4: 425 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 104/53 learnt, at most 224/124, 369 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2101, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_005.csv: 632 draws
+view 0: 640 draws | truck found 78 members at (-1.86 -1.23 -1.72) | trailer found 53 members at (1.28 0.53 -7.63)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 78/53 learnt, at most 172/124, 291 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2198, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_006.csv: 2407 draws
+view 0: 494 draws | truck found 32 members at (-2.56 2.36 -1.00) | trailer found 53 members at (-67.64 7.44 -100.26)
+view 1: 581 draws | truck found 61 members at (2.68 2.23 -1.15) | trailer found 53 members at (73.62 1.30 -96.44)
+view 2: 161 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 309 draws | truck found 56 members at (-1.92 2.44 -2.31) | trailer found 53 members at (-20.81 -9.27 -119.02)
+view 4: 361 draws | truck found 51 members at (2.03 2.43 -2.31) | trailer found 53 members at (33.24 -9.65 -116.30)
+view 5: 391 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 105/53 learnt, at most 226/124, 372 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2322, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_007.csv: 1328 draws
+view 0: 250 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 1: 209 draws | truck found 37 members at (2.68 2.23 -1.16) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 84 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 222 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 4: 120 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 5: 356 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 1, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 37/0 learnt, at most 86/0, 75 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2347, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_008.csv: 1272 draws
+view 0: 223 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 1: 85 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 2: 108 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 3: 159 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 4: 106 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+view 5: 503 draws | truck - 0 members at (0.00 0.00 0.00) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: the truck is in no view, nothing to test
+testdata/rig/run2_capture_009.csv: 461 draws
+view 0: 469 draws | truck found 97 members at (-0.07 -1.74 -8.79) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 97/0 learnt, at most 218/0, 219 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2420, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_010.csv: 471 draws
+view 0: 479 draws | truck found 97 members at (-0.99 -1.34 -11.31) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 97/0 learnt, at most 218/0, 219 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2493, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_011.csv: 536 draws
+view 0: 544 draws | truck found 97 members at (-0.81 -1.81 -9.25) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 97/0 learnt, at most 218/0, 219 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2566, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_012.csv: 704 draws
+view 0: 712 draws | truck found 97 members at (-0.64 -1.83 -9.13) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 97/0 learnt, at most 218/0, 219 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2639, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_013.csv: 498 draws
+view 0: 506 draws | truck found 97 members at (-0.22 -1.80 -8.90) | trailer - 0 members at (0.00 0.00 0.00)
+  churn: main view 0, 8 made-up draws a frame (new meshes, at 4 places) claimed 0, known (truck/trailer) 97/0 learnt, at most 218/0, 219 inherited, LOD phase ends checked 11, views with draws lost 0
+  promoted 2712, held 0, cab claims 0, missed 0, handed 0, shared 0
+done

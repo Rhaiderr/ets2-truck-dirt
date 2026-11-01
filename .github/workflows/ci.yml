@@ -1,0 +1,124 @@
+# Portable tests on Linux (gcc and clang), the MSVC build of the offline tools on Windows with the
+# dustpreview PNGs (D3D11 WARP) as an artifact, and the MSVC build of the DLL against the SCS SDK
+# downloaded from SCS (MIT licence, sdk_license.txt in the archive), packaged as the players' zip
+# (tools/release/make_release.sh) for the run's artifacts. The SDK is never in the repository.
+name: CI
+
+# Not on every push (29/10: each run took ~5 min the in-game test loop waited for): the local build with
+# tools/run_tests.sh (MSVC) and tools/probetest (the real GPU, which CI has not) are the gate before an install. CI
+# runs for a release tag, a pull request, or by hand (gh workflow run CI), as the clean-checkout and gcc/clang check.
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Compilers
+        run: g++ --version | head -n 1 && clang++ --version | head -n 1 && cmake --version | head -n 1
+      - name: Portable tests against testdata/baseline
+        run: tools/run_tests.sh g++ clang++
+      - name: Test outputs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-test-output
+          path: build/tests-*/
+          if-no-files-found: ignore
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure (MSVC, no SCS SDK)
+        run: cmake -S . -B build -A x64
+      - name: Build
+        run: cmake --build build --config Release
+      - name: Portable tests against testdata/baseline (MSVC binaries)
+        shell: bash
+        run: tools/run_tests.sh --bin build/out
+      - name: Dust preview (WARP)
+        shell: bash
+        env:
+          DUSTPREVIEW_WARP: "1"
+        run: |
+          mkdir -p build/preview
+          build/out/dustpreview.exe build/preview
+          {
+            echo "### dustpreview ($(ls build/preview/*.png | wc -l) PNGs, WARP)"
+            echo "Download: artifact **dustpreview** of this run."
+            ls build/preview | sed 's/^/- /'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dustpreview
+          path: build/preview/*.png
+          if-no-files-found: error
+      - name: Test outputs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-test-output
+          path: build/tests-output/
+          if-no-files-found: ignore
+
+  # The SDK is downloaded into the runner only (hash checked) and never uploaded. The DLL is uploaded only
+  # inside the release zip (D7), as a run artifact of this private repository; nothing is published.
+  # A new SDK (or SCS replacing the archive) fails the hash check: update both lines on purpose.
+  dll:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      SCS_SDK_URL: https://download.eurotrucksimulator2.com/scs_sdk_1_16.zip
+      SCS_SDK_SHA256: 49821e25568f4d7e462135f577f8fef2ab197326404f2c1daef139b8f3dc5e69
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # with the tags: the version is the tag v* on HEAD when there is one (tools/release/version.cmake)
+      - name: SCS SDK (official download, checked hash)
+        shell: bash
+        run: |
+          mkdir -p build/sdk third_party/scs_sdk
+          curl -sSfL -o build/sdk/scs_sdk.zip "$SCS_SDK_URL"
+          echo "$SCS_SDK_SHA256  build/sdk/scs_sdk.zip" | sha256sum -c -
+          unzip -q build/sdk/scs_sdk.zip -d build/sdk
+          head -n 2 build/sdk/sdk_license.txt
+          cp -r build/sdk/include third_party/scs_sdk/include
+          test -f third_party/scs_sdk/include/scssdk.h
+      - name: Configure
+        run: cmake -S . -B build -A x64
+      - name: Build (DLL, probetest and the offline tools)
+        run: cmake --build build --config Release
+      - name: DLL built
+        shell: bash
+        run: ls -l build/out/ets2_truck_dirt.dll build/out/probetest.exe build/out/version.txt
+      - name: Release zip (D7)
+        shell: bash
+        run: |
+          tools/release/make_release.sh --no-premap | tee build/release.txt
+          {
+            echo "### Release zip $(cat build/out/version.txt)"
+            echo "Download: artifact **release-zip** of this run."
+            echo '```'
+            cat build/release.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-zip
+          path: dist/ets2_truck_dirt-*.zip
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,31 @@
+# Truck Dirt: texts in lt_lt (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Lietuvių
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Paspauskite {key}, kad nuplautumėte sunkvežimį ({price})
+wash.hint_free = Paspauskite {key}, kad nuplautumėte sunkvežimį (nemokamai)
+wash.prompt = Nuplauti sunkvežimį
+wash.stop_first = Sustabdykite sunkvežimį, kad jį nuplautumėte
+wash.parking_brake = Įjunkite stovėjimo stabdį, kad nuplautumėte
+wash.already_clean = Sunkvežimis jau švarus
+wash.no_money = Nepakanka pinigų plovimui ({price})
+wash.charge_failed = Mokėjimas nepavyko: sunkvežimis nenuplautas
+wash.washing = Plaunamas sunkvežimis
+wash.washed = Sunkvežimis švarus
+wash.ended_early = Plovimas baigėsi anksčiau
+wash.unknown_station = Vieną kartą čia įsipilkite degalų, kad galėtumėte čia plauti
+
+menu.title = Truck Dirt: klavišai
+menu.wash_key = Nuplauti sunkvežimį
+menu.panel_key = Bandymų skydelis
+menu.not_set = (nenustatyta)
+menu.press_key = Paspauskite naują klavišą ({key}: atšaukti)
+menu.help = {move}: rinktis, {edit}: keisti, {default}: numatytasis, {close}: uždaryti
+menu.saved = Išsaugota
+menu.taken = Jau naudojamas: {name}
+menu.unsupported = Šio klavišo naudoti negalima

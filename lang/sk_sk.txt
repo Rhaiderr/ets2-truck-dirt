@@ -1,0 +1,31 @@
+# Truck Dirt: texts in sk_sk (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Slovenčina
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Stlačte {key} na umytie kamióna ({price})
+wash.hint_free = Stlačte {key} na umytie kamióna (zadarmo)
+wash.prompt = Umyť kamión
+wash.stop_first = Zastavte kamión, aby ste ho mohli umyť
+wash.parking_brake = Zatiahnite parkovaciu brzdu na umytie
+wash.already_clean = Kamión je už čistý
+wash.no_money = Nedostatok peňazí na umytie ({price})
+wash.charge_failed = Platba zlyhala: kamión nebol umytý
+wash.washing = Umývanie kamiónu
+wash.washed = Kamión je čistý
+wash.ended_early = Umývanie sa skončilo predčasne
+wash.unknown_station = Raz tu natankujte, aby ste tu mohli umývať
+
+menu.title = Truck Dirt: klávesy
+menu.wash_key = Umyť kamión
+menu.panel_key = Testovací panel
+menu.not_set = (nenastavené)
+menu.press_key = Stlačte novú klávesu ({key}: zrušiť)
+menu.help = {move}: vybrať, {edit}: zmeniť, {default}: predvolené, {close}: zavrieť
+menu.saved = Uložené
+menu.taken = Už použité: {name}
+menu.unsupported = Túto klávesu nemožno použiť

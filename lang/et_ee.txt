@@ -1,0 +1,31 @@
+# Truck Dirt: texts in et_ee (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Eesti
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Veoki pesemiseks vajuta {key} ({price})
+wash.hint_free = Veoki pesemiseks vajuta {key} (tasuta)
+wash.prompt = Pese veokit
+wash.stop_first = Peata veok, et seda pesta
+wash.parking_brake = Pesemiseks rakenda seisupidur
+wash.already_clean = Veok on juba puhas
+wash.no_money = Pesemiseks pole piisavalt raha ({price})
+wash.charge_failed = Makse ebaõnnestus: veokit ei pestud
+wash.washing = Veoki pesemine
+wash.washed = Veok on puhas
+wash.ended_early = Pesemine lõppes enneaegselt
+wash.unknown_station = Tangi siin üks kord, et siin pesta saaks
+
+menu.title = Truck Dirt: klahvid
+menu.wash_key = Pese veok
+menu.panel_key = Testpaneel
+menu.not_set = (määramata)
+menu.press_key = Vajuta uut klahvi ({key}: tühista)
+menu.help = {move}: vali, {edit}: muuda, {default}: vaikimisi, {close}: sulge
+menu.saved = Salvestatud
+menu.taken = Juba kasutusel: {name}
+menu.unsupported = Seda klahvi ei saa kasutada

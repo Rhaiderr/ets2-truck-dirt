@@ -1,0 +1,31 @@
+# Truck Dirt: texts in tr_tr (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Türkçe
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Tırı yıkamak için {key} tuşuna basın ({price})
+wash.hint_free = Tırı yıkamak için {key} tuşuna basın (ücretsiz)
+wash.prompt = Tırı yıka
+wash.stop_first = Yıkamak için tırı durdurun
+wash.parking_brake = Yıkamak için el frenini çekin
+wash.already_clean = Tır zaten temiz
+wash.no_money = Yıkama için yeterli paranız yok ({price})
+wash.charge_failed = Ödeme başarısız: tır yıkanmadı
+wash.washing = Tır yıkanıyor
+wash.washed = Tır temiz
+wash.ended_early = Yıkama erken bitti
+wash.unknown_station = Burada yıkayabilmek için bir kez yakıt alın
+
+menu.title = Truck Dirt: tuşlar
+menu.wash_key = Tırı yıka
+menu.panel_key = Test paneli
+menu.not_set = (atanmadı)
+menu.press_key = Yeni tuşa basın ({key}: iptal)
+menu.help = {move}: seç, {edit}: değiştir, {default}: varsayılan, {close}: kapat
+menu.saved = Kaydedildi
+menu.taken = Zaten kullanılıyor: {name}
+menu.unsupported = Bu tuş kullanılamaz

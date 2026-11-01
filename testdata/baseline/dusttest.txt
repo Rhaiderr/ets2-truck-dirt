@@ -1,0 +1,86 @@
+ok   80 km of dry asphalt (~1 h): no dust (D12c)                0.000
+ok   100 km of dry dirt (~6 real min): mostly dusty             0.713
+ok   700 km of dirt: saturates at 1                             1.000
+ok   D14: a real minute of road_dirt (16.6 km): ~14%            0.139
+ok   static right after dirt counts as dirt                     0.002
+ok   static after 300 m counts as asphalt                       0.000
+ok   wheels in the air: no dust                                 0.000
+ok   snow: no dust                                              0.000
+ok   2 game hours of rain halve the truck's dust                0.400
+ok   ... and the trailer's                                      0.200
+ok   30 game min after the rain: road wet, no dust              0.400
+ok   70 game min after the rain: dry, dust again                0.636
+ok   units are separate (trailer only)                          0.713
+ok   INI override forces the level                              0.700
+ok   rate x10: 10 km of dirt as dusty as 100 km                 0.713
+ok   a teleport (> 1 km in one step) is ignored                 0.000
+ok   D4: 1 game hour of rain soaks the road                     0.998
+ok   50 km of wet dirt at 50 km/h: the lower part well muddy    0.713
+ok   ... and no dust (wet road)                                 0.000
+ok   30 game min after the rain: road half dry                  0.499
+ok   60 game min after the rain: road dry                       0.000
+ok   3 game hours later the mud is mostly dry                   0.690
+ok   ... and none of it is lost drying                          0.713
+ok   1 game hour of hard rain softens the dry mud               0.414
+ok   ... light rain softens less                                0.569
+ok   dry dirt: no mud                                           0.000
+ok   dry asphalt: no spray                                      0.000
+ok   300 km of wet motorway at 80 km/h: spray                   0.622
+ok   ... and no mud                                             0.000
+ok   hard rain takes part of the spray                          0.391
+ok   dry again: the spray turns into film                       0.391
+ok   N39: 300 km of dry motorway at 80 km/h: a hint of soot     0.075
+ok   ... 1000 km: about a fifth                                 0.229
+ok   D12c: 12 game hours of motorway (~1170 km at 110 km/h): about 30% 0.296
+ok   ... 2 game hours of hard rain take little                  0.826
+ok   ... none on dirt                                           0.000
+ok   ... twice as fast on a soaked road                         1.990
+ok   ... the wash takes it                                      0.000
+ok   100 km of dry gravel: grit                                 0.451
+ok   ... and dust, as in D3                                     0.528
+ok   1 game hour of rain halves the grit                        0.226
+ok   100 km of snow road: salt crust                            0.632
+ok   parked on snow: the salt stays                             0.632
+ok   4 game hours off the snow: half melts                      0.316
+ok   90 km/h splashes more mud per km than 30                   1.527
+ok   ... and higher on the body                                 1.000
+ok   the reach is the mean of the speeds, by amount             0.630
+ok   ... and stays with the mud when it dries                   0.630
+ok   the trailer front takes the truck's mud                    0.482
+ok   ... the truck front does not                               0.000
+ok   a trailer driven alone: no truck splash on its front       0.666
+ok   the front's mud dries too                                  0.479
+ok   wheels in the air: no mud                                  0.000
+ok   half the wheels on the ground: about half the mud          0.503
+ok   a teleport (> 1 km in one step) is ignored                 0.012
+ok   small or big steps: the same layers (max difference)       0.000
+ok   a new trailer starts clean (every layer)                   0.000
+ok   setting the dust leaves the mud                            0.666
+ok   INI override forces a layer (body and trailer front)       0.800
+ok   rate x10: 6 km of wet dirt as muddy as 60 km               0.776
+ok   a saved reach is restored (not for the dust)               0.700
+ok   N31: a new unit's tread starts worn (clean tyres)          0.920
+ok   40 km of wet dirt: the tread as dirty as the wheel         0.000
+ok   ... then 1 km of dry asphalt: the tread wears to the floor 0.704
+ok   ... then 2 km of dry asphalt: the tread wears to the floor 0.775
+ok   ... then 3 km of dry asphalt: the tread wears to the floor 0.823
+ok   ... then 4 km of dry asphalt: the tread wears to the floor 0.855
+ok   ... the trailer's tread alike                              0.855
+ok   ... while the body (and the side walls) keep their mud and dust 0.631
+ok   wheels in the air: the tread stays as it is                0.855
+ok   300 m of dirt: the tread takes the wheel's dirt again      0.141
+ok   static right after dirt counts as dirt for the tread too   0.043
+ok   static after 300 m wears it as asphalt                     0.707
+ok   a cleaned unit's tread starts worn again                   0.920
+ok   wet asphalt wears it too (the spray stays)                 0.775
+ok   small or big steps: the same tread wear                    0.000
+ok   wheels: no telemetry, no turn and no blur                  0.000
+ok   wheels: steered 1/4 turn left, its front is at -x          -1.000
+ok   wheels: rolled 1/4 turn forward, its top is in front       1.000
+ok   wheels: a wheel past the count stays as it is              -1.000
+ok   wheels: the angle blurs from 15 to 45 km/h                 0.500
+ok   levels: 1 goes to the pass as 0.8, the dust as 0.68 (not the wetness, the tread wear, the reach) 0.680
+ok   levels: clamped to 0..1 first (NaN = 0), then scaled       0.400
+ok   deflection: the raised tyre's top is on the wheel (0.9 r)  0.900
+ok   deflection: the arch keeps its place on the body           0.000
+done

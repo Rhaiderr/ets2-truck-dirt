@@ -1,0 +1,121 @@
+== 1. stencil: what a state writes
+ok   game G-buffer state (0x0f, replace, ref 1): 0x01, none of ours     1.000
+ok   same state with ref 0xff: still none of ours (mask 0x0f)           15.000
+ok   stencil disabled: writes nothing                                   0.000
+ok   keep everywhere (a stencil test only): writes nothing              0.000
+ok   zero: never sets a bit                                             0.000
+ok   mask 0xff, replace, ref 0x01: none of ours                         1.000
+ok   mask 0xff, replace, ref 0x21: bit 0x20 of ours                     32.000
+ok   mask 0x7f, incr_sat: all of ours, whatever the ref                 112.000
+ok   mask 0x40, invert on fail only: bit 0x40                           64.000
+    ops text: keep/keep/replace keep/keep/replace
+ok   ops text                                                           0.000
+== 1. stencil: decision
+ok   no conflict: drawing on, nothing logged                            0.000
+    | compat 10.0 s: stencil: game state #7 ops keep/keep/replace keep/keep/replace writes bits 0x10 of ours (0xf0): mask 0xff, ref 0x11 (measured 0x10, limit 0x00) -> drawing off for the session
+ok   game writes 0x10: drawing off                                      0.000
+ok   the line names the state, the mask, the measure and the limit      0.000
+    | compat 10.0 s: stencil: game state #9 writes bits 0x70 of ours (0xf0): mask 0x7f, ref 0x00 (measured 0x70, limit 0x00) -> already decided
+ok   a second state: one more line, still off                           0.000
+ok   stays off for the session (the state still exists)                 0.000
+    summary: compatibility: turned off: drawing (stencil: game state #7 ops keep/keep/replace keep/keep/replace writes bits 0x10 of ours (0xf0): mask 0xff, ref 0x11 (measured 0x10, limit 0x00))
+ok   summary: drawing off by the stencil                                0.000
+    | compat 1.0 s: stencil: game state #7 writes bits 0x10 of ours (0xf0): mask 0xff, ref 0x11 (measured 0x10, limit 0x00) -> would turn the drawing off (enforce = 0: only logged)
+ok   enforce = 0: logged, drawing stays on                              0.000
+    summary: compatibility: would have turned off (enforce = 0, nothing was): drawing (stencil: game state #7 writes bits 0x10 of ours (0xf0): mask 0xff, ref 0x11 (measured 0x10, limit 0x00))
+ok   summary with enforce = 0                                           0.000
+== 2. G-buffer
+ok   menu / pause: 120 s without a G-buffer, nothing logged             0.000
+ok   loading: 10 frames 8 s apart (80 s), nothing logged                0.000
+ok   no truck configured yet: nothing logged                            0.000
+ok   14 s without a G-buffer while driving: below the limit             0.000
+    | compat 295.0 s: g-buffer: no G-buffer pass for 15.0 s with the game running and the truck in it (limit 15 s): nothing is drawn -> log only
+ok   16 s without it: one line, with the limit                          0.000
+ok   log only: the drawing is not turned off                            0.000
+ok   still without it: no repeat                                        0.000
+    | compat 326.0 s: g-buffer: G-buffer pass seen again after 46.0 s without it
+ok   back: one line                                                     0.000
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#0) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#1) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#2) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#3) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#4) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#5) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#6) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+    | compat 1.0 s: g-buffer: a pass with 4+ targets is not taken as the G-buffer: formats 10,10,10,11 depth 20 (#7) (want rt0-2 R16G16B16A16_FLOAT, rt3 R16G16B16A16_UINT, depth with stencil) -> log only
+ok   4+ target mismatches: at most 8 lines a session                    8.000
+    summary: compatibility: nothing turned off | warnings: no G-buffer seen; a 4+ target pass did not match (formats 10,10,10,11 depth 20 (#0))
+ok   no G-buffer in the session: the mismatch is a warning in the summary 0.000
+    summary: compatibility: all ok
+ok   with the G-buffer seen: another 4+ target pass of the game, all ok 0.000
+== 3. matrix in cb0
+ok   0.4% for 120 s: nothing                                            0.000
+    stats: drawing ok, no matrix 0.40% (max 0.40%)
+ok   stats: the measured share                                          0.000
+ok   single bad windows between good ones: on                           0.000
+    | compat 150.0 s: matrix: 60.0% of the G-buffer draws have no model->camera matrix in VS cb0 (90000 of 150000 in the last 5 s, 2 windows in a row; limit 25%, normal ~0.4%) -> drawing off for the session
+ok   two bad windows in a row (10 s at 60%): off                        0.000
+ok   the line has the share, the counts and the limit                   0.000
+ok   stays off for the session                                          0.000
+ok   too few draws per window (150 < 300): no verdict                   0.000
+ok   paused: nothing counts                                             0.000
+    | compat 10.0 s: matrix: 60.0% of the G-buffer draws have no model->camera matrix in VS cb0 (90000 of 150000 in the last 5 s, 2 windows in a row; limit 25%, normal ~0.4%) -> would turn the drawing off (enforce = 0: only logged)
+ok   enforce = 0: logged only                                           0.000
+== 4. wheels and parts
+ok   trailer unrecognised 59 s: nothing yet                             0.000
+ok   paused or no G-buffer: does not count                              0.000
+    | compat 125.0 s: parts: trailer in the game, G-buffer drawn, none of its parts recognised for 60.0 s (limit 60 s): an unusual model (mod)? It gets no dust -> log only
+ok   60 s: one line for the trailer                                     0.000
+ok   the truck is fine; log only                                        0.000
+    | compat 126.0 s: parts: trailer recognised again after 61.0 s
+ok   recognised again: one line                                         0.000
+ok   trailer uncoupled: no line                                         0.000
+== 5. rain
+ok   wipers on with rain for 300 s: nothing                             0.000
+ok   two dry wiper runs of 100 s: nothing (limit per run)               0.000
+    | compat 521.0 s: rain: wipers on for 120.0 s and no rain seen on the GPU (limit 120 s): the rain now comes from the wipers alone (an update or weather mod changed the rain, or the wipers run in dry weather) -> log only
+ok   121 s with wipers and no rain: one line                            0.000
+ok   no repeat                                                          0.000
+    | compat 622.0 s: rain: rain seen on the GPU again (with the wipers on)
+ok   rain back: one line                                                0.000
+== 6. interior (stencil ref 2)
+ok   exterior camera (1 view, no ref 2) for 120 s: nothing              0.000
+ok   interior camera with ref 2: nothing                                0.000
+ok   29 s of interior camera without ref 2: still on                    0.000
+    | compat 330.0 s: interior: no ref-2 draw (the cabin seen from inside) in 30.0 s of interior camera (measured 0, limit > 0 in 30 s; normal ~86 per frame) -> interior dust off (back on when ref 2 returns)
+ok   31 s in all (the exterior in between does not reset): off          0.000
+ok   only the interior: the exterior keeps its dust                     0.000
+ok   no repeat while off                                                0.000
+    | compat 391.0 s: interior: 86 ref-2 draws in the interior camera again -> interior dust back on
+ok   ref 2 back: interior dust back on                                  0.000
+    summary: compatibility: turned off: interior dust 1 time(s), back on later (ref 2 seen again)
+ok   summary: off once, back on                                         0.000
+    | compat 422.0 s: interior: no ref-2 draw (the cabin seen from inside) in 30.0 s of interior camera (measured 0, limit > 0 in 30 s; normal ~86 per frame) -> interior dust off (back on when ref 2 returns)
+ok   lost again: off again                                              0.000
+    summary: compatibility: turned off: interior dust (interior: no ref-2 draw (the cabin seen from inside) in 30.0 s of interior camera (measured 0, limit > 0 in 30 s; normal ~86 per frame))
+    | compat 30.0 s: interior: no ref-2 draw (the cabin seen from inside) in 30.0 s of interior camera (measured 0, limit > 0 in 30 s; normal ~86 per frame) -> would turn the interior dust off (enforce = 0: only logged)
+ok   enforce = 0: logged only                                           0.000
+== FPS independence
+    | compat 50.0 s: interior: no ref-2 draw (the cabin seen from inside) in 30.0 s of interior camera (measured 0, limit > 0 in 30 s; normal ~86 per frame) -> interior dust off (back on when ref 2 returns)
+    | compat 70.0 s: matrix: 60.0% of the G-buffer draws have no model->camera matrix in VS cb0 (45000 of 75000 in the last 5 s, 2 windows in a row; limit 25%, normal ~0.4%) -> drawing off for the session
+     30 FPS: interior off at 50.000 s, drawing off at 70.000 s, lines 2
+ok   both decisions taken, nothing else                                 0.000
+    | compat 50.0 s: interior: no ref-2 draw (the cabin seen from inside) in 30.0 s of interior camera (measured 0, limit > 0 in 30 s; normal ~86 per frame) -> interior dust off (back on when ref 2 returns)
+    | compat 70.0 s: matrix: 60.0% of the G-buffer draws have no model->camera matrix in VS cb0 (90000 of 150000 in the last 5 s, 2 windows in a row; limit 25%, normal ~0.4%) -> drawing off for the session
+     60 FPS: interior off at 50.000 s, drawing off at 70.000 s, lines 2
+ok   both decisions taken, nothing else                                 0.000
+    | compat 50.0 s: interior: no ref-2 draw (the cabin seen from inside) in 30.0 s of interior camera (measured 0, limit > 0 in 30 s; normal ~86 per frame) -> interior dust off (back on when ref 2 returns)
+    | compat 70.0 s: matrix: 60.0% of the G-buffer draws have no model->camera matrix in VS cb0 (216000 of 360000 in the last 5 s, 2 windows in a row; limit 25%, normal ~0.4%) -> drawing off for the session
+    144 FPS: interior off at 50.000 s, drawing off at 70.000 s, lines 2
+ok   both decisions taken, nothing else                                 0.000
+ok   interior: same time at every rate                                  0.000
+ok   matrix: same time at every rate                                    0.000
+ok   interior: same time at every rate                                  0.000
+ok   matrix: same time at every rate                                    0.000
+== summary
+    summary: compatibility: all ok
+ok   a normal session: all ok                                           0.000
+ok   all ok with enforce = 0                                            0.000
+    stats: drawing ok, no matrix 0.40% (max 0.40%) [enforce 0]
+ok   stats show enforce = 0                                             0.000
+all compat checks passed (0 failures)

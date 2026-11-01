@@ -1,0 +1,30 @@
+# Truck Dirt: texts in de_de (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+
+_name = Deutsch
+_script = latin
+_review = ok
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Drücke {key}, um den Lkw zu waschen ({price})
+wash.hint_free = Drücke {key}, um den Lkw zu waschen (kostenlos)
+wash.prompt = Lkw waschen
+wash.stop_first = Halte den Lkw an, um ihn zu waschen
+wash.parking_brake = Zieh die Feststellbremse an, um zu waschen
+wash.already_clean = Der Lkw ist schon sauber
+wash.no_money = Nicht genug Geld für die Wäsche ({price})
+wash.charge_failed = Zahlung fehlgeschlagen: Der Lkw wurde nicht gewaschen
+wash.washing = Lkw wird gewaschen
+wash.washed = Der Lkw ist sauber
+wash.ended_early = Die Wäsche wurde vorzeitig beendet
+wash.unknown_station = Einmal hier tanken, um hier waschen zu können
+
+menu.title = Truck Dirt: Tasten
+menu.wash_key = Lkw waschen
+menu.panel_key = Testpanel
+menu.not_set = (nicht belegt)
+menu.press_key = Neue Taste drücken ({key}: abbrechen)
+menu.help = {move}: wählen, {edit}: ändern, {default}: Standard, {close}: schließen
+menu.saved = Gespeichert
+menu.taken = Schon belegt: {name}
+menu.unsupported = Diese Taste kann nicht verwendet werden

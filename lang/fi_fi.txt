@@ -1,0 +1,31 @@
+# Truck Dirt: texts in fi_fi (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Suomi
+_script = latin
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = \s
+
+wash.hint = Paina {key} pestäksesi rekan ({price})
+wash.hint_free = Paina {key} pestäksesi rekan (ilmainen)
+wash.prompt = Pese rekka
+wash.stop_first = Pysäytä rekka pestäksesi sen
+wash.parking_brake = Kytke seisontajarru pestäksesi
+wash.already_clean = Rekka on jo puhdas
+wash.no_money = Rahaa ei ole tarpeeksi pesuun ({price})
+wash.charge_failed = Maksu epäonnistui: rekkaa ei pesty
+wash.washing = Rekkaa pestään
+wash.washed = Rekka on puhdas
+wash.ended_early = Pesu päättyi ennenaikaisesti
+wash.unknown_station = Tankkaa täällä kerran, niin voit pestä täällä
+
+menu.title = Truck Dirt: näppäimet
+menu.wash_key = Pese rekka
+menu.panel_key = Testipaneeli
+menu.not_set = (ei asetettu)
+menu.press_key = Paina uutta näppäintä ({key}: peruuta)
+menu.help = {move}: valitse, {edit}: vaihda, {default}: oletus, {close}: sulje
+menu.saved = Tallennettu
+menu.taken = Jo käytössä: {name}
+menu.unsupported = Tätä näppäintä ei voi käyttää

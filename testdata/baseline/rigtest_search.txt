@@ -1,0 +1,147 @@
+testdata/rig/run1_capture_001.csv: 1626 draws
+  searches (found): tracked 61 (5), away 84 (0), back 7 (4)
+  view 0 claimed (truck/trailer): frame 3 33/53 frame 30 33/53 frame 31 0/0 frame 62 33/53
+  view 2 claimed (truck/trailer): frame 3 32/45 frame 30 32/45 frame 31 0/0 frame 62 32/45
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 30 23/41 frame 31 0/0 frame 62 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 30 28/41 frame 31 0/0 frame 62 28/41
+  promoted 98, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_002.csv: 1615 draws
+  searches (found): tracked 61 (5), away 84 (0), back 7 (4)
+  view 0 claimed (truck/trailer): frame 3 33/53 frame 30 33/53 frame 31 0/0 frame 62 33/53
+  view 2 claimed (truck/trailer): frame 3 32/45 frame 30 32/45 frame 31 0/0 frame 62 32/45
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 30 23/41 frame 31 0/0 frame 62 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 30 28/41 frame 31 0/0 frame 62 28/41
+  promoted 196, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_003.csv: 1342 draws
+  searches (found): tracked 61 (5), away 84 (0), back 7 (4)
+  view 0 claimed (truck/trailer): frame 3 33/53 frame 30 33/53 frame 31 0/0 frame 62 33/53
+  view 2 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 30 23/41 frame 31 0/0 frame 62 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 30 28/41 frame 31 0/0 frame 62 28/41
+  promoted 294, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_004.csv: 1686 draws
+  searches (found): tracked 61 (5), away 84 (0), back 7 (4)
+  view 1 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 2 claimed (truck/trailer): frame 3 33/53 frame 30 33/53 frame 31 0/0 frame 62 33/53
+  view 3 claimed (truck/trailer): frame 3 28/41 frame 30 28/41 frame 31 0/0 frame 62 28/41
+  view 4 claimed (truck/trailer): frame 3 23/41 frame 30 23/41 frame 31 0/0 frame 62 23/41
+  promoted 392, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_005.csv: 1971 draws
+  searches (found): tracked 173 (5), away 84 (0), back 15 (0)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 1 claimed (truck/trailer): frame 3 33/53 frame 30 33/53 frame 31 0/0 frame 62 33/53
+  view 3 claimed (truck/trailer): frame 3 28/41 frame 30 28/41 frame 31 0/0 frame 62 28/41
+  view 4 claimed (truck/trailer): frame 3 23/41 frame 30 23/41 frame 31 0/0 frame 62 23/41
+  promoted 490, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_006.csv: 2014 draws
+  searches (found): tracked 61 (5), away 84 (0), back 7 (4)
+  view 0 claimed (truck/trailer): frame 3 32/49 frame 30 32/49 frame 31 0/0 frame 62 32/49
+  view 1 claimed (truck/trailer): frame 3 33/53 frame 30 33/53 frame 31 0/0 frame 62 33/53
+  view 3 claimed (truck/trailer): frame 3 23/41 frame 30 23/41 frame 31 0/0 frame 62 23/41
+  view 4 claimed (truck/trailer): frame 3 28/41 frame 30 28/41 frame 31 0/0 frame 62 28/41
+  promoted 588, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_007.csv: 910 draws
+  searches (found): tracked 32 (32), away 12 (0), back 4 (4)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 704, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_008.csv: 455 draws
+  searches (found): tracked 32 (32), away 12 (0), back 4 (4)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 820, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_009.csv: 416 draws
+  searches (found): tracked 4 (4), away 12 (0), back 1 (1)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 936, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_010.csv: 524 draws
+  searches (found): tracked 4 (4), away 12 (0), back 1 (1)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 1052, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_011.csv: 788 draws
+  searches (found): tracked 32 (32), away 12 (0), back 4 (4)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 1168, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_012.csv: 1893 draws
+  searches (found): tracked 61 (5), away 84 (0), back 7 (4)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 30 61/53 frame 31 0/0 frame 62 61/53
+  view 3 claimed (truck/trailer): frame 3 56/41 frame 30 56/41 frame 31 0/0 frame 62 56/41
+  view 4 claimed (truck/trailer): frame 3 51/41 frame 30 51/41 frame 31 0/0 frame 62 51/41
+  promoted 1293, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_013.csv: 615 draws
+  searches (found): tracked 4 (4), away 12 (0), back 1 (1)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 1409, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_014.csv: 500 draws
+  searches (found): tracked 4 (4), away 12 (0), back 1 (1)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 1525, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run1_capture_015.csv: 516 draws
+  searches (found): tracked 4 (4), away 12 (0), back 1 (1)
+  view 0 claimed (truck/trailer): frame 3 101/57 frame 30 101/57 frame 31 0/0 frame 62 101/57
+  promoted 1641, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_001.csv: 1604 draws
+  searches (found): tracked 25 (5), away 52 (0), back 4 (4)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 30 61/53 frame 31 0/0 frame 62 61/53
+  view 2 claimed (truck/trailer): frame 3 56/41 frame 30 56/41 frame 31 0/0 frame 62 56/41
+  view 3 claimed (truck/trailer): frame 3 51/41 frame 30 51/41 frame 31 0/0 frame 62 51/41
+  promoted 1764, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_002.csv: 1767 draws
+  searches (found): tracked 85 (5), away 112 (0), back 10 (4)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 30 61/53 frame 31 0/0 frame 62 61/53
+  view 3 claimed (truck/trailer): frame 3 56/41 frame 30 56/41 frame 31 0/0 frame 62 56/41
+  view 4 claimed (truck/trailer): frame 3 51/41 frame 30 51/41 frame 31 0/0 frame 62 51/41
+  promoted 1888, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_003.csv: 2226 draws
+  searches (found): tracked 203 (35), away 132 (0), back 19 (4)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 1 claimed (truck/trailer): frame 3 37/41 frame 30 37/41 frame 31 0/0 frame 62 37/41
+  view 3 claimed (truck/trailer): frame 3 28/53 frame 30 28/53 frame 31 0/0 frame 62 28/53
+  promoted 1978, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_004.csv: 1824 draws
+  searches (found): tracked 25 (5), away 52 (0), back 4 (4)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 30 61/53 frame 31 0/0 frame 62 61/53
+  view 2 claimed (truck/trailer): frame 3 56/41 frame 30 56/41 frame 31 0/0 frame 62 56/41
+  view 3 claimed (truck/trailer): frame 3 51/41 frame 30 51/41 frame 31 0/0 frame 62 51/41
+  promoted 2101, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_005.csv: 632 draws
+  searches (found): tracked 4 (4), away 12 (0), back 1 (1)
+  view 0 claimed (truck/trailer): frame 3 78/53 frame 30 78/53 frame 31 0/0 frame 62 78/53
+  promoted 2198, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_006.csv: 2407 draws
+  searches (found): tracked 85 (5), away 112 (0), back 10 (4)
+  view 0 claimed (truck/trailer): frame 3 32/53 frame 30 32/53 frame 31 0/0 frame 62 32/53
+  view 1 claimed (truck/trailer): frame 3 61/53 frame 30 61/53 frame 31 0/0 frame 62 61/53
+  view 3 claimed (truck/trailer): frame 3 56/53 frame 30 56/53 frame 31 0/0 frame 62 56/53
+  view 4 claimed (truck/trailer): frame 3 51/53 frame 30 51/53 frame 31 0/0 frame 62 51/53
+  promoted 2322, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_007.csv: 1328 draws
+  searches (found): tracked 164 (2), away 140 (0), back 12 (0)
+  view 1 claimed (truck/trailer): frame 3 37/0 frame 30 37/0 frame 31 0/0 frame 62 37/0
+  promoted 2347, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_008.csv: 1272 draws
+  searches (found): tracked 72 (0), away 24 (0), back 0 (0)
+  promoted 2347, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_009.csv: 461 draws
+  searches (found): tracked 36 (30), away 8 (0), back 3 (3)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 30 97/0 frame 31 0/0 frame 62 97/0
+  promoted 2420, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_010.csv: 471 draws
+  searches (found): tracked 8 (2), away 8 (0), back 0 (0)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 30 97/0 frame 31 0/0 frame 62 97/0
+  promoted 2493, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_011.csv: 536 draws
+  searches (found): tracked 8 (2), away 8 (0), back 0 (0)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 30 97/0 frame 31 0/0 frame 62 97/0
+  promoted 2566, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_012.csv: 704 draws
+  searches (found): tracked 8 (2), away 8 (0), back 0 (0)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 30 97/0 frame 31 0/0 frame 62 97/0
+  promoted 2639, held 0, cab claims 0, missed 0, handed 0, shared 0
+testdata/rig/run2_capture_013.csv: 498 draws
+  searches (found): tracked 36 (30), away 8 (0), back 3 (3)
+  view 0 claimed (truck/trailer): frame 3 97/0 frame 30 97/0 frame 31 0/0 frame 62 97/0
+  promoted 2712, held 0, cab claims 0, missed 0, handed 0, shared 0
+done

@@ -1,0 +1,63 @@
+-- format
+ok   key: spaces and separators escaped                             truck|volvo.fh16_2012|AB%201%7C2%3D3%25
+ok   key: UTF-8 plate escaped byte by byte                          trailer|trailer.x|%C3%96Z%209
+ok   key: no id = no unit                                           
+# ETS2/ATS Truck Dirt: saved dirt of the player's trucks and own trailers (0 = clean, 1 = covered).
+# Written by the plugin: edit only with the game closed.
+truckdirt_state 1
+trailer|trailer.own_b|XY%202 dust=1.0000
+trailer|trailer.own_a|XY%201 dust=0.3000 mud=0.0500
+truck|scania.s_2016|AB%20123%20CD dust=0.4124
+end 3
+ok   round trip: same units, order                                  ok, 3 units, 0 skipped
+ok   levels rounded to 4 decimals                                   0.4124
+ok   levels clamped to 1                                            1.0000
+ok   most recently used first                                       
+ok   a layer not given is kept (older plugin, D4 layers)            
+ok   all layers 0: the unit is not written (missing = clean)        
+ok   layers at 0 not written; a saved layer can go back to 0        
+ok   bad layer names ignored                                        
+ok   bad keys ignored                                               
+ok   at most 256 units: the least recently used are dropped         256
+-- files
+ok   missing file: everything clean                                 ok, 0 units, 0 skipped
+ok   save: file written, no .tmp left                               
+ok   load: the same units                                           ok, 2 units, 0 skipped
+ok   save over an existing file (rename replaces it)                0.7500
+ok   cut file: the good units are kept                              damaged, 1 units, 1 skipped (no end line: the file was cut)
+ok   cut file: copied to .bad                                       
+ok   cut file: the next save writes a good file                     
+ok   bad lines skipped, CRLF and the rest kept                      damaged, 2 units, 6 skipped (line 4: bad layer 'dust=nan')
+ok   garbage: unreadable, everything clean                          unreadable, 0 units, 0 skipped (line 1: not a dirt_state file)
+ok   garbage: copied to .bad                                        
+ok   garbage: the next save writes a good file                      
+ok   empty file: unreadable                                         unreadable, 0 units, 0 skipped (empty file)
+ok   newer format: not loaded, never overwritten                    newer, 0 units, 0 skipped (format 2, this plugin reads up to 1)
+ok   text after the end line: damaged, units kept                   damaged, 2 units, 1 skipped (line 7: text after the end line)
+-- sessions
+ok   new truck: player's, clean                                     
+ok   own trailer, no job: player's, clean                           
+ok   cargo_market job: still the player's                           
+ok   trailer detached: no unit                                      
+ok   swap to own trailer B: B starts clean                          0.0000
+ok   back to A: A has its dirt again                                0.3000
+ok   save: truck, A and B                                           
+ok   next session: truck and A as saved                             0.4000 0.3000
+ok   washed A: removed from the file, B kept                        
+ok   company trailer: clean                                         
+ok   company trailer: not saved, the truck is                       
+ok   same company trailer again: keeps its dirt this session        0.5000
+ok   quick job: company truck and trailer, clean                    
+ok   after the quick job: own truck with its dirt                   0.5000
+ok   quick job: nothing of it saved                                 2 units
+ok   trailer before its job: taken as the player's for a frame      
+ok   then the job: the company's, clean                             
+ok   company trailer seen as the player's for a frame: never saved  
+ok   quick job before its truck: own truck's dirt saved first       0.5500
+ok   quick job ends before its truck goes: own truck back, quick truck not saved 0.5500
+-- writer thread (D11n)
+ok   WriteText writes what Save would; the store clean after MarkClean 
+ok   MarkDirty: a failed write is saved again later                 
+ok   the writer runs 1000 jobs in order, all before Stop returns    1000
+ok   a writer not started runs a job at once                        
+all passed

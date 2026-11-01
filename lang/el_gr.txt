@@ -1,0 +1,31 @@
+# Truck Dirt: texts in el_gr (UTF-8). Format: src/lang.h; English reserve: en_gb.txt.
+# [estimate] machine-made translation: a speaker should check it (and set _review = ok).
+
+_name = Ελληνικά
+_script = greek
+_review = estimate
+_price = {amount}\s{currency}
+_thousands = .
+
+wash.hint = Πατήστε {key} για να πλύνετε το φορτηγό ({price})
+wash.hint_free = Πατήστε {key} για να πλύνετε το φορτηγό (δωρεάν)
+wash.prompt = Πλύσιμο φορτηγού
+wash.stop_first = Σταματήστε το φορτηγό για να το πλύνετε
+wash.parking_brake = Τραβήξτε το χειρόφρενο για πλύσιμο
+wash.already_clean = Το φορτηγό είναι ήδη καθαρό
+wash.no_money = Δεν έχετε αρκετά χρήματα για το πλύσιμο ({price})
+wash.charge_failed = Η πληρωμή απέτυχε: το φορτηγό δεν πλύθηκε
+wash.washing = Πλύσιμο φορτηγού
+wash.washed = Το φορτηγό είναι καθαρό
+wash.ended_early = Το πλύσιμο τελείωσε νωρίτερα
+wash.unknown_station = Ανεφοδιάστε εδώ μία φορά για να μπορείτε να πλύνετε εδώ
+
+menu.title = Truck Dirt: πλήκτρα
+menu.wash_key = Πλύσιμο φορτηγού
+menu.panel_key = Πίνακας δοκιμών
+menu.not_set = (δεν έχει οριστεί)
+menu.press_key = Πατήστε το νέο πλήκτρο ({key}: ακύρωση)
+menu.help = {move}: επιλογή, {edit}: αλλαγή, {default}: προεπιλογή, {close}: κλείσιμο
+menu.saved = Αποθηκεύτηκε
+menu.taken = Ήδη σε χρήση: {name}
+menu.unsupported = Αυτό το πλήκτρο δεν μπορεί να χρησιμοποιηθεί
