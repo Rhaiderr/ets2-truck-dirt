@@ -1,6 +1,8 @@
 #include "premap.h"
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 #include <cmath>
 #include <cstdio>
@@ -60,8 +62,10 @@ int Parse(const std::string& text) {
     return taken;
 }
 
+// The folder listing is Windows only (the plugin's); the portable tests use Parse.
 int LoadDir(const std::wstring& dir, const std::wstring& prefix) {
     int taken = 0;
+#ifdef _WIN32
     WIN32_FIND_DATAW fd;
     const HANDLE h = FindFirstFileW((dir + L"\\" + prefix + L"*.premap").c_str(), &fd);
     if (h == INVALID_HANDLE_VALUE) return 0;
@@ -73,6 +77,10 @@ int LoadDir(const std::wstring& dir, const std::wstring& prefix) {
         taken += Parse(ss.str());
     } while (FindNextFileW(h, &fd));
     FindClose(h);
+#else
+    (void)dir;
+    (void)prefix;
+#endif
     return taken;
 }
 
