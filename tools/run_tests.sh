@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the portable tests (rigtest, maptest, dusttest, statetest, washtest, paneltest, langtest, compattest) and compares their output
+# Builds the portable tests (rigtest, maptest, dusttest, statetest, washtest, paneltest, langtest, compattest, premaptest, cargotest) and compares their output
 # with testdata/baseline/. Runs the rigtest modes of the baseline (the six of fb3b37c and the later ones, N13's
 # lod and defl, N14's lodcab and churn and N17's grass among them),
 # dusttest, statetest, washtest, paneltest, langtest (on lang/) and compattest; any difference or failing test fails
@@ -151,7 +151,7 @@ else
         mkdir -p "$dir"
         if ! CXXFLAGS="${CXXFLAGS:-} -Werror" cmake -S . -B "$dir" -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_CXX_COMPILER="$cxx" > "$dir/configure.log" 2>&1 ||
-           ! cmake --build "$dir" --target rigtest maptest dusttest statetest washtest paneltest langtest compattest > "$dir/build.log" 2>&1; then
+           ! cmake --build "$dir" --target rigtest maptest dusttest statetest washtest paneltest langtest compattest premaptest cargotest > "$dir/build.log" 2>&1; then
             echo "FAIL $cxx: build failed (warnings are errors)"
             tail -n 30 "$dir/configure.log" "$dir/build.log" 2> /dev/null
             failures=$((failures + 1))
