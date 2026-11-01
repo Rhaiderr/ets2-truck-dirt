@@ -50,6 +50,14 @@ In the game, your truck leaves any dirt road looking showroom-new. With this plu
   <img src="docs/img/readme/2026-10-31-ats-vnl2025-lowboy-jcb-entardecer.webp" alt="The rig with the wheel loader at dusk" width="49%">
 </p>
 
+<p align="center">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-1-f8-no-posto.webp" alt="Stopped at an ATS fuel pump: the F8 wash prompt with its price" width="32%">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-2-lavando.png" alt="The wash screen with the truck icon, the price and the progress bar" width="32%">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="After the wash: the truck is clean" width="32%">
+</p>
+
+*Washing at the fuel station (ATS): stop at a pump, pull the parking brake and press **F8**; the wash screen runs and the truck comes out clean. Here with the charge on (`charge = 1`); by default it is free.*
+
 ## Compatibility
 
 | Item | Status |

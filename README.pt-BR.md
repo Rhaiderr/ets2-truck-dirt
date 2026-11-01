@@ -50,6 +50,14 @@ No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o
   <img src="docs/img/readme/2026-10-31-ats-vnl2025-lowboy-jcb-entardecer.webp" alt="O conjunto com a pá carregadeira no entardecer" width="49%">
 </p>
 
+<p align="center">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-1-f8-no-posto.webp" alt="Parado numa bomba de combustível no ATS: o aviso do F8 com o preço da lavagem" width="32%">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-2-lavando.png" alt="A tela da lavagem com o caminhão, o preço e a barra de progresso" width="32%">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="Depois da lavagem: o caminhão está limpo" width="32%">
+</p>
+
+*Lavagem no posto (ATS): pare numa bomba, puxe o freio de mão e aperte **F8**; a tela da lavagem roda e o caminhão sai limpo. Aqui com a cobrança ligada (`charge = 1`); por padrão é de graça.*
+
 ## Compatibilidade
 
 | Item | Situação |
