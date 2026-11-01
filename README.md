@@ -58,6 +58,12 @@ In the game, your truck leaves any dirt road looking showroom-new. With this plu
 
 *Washing at the fuel station (ATS): stop at a pump, pull the parking brake and press **F8**; the wash screen runs and the truck comes out clean. Here with the charge on (`charge = 1`); by default it is free.*
 
+<p align="center">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="The washed Volvo VNL and its lowboy at a Green Petrol pump, seen from outside" width="66%">
+</p>
+
+*The rig after the wash, still at the pump: cab, chassis, wheels and lowboy clean.*
+
 ## Compatibility
 
 | Item | Status |

@@ -58,6 +58,12 @@ No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o
 
 *Lavagem no posto (ATS): pare numa bomba, puxe o freio de mão e aperte **F8**; a tela da lavagem roda e o caminhão sai limpo. Aqui com a cobrança ligada (`charge = 1`); por padrão é de graça.*
 
+<p align="center">
+  <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="O Volvo VNL lavado com a prancha numa bomba da Green Petrol, visto de fora" width="66%">
+</p>
+
+*O conjunto depois da lavagem, ainda na bomba: cabine, chassi, rodas e prancha limpos.*
+
 ## Compatibilidade
 
 | Item | Situação |
