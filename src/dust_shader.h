@@ -314,6 +314,18 @@ float3 vnoise_grad(float3 x) {
     return du * float3(k1 + k4 * u.y + k6 * u.z + k7 * u.y * u.z, k2 + k5 * u.z + k4 * u.x + k7 * u.z * u.x,
                        k3 + k6 * u.x + k5 * u.y + k7 * u.x * u.y);
 }
+// N59 (the user, ATS 05/11: the mud "lacks volume"): the cakes of mud, far coarser than D11k's clumps (~14 cm and
+// ~6 cm, where those are 2.5 cm down), so they still read from several metres away: their height (0..1) and their
+// slope (per metre). One value plus one gradient lookup per octave.
+float4 cake_field(float3 q, float fp) {
+    const float3x3 r = float3x3(0.00, 0.80, 0.60, -0.80, 0.36, -0.48, -0.60, -0.48, 0.64);
+    const float3 q0 = mul(r, q) + 5.9, q1 = mul(r, q0) + 2.7;
+    const float f0 = saturate(1.5 - fp * 21.0), f1 = saturate(1.5 - fp * 48.0);  // gone under ~3 pixels, as fnoise's
+    const float h = 0.62 * lerp(0.5, vnoise(q0 * 7.0), f0) + 0.38 * lerp(0.5, vnoise(q1 * 16.0), f1);
+    const float3 g0 = vnoise_grad(q0 * 7.0) * (0.62 * 7.0 * f0);
+    const float3 g1 = vnoise_grad(q1 * 16.0) * (0.38 * 16.0 * f1);
+    return float4(mul(mul(g1, r) + g0, r), h);
+}
 float3 relief_grad(float3 q, float fp) {
     const float3x3 r = float3x3(0.00, 0.80, 0.60, -0.80, 0.36, -0.48, -0.60, -0.48, 0.64);
     const float3 q0 = mul(r, q) + 1.3, q1 = mul(r, q0) + 9.1, q2 = mul(r, q1) + 3.7;
@@ -795,6 +807,31 @@ R"(
         [branch] if (wet_share < 0.999) crack = cracks(sq, fq) * smoothstep(0.45, 0.65, thick);
         dry_col *= (1.0 - 0.4 * crack) * (0.9 + 0.2 * detail);
         float3 mud_col = lerp(dry_col, wet_col, lw);
+        // N59: the mud lies in cakes of ~6-14 cm, 1-2 cm thick where it piles up: the slope of that field tilts the
+        // normal (so the cakes catch the game's light from metres away, not only the D11k clumps up close), the
+        // hollows between them go darker and the raised tops lighter, and a cake's rim takes a little more mud.
+        // Far away both octaves are faded out (fp > ~7 cm a pixel): nothing to work out.
+        [branch] if (!on_wheel && am > 0.0 && fp < 0.07) {
+            const float4 cake = cake_field(p + 71.3, fp);
+            const float body = smoothstep(0.08, 0.5, am);        // only where the coat is more than a smear
+            const float h = saturate(cake.w * 1.8 - 0.4);        // its height, 0..1
+            const float thickness = body * (0.006 + 0.026 * h) * (1.0 + 0.4 * hm) * (1.0 - 0.25 * lw);
+            s_bump += cake.xyz * thickness;
+            // Lit by shape alone: the hollows in shadow, the tops catching more (a cake reads as a cake in flat light);
+            // under a cake's own edge the darkest, where in life it shades the layer below.
+            const float ledge = saturate(1.0 - abs(h - 0.32) * 7.0) * saturate(-cake.y * 0.35);
+            mud_col *= (0.58 + 0.8 * h) * (1.0 - 0.3 * ledge);
+            // A caked edge is ragged, not a fade: where the coat thins out, the cakes stand apart.
+            const float rim = smoothstep(0.65, 0.12, am);
+            am = saturate(am * lerp(1.0, saturate(0.25 + 1.9 * h), rim) + body * 0.1 * h);
+        }
+        // N59: two generations where the mud dried and was splashed again: over the pale dried base, darker wet
+        // splatter in patches of ~3-10 cm, as much as the layer's fresh share says.
+        [branch] if (!on_wheel && am > 0.0 && wet_share > 0.05 && lw < 0.85 && fp < 0.06) {
+            const float fresh = smoothstep(0.52, 0.74, fbm(p * float3(1.0, 1.1, 1.0) + 97.7, 9.0, fp)) *
+                                smoothstep(0.05, 0.5, wet_share) * (1.0 - lw);
+            mud_col = lerp(mud_col, float3(0.095, 0.068, 0.045) * (0.8 + 0.4 * thick), fresh * 0.85);
+        }
         // D11k (N44): the mud's volume: ~2-8 mm thick in clumps (the thick parts thicker; wet mud a little flatter), and
         // up close bits of grit and stones of ~1-4 mm in it, lighter and darker.
         if (!on_wheel) s_amp = max(s_amp, am * (0.002 + 0.006 * thick) * (1.0 + 0.5 * hm) * (1.0 - 0.3 * lw));
