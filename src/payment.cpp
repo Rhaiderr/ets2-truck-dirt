@@ -14,8 +14,9 @@ namespace {
 const char* kPayPattern =
     "48 83 EC 58 48 85 C9 0F 84 ?? ?? ?? ?? 48 85 D2 0F 8E ?? ?? ?? ?? 48 8B 41 10 48 39 50 10 7D ?? "
     "48 8B 0D ?? ?? ?? ?? BA 06 00 00 00";
-// A caller in the game: mov rdi,[economy] ... mov r8b,1; mov rdx,r9; mov rcx,rdi; call Pay.
-const char* kCallerPattern = "48 8B 3D ?? ?? ?? ?? 4C 8B FA 48 89 7D 88 74 ?? 41 B0 01 49 8B D1 48 8B CF E8";
+// A caller in the game: mov reg,[economy] ... mov r8b,1; mov rdx,r9; mov rcx,reg; call Pay. The register
+// and the stack slot change between builds (rdi/[rbp-0x78] in 1.61, rsi/[rbp-0x70] in the 2026-11 update).
+const char* kCallerPattern = "48 8B ?? ?? ?? ?? ?? 4C 8B FA 48 89 ?? ?? 74 ?? 41 B0 01 49 8B D1 48 8B ?? E8";
 constexpr size_t kCallerEconomyRel = 3;  // rel32 of "mov rdi,[rip+x]"; next instruction at +7
 constexpr size_t kCallerCallAt = 25;     // the E8; its rel32 at +26, next instruction at +30
 
@@ -64,6 +65,10 @@ Located Locate() {
         return out;
     }
     const uint8_t* c = caller[0];
+    if ((c[2] & 0xC7) != 0x05) {  // must be "mov reg,[rip+x]"
+        out.detail = "the caller does not load the economy from a global";
+        return out;
+    }
     const uint8_t* economy_slot = pattern::Rel32(c + kCallerEconomyRel, c + kCallerEconomyRel + 4);
     const uint8_t* call_target = pattern::Rel32(c + kCallerCallAt + 1, c + kCallerCallAt + 5);
     if (call_target != pay[0]) {

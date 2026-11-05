@@ -13,13 +13,14 @@ namespace station {
 namespace {
 
 // A reader of the gameplay mode (the "activation allowed" check): jb; mov rax,[rip+global];
-// mov rcx,[rax+mode]; test rcx,rcx; je; mov rax,[rcx]; call [rax+0xE0]; mov edx,eax.
-const char* kGlobalPattern = "72 ?? 48 8B 05 ?? ?? ?? ?? 48 8B 88 ?? ?? 00 00 48 85 C9 74 ?? 48 8B 01 FF 90 E0 00 00 00 8B D0";
+// mov rcx,[rax+mode]; test rcx,rcx; je; mov rax,[rcx]; call [rax+slot]; mov edx,eax (slot 0xE0 in 1.61; the
+// virtual slots move between builds).
+const char* kGlobalPattern = "72 ?? 48 8B 05 ?? ?? ?? ?? 48 8B 88 ?? ?? 00 00 48 85 C9 74 ?? 48 8B 01 FF 90 ?? ?? 00 00 8B D0";
 constexpr size_t kGlobalRel = 5;   // rel32 of "mov rax,[rip+x]"; next instruction at +9
 constexpr size_t kGlobalMode = 12;  // disp32 of "mov rcx,[rax+mode]"
-// start_activation: cmp [rcx+0x14],0; mov r14,r8; mov edi,edx; mov rsi,rcx; je; mov rax,[rcx]; call [rax+0x198]
-// (the previous offer ended); xor r15d,r15d; mov [rsi+0x18],r14.
-const char* kStartPattern = "83 79 14 00 4D 8B F0 8B FA 48 8B F1 74 ?? 48 8B 01 FF 90 98 01 00 00 45 33 FF 4C 89 76 18";
+// start_activation: cmp [rcx+0x14],0; mov r14,r8; mov edi,edx; mov rsi,rcx; je; mov rax,[rcx]; call [rax+slot]
+// (the previous offer ended; 0x198 in 1.61, 0x1A0 in the 2026-11 update); xor r15d,r15d; mov [rsi+0x18],r14.
+const char* kStartPattern = "83 79 14 00 4D 8B F0 8B FA 48 8B F1 74 ?? 48 8B 01 FF 90 ?? ?? 00 00 45 33 FF 4C 89 76 18";
 // Its switch on the type: lea eax,[rdi-1]; mov rbx,[r9+x]; cmp eax,0x1E; ja; lea rdx,[rip+image]; mov ecx,[rdx+rax*4+table].
 const char* kSwitchPattern = "8D 47 FF 49 8B 99 ?? ?? 00 00 83 F8 1E 0F 87 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 8B 8C 82 ?? ?? ?? ??";
 constexpr size_t kSwitchImageRel = 22;  // next instruction at +26
