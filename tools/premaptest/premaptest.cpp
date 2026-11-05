@@ -64,6 +64,18 @@ int main() {
     Expect("144/74 int_ext's size, moved (only a cargo goes by size)", premap::Lookup(144, 74, x_lo, x_hi), premap::kNone);
     const float m_lo[3] = {-1.3085f, 0.6900f, -3.8867f}, m_hi[3] = {1.3271f, 1.8364f, 0.5873f};
     Expect("2463/1135 at the model's box", premap::Lookup(2463, 1135, m_lo, m_hi), premap::kCargo);
+    // N58c: the Peterbilt 389's interior seen from outside, variant 1 (pieces 1, 3, 4) drawn as one, as the game drew it.
+    premap::Parse("truck dirt premap 1\n"
+                  "m 4989 1643 -1.1686 0.2940 -1.5002 1.1686 1.9172 1.4964 int_ext stock.pmg@1\n"
+                  "m 600 200 0 0 0 1 1 1 int_ext twin@0\n"
+                  "p 600 200 5 5 5 6 6 6 ext same_size_piece#0\n");
+    const float v_lo[3] = {-1.169f, 1.132f, -2.567f}, v_hi[3] = {1.169f, 2.755f, 0.429f};
+    Expect("4989/1643, a variant drawn as one, moved", premap::Lookup(4989, 1643, v_lo, v_hi), premap::kIntExt);
+    const float w_lo[3] = {-1.1686f, 0.2940f, -1.5002f}, w_hi[3] = {1.1686f, 1.9172f, 1.4964f};
+    Expect("4989/1643 at its pieces' box (a merged line by size only)", premap::Lookup(4989, 1643, w_lo, w_hi),
+           premap::kIntExt);
+    const float t_lo[3] = {2, 2, 2}, t_hi[3] = {3, 3, 3};
+    Expect("600/200, a merged size also a piece's of another kind", premap::Lookup(600, 200, t_lo, t_hi), premap::kNone);
     premap::Clear();
     Expect("after Clear", premap::Lookup(144, 74, ext_lo, ext_hi), premap::kNone);
     printf(failures ? "FAILED (%d)\n" : "ok\n", failures);

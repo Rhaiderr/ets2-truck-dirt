@@ -39,21 +39,28 @@ constexpr UINT8 kCargoBit = 0x80;
 constexpr UINT8 kBits = 0xF0;
 static_assert(rig::kUnits == 6, "one stencil code per unit");
 // The dust pass draws once per class of pixel: truck chassis, truck cab, each trailer, each trailer's cargo.
+// N58b: on the truck (no cargo) the same bit marks a piece the pre-map read as the outside's (`known`): the cab's boxes
+// leave it its dust (the boxes stay for the pieces the tables do not know: an interior part seen through a window).
 struct DustClass {
     int unit;
     bool cab;
     UINT8 ref;
     bool cargo = false;
+    bool known = false;
 };
 constexpr DustClass kClasses[] = {{0, false, 0x10},       {0, true, 0x50},        {1, false, 0x20},
                                   {2, false, 0x30},       {3, false, 0x40},       {4, false, 0x60},
                                   {5, false, 0x70},       {1, false, 0xA0, true}, {2, false, 0xB0, true},
-                                  {3, false, 0xC0, true}, {4, false, 0xE0, true}, {5, false, 0xF0, true}};
-constexpr int kClassCount = 12;
+                                  {3, false, 0xC0, true}, {4, false, 0xE0, true}, {5, false, 0xF0, true},
+                                  {0, false, 0x90, false, true}, {0, true, 0xD0, false, true}};
+constexpr int kClassCount = 14;
 // The class of a marked draw (kClasses' index).
-int ClassOf(int unit, bool cab, bool cargo = false) {
-    return unit == 0 ? (cab ? 1 : 0) : cargo ? unit + 6 : unit + 1;
+int ClassOf(int unit, bool cab, bool cargo = false, bool known = false) {
+    return unit == 0 ? (known ? 12 : 0) + (cab ? 1 : 0) : cargo ? unit + 6 : unit + 1;
 }
+// N58b: what MeshPrint gives a range whose part was read as the outside's but the range itself not (a twin of an
+// interior mesh at the same place shares the part id: R1): dust, but the boxes still apply.
+constexpr int kExtUnread = 50;
 
 int g_mode = 0;  // 0 off, 1 red, 2 dust, 3 position test, 4 diagnosis (N26)
 bool g_on = false;
@@ -64,6 +71,7 @@ std::atomic<float> g_layers[rig::kUnits][3][dust::kSlots];
 std::atomic<float> g_cargo_dust[rig::kUnits];
 std::atomic<float> g_cargo_layers[rig::kUnits][3][dust::kSlots];
 std::atomic<long long> g_cargo_marked{0};
+std::atomic<long long> g_known_marked{0};  // N58b: truck draws read as the outside's (no boxes on them)
 // N12: each wheel's steering and rolling turn (turns), and the unit's speed (km/h).
 std::atomic<float> g_steer[rig::kUnits][dust::kWheels], g_roll[rig::kUnits][dust::kWheels], g_speed[rig::kUnits];
 bool g_busy = false;  // render thread only
@@ -265,6 +273,12 @@ bool g_objects_ok = false;      // every object above exists
 bool g_objects_failed = false;  // a creation failed: no retry this session
 // The game's state (referenced, so its address is not reused while cached) -> our variant.
 std::unordered_map<ID3D11DepthStencilState*, ID3D11DepthStencilState*> g_variants;
+// N58 (the user, ATS 1.61-1.62: the headlights' glass gone for a while, then back): a game state whose stencil test
+// reads our bits (its read mask takes some of 0xf0, a test other than always) would see the pass's marks where the game
+// expects zeros. Its copy without our bits in the read mask (referenced key; nullptr: the state does not read them).
+std::unordered_map<ID3D11DepthStencilState*, ID3D11DepthStencilState*> g_read_fix;
+long long g_read_states = 0;     // the game's states found reading our bits
+long long g_read_fixed = 0;      // times one was set with its copy instead (out of the pass)
 constexpr size_t kMaxVariants = 256;  // the game makes its states at load: a few dozen
 // N25: a copy of rt3 made before the pass draws into it (a target cannot be read while it is drawn into),
 // remade when rt3's size or format changes.
@@ -726,6 +740,8 @@ ID3D11DepthStencilState* Variant(ID3D11DepthStencilState* s) {
                              d.BackFace.StencilPassOp == D3D11_STENCIL_OP_REPLACE;
         d.StencilWriteMask = static_cast<UINT8>((replace ? d.StencilWriteMask : 0) | kBits);
         d.FrontFace.StencilPassOp = d.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+        // N58: the reference now carries our code, the buffer our marks: neither is part of the game's own test.
+        d.StencilReadMask = static_cast<UINT8>(d.StencilReadMask & ~kBits);
     }
     ID3D11DepthStencilState* v = nullptr;
     if (FAILED(g_dev->CreateDepthStencilState(&d, &v))) v = nullptr;
@@ -738,6 +754,33 @@ ID3D11DepthStencilState* Variant(ID3D11DepthStencilState* s) {
     }
     if (s) s->AddRef();
     g_variants[s] = v;
+    return v;
+}
+
+// N58: the game's state `s` with our bits out of its read mask, when its test reads them (nullptr: it does not, or the
+// copy could not be made). The game never writes those bits (check 1) and its reference carries none of them where this
+// is used, so the test is the game's own: the same bits compared, zeros on both sides left out.
+ID3D11DepthStencilState* ReadFix(ID3D11DepthStencilState* s) {
+    auto it = g_read_fix.find(s);
+    if (it != g_read_fix.end()) return it->second;
+    D3D11_DEPTH_STENCIL_DESC d = {};
+    s->GetDesc(&d);
+    const auto tests = [](const D3D11_DEPTH_STENCILOP_DESC& f) { return f.StencilFunc != D3D11_COMPARISON_ALWAYS; };
+    ID3D11DepthStencilState* v = nullptr;
+    if (d.StencilEnable && (d.StencilReadMask & kBits) && (tests(d.FrontFace) || tests(d.BackFace))) {
+        d.StencilReadMask = static_cast<UINT8>(d.StencilReadMask & ~kBits);
+        if (FAILED(g_dev->CreateDepthStencilState(&d, &v))) v = nullptr;
+        ++g_read_states;
+    }
+    if (g_read_fix.size() >= kMaxVariants) {  // as the variants: start over
+        for (auto& e : g_read_fix) {
+            e.first->Release();
+            if (e.second) e.second->Release();
+        }
+        g_read_fix.clear();
+    }
+    s->AddRef();
+    g_read_fix[s] = v;
     return v;
 }
 
@@ -1204,8 +1247,11 @@ void RunPass(ID3D11DeviceContext* c, SavedState* saved, bool* saved_ok) {
             if (u == 0) {  // N41: the truck's passes (chassis and cab: the interior's parts are either)
                 std::lock_guard<std::mutex> lock(g_inside_mutex);
                 // D14d: the boxes stay (N55's learned parts keep their dust: see rig::Classify). P1: not once the
-                // pre-map found the truck's interior pieces (each gets no dust itself: MeshPrint).
-                const bool premapped = g_mp_int_ext.load(std::memory_order_relaxed) > 0;
+                // pre-map found the truck's interior pieces (each gets no dust itself: MeshPrint). N58b (the user, ATS
+                // 05/11, the Peterbilt 389: "the interior flickers with dirt" once its interior pieces were found, the
+                // parts the tables do not know left without the boxes): the boxes stay, but not on the pieces read as
+                // the outside's (the hood, the doors: why P1 took them off, D14d).
+                const bool premapped = kClasses[k].known;
                 cb.inside_lo[3] = g_inside_on && !premapped ? 1.f : 0.f;
                 for (int i = 0; i < 3; ++i) cb.inside_lo[i] = g_inside_lo[i], cb.inside_hi[i] = g_inside_hi[i];
                 cb.cavity_lo[3] = g_cavity_on && !premapped ? 1.f : 0.f;
@@ -1476,7 +1522,13 @@ void FilterDepthStencilState(ID3D11DeviceContext* c, ID3D11DepthStencilState** s
     g_ref = *ref;
     if (!g_on) return;
     CheckStencil(*s, *ref);
-    if (g_draw_off || !g_pass.open || !MakeObjects(c)) return;
+    if (g_draw_off || !MakeObjects(c)) return;
+    if (!g_pass.open) {
+        // N58: out of the pass (the forward draws among them) a test that reads our bits leaves them out.
+        if (*s && !(*ref & kBits))
+            if (ID3D11DepthStencilState* v = ReadFix(*s)) *s = v, ++g_read_fixed;
+        return;
+    }
     if (ID3D11DepthStencilState* v = Variant(*s)) {
         *s = v;
         *ref &= ~UINT(kBits);
@@ -1812,8 +1864,9 @@ int MeshPrint(ID3D11DeviceContext* c, int unit, UINT count, UINT start, INT base
             // kind that keeps the dust (ext, none) is safe to share unread; an interior's or a cargo's is taken for
             // now and the range is read too: a twin reading otherwise makes the part mixed (read per range after).
             if (kind != premap::kIntExt && kind != premap::kCargo) {
-                if (g_prints.size() < kMaxPrints) g_prints.emplace(key, int8_t(kind));
-                return kind;
+                const int k = kind == premap::kExt ? kExtUnread : kind;  // N58b
+                if (g_prints.size() < kMaxPrints) g_prints.emplace(key, int8_t(k));
+                return k;
             }
             provisional = kind;
         }
@@ -2007,10 +2060,12 @@ bool BeforeDrawBody(ID3D11DeviceContext* c, UINT count, UINT start, INT base) {
     if (!MakeObjects(c) || !Variant(g_dss)) return g_verdict = -7, false;
     cab = cab && unit == 0;
     const bool cargo = unit > 0 && kind == premap::kCargo;
-    SetPassState(c, unit, cab, cargo);
+    const bool known = unit == 0 && kind == premap::kExt;  // N58b: the outside's for sure (this range read)
+    SetPassState(c, unit, cab, cargo || known);
     if (cargo) g_cargo_marked.fetch_add(1, std::memory_order_relaxed);
+    if (known) g_known_marked.fetch_add(1, std::memory_order_relaxed);
     ++g_pass.marked;
-    ++g_pass.marked_class[ClassOf(unit, cab, cargo)];
+    ++g_pass.marked_class[ClassOf(unit, cab, cargo, known)];
     g_marked.fetch_add(1, std::memory_order_relaxed);
     g_verdict = unit;
     return true;
@@ -2186,11 +2241,11 @@ std::string StatsLine() {
                      (g_mp_misses[1].empty() ? std::string(" -") : g_mp_misses[1]);
         }
         snprintf(b, sizeof(b), " | premap (P1): %d pieces; meshes read %d (the trailers' %d; failed %d): int_ext %d, int %d, ext %d, "
-                 "cargo %d, none %d (cache emptied %d); cargo draws marked %lld (N57); matched by size %d (N57c); ranges taken by part %lld, parts %zu (N57b); this truck's interior pieces %d, boxes %s; first misses%s",
+                 "cargo %d, none %d (cache emptied %d); cargo draws marked %lld (N57); matched by size %d (N57c); ranges taken by part %lld, parts %zu (N57b); this truck's interior pieces %d, boxes on but off on %lld draws read as the outside's (N58b); first misses%s",
                  premap::Pieces(), g_mp_read.load(), g_mp_trailer_read.load(), g_mp_failed.load(), g_mp_kind[premap::kIntExt].load(),
                  g_mp_kind[premap::kInt].load(), g_mp_kind[premap::kExt].load(), g_mp_kind[premap::kCargo].load(),
                  g_mp_kind[premap::kNone].load(),
-                 g_mp_pruned.load(), g_cargo_marked.load(), g_mp_by_size.load(), g_mp_by_part.load(), g_mp_parts.load(), g_mp_int_ext.load(), g_mp_int_ext.load() > 0 ? "off" : "on", misses.c_str());
+                 g_mp_pruned.load(), g_cargo_marked.load(), g_mp_by_size.load(), g_mp_by_part.load(), g_mp_parts.load(), g_mp_int_ext.load(), g_known_marked.load(), misses.c_str());
         line += b;
     }
     snprintf(b, sizeof(b), " | indirect draws (N28): %lld, in a G-buffer pass %lld | matrix lower in cb0 (N29): %lld draws",
@@ -2233,6 +2288,9 @@ std::string StatsLine() {
              g_timer_failed ? ", no queries" : "", g_rect_passes ? 100.0 * g_rect_cover / double(g_rect_passes) : 0.0,
              g_rect_passes, g_rect_parts, g_rect_parts ? 100.0 * g_rect_class_cover / double(g_rect_parts) : 0.0,
              g_rect_unknown, g_rects_off.load() ? "; rectangles off after an exception (D13e)" : "");
+    line += b;
+    snprintf(b, sizeof(b), " | stencil reads (N58): %lld game states read our bits, set without them %lld times",
+             g_read_states, g_read_fixed);
     line += b;
     snprintf(b, sizeof(b), " | cab inside (N55): %d parts of %d seen, %lld draws looked at, main view looks %lld "
              "(placed %lld); not used (D14d), boxes on (to the front wheels' track)",

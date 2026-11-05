@@ -246,6 +246,13 @@ float splash(float y, float top, float edge, float zone, float fan, float under,
     const float low = smoothstep(top, top * 0.3, y + (edge - 0.5) * 0.5 * top);
     return saturate((max(low * 0.85, max(zone, fan * 0.9)) + under * 0.35) * (1.0 - 0.45 * up));
 }
+// N58: the mud's: in the arches, behind the wheels and in the rays off them, the low band along the skirts thin (~40%
+// of the other layers'); faces looking down catch more near the wheels, top faces less.
+float mud_splash(float y, float top, float edge, float zone, float fan, float rays, float under, float up) {
+    const float low = smoothstep(top, top * 0.3, y + (edge - 0.5) * 0.5 * top);
+    const float near = max(zone * 0.95, max(fan * 0.75, rays));
+    return saturate((max(low * 0.35, near) + under * 0.3 * max(near, low * 0.5)) * (1.0 - 0.45 * up));
+}
 // Body or front face, by which one puts more of the layer here: weight, level, share of the front.
 float3 pick(float wb, float lb, float wf, float lf) {
     const float k = wf * lf / max(wb * lb + wf * lf, 1e-5);
@@ -395,6 +402,9 @@ float4 shade(float4 pos) {
     float wid = 0.0;   // on a wheel: its index (each wheel its own pattern)
     float tread = 0.0; // on a wheel: on the tread (facing out), not on a side wall
     const int wheels = (int)params.z;
+    // N58: the mud's rays off the wheel that throws the most here (its centre at rest, this pixel from it).
+    float ray_w = 0.0, ray_z = 0.0, ray_y = -1.0, ray_d = 1.0, ray_id = 0.0;
+    const float mud_reach = (body0.x * reach0.x + body0.y * reach0.y) / max(body0.x + body0.y, 1e-4);
     [unroll] for (int i = 0; i < 14; ++i) {
         if (i >= wheels) continue;
         const float4 w = wheel[i];
@@ -416,7 +426,11 @@ float4 shade(float4 pos) {
         const float outer = 0.35 + max(wout[i >> 2][i & 3], 0.2 * smoothstep(0.961, 0.990, st.x));
         const float tyre = wrad[i >> 2][i & 3];
         const float edge = tyre > 0.1 ? tyre * 1.04 : r * 1.12;  // N22: the SDK's tyre radius; else N17
-        if (spin.y < 0.5 && dw < edge && across > -0.35 && across < outer) {  // N16: no cab pixel
+        // N58 (the user, ATS 1.62 04/11: "a black stain at the bottom of the tyre"): where the tyre squats on the road
+        // its bottom reached past the edge and took the body's lowest dirt (the near black oily soot); straight down
+        // from the axle the edge goes up to 12% further (below it there is only the road, never one of our pixels).
+        const float down = smoothstep(0.3, 0.8, -rw.y / max(dw, 1e-3));
+        if (spin.y < 0.5 && dw < edge * (1.0 + 0.12 * down) && across > -0.35 && across < outer) {  // N16: no cab pixel
             ring = dw / r;
             wr = r;
             wid = i;
@@ -427,21 +441,52 @@ float4 shade(float4 pos) {
         // Behind the wheel (+z), below ~1.4 m, fading over ~2 m.
         const float behind = smoothstep(-0.2, 0.6, (p.z - w.z) / r);
         fan = max(fan, smoothstep(2.4, 0.9, d) * behind * smoothstep(1.6, 0.6, p.y));
+        // N58 (the user, 04/11: the mud "focused on the wheel arch and near the wheels, spreading in lines radial to
+        // the wheel"): the mud a rolling tyre throws, in rays from the axle over the faces beside it, from the tyre's
+        // edge out to ~2-3.4 radii (with the mud's reach), more towards the rear and upwards (the tread leaves the
+        // road going back, the top of the tyre runs forward into the arch).
+        const float rr = d / r;
+        const float2 dir = float2(p.z - w.z, p.y - w.w) / max(d, 1e-3);
+        const float rays_i = smoothstep(2.0 + 1.4 * mud_reach, 1.1, rr) * smoothstep(0.9, 1.08, rr) *
+                             smoothstep(0.9, 0.3, lateral) * (0.35 + 0.65 * saturate(0.5 + 0.6 * dot(dir, float2(0.8, 0.6))));
+        if (rays_i > ray_w) ray_w = rays_i, ray_z = p.z - w.z, ray_y = p.y - w.w, ray_d = d, ray_id = i;
     }
     // Noise coordinates: the unit's frame on the body; on a wheel the tyre's
     // own frame (x across, y z in its plane, in radii), so the dirt turns with
     // the wheel; at speed its angle fades into rings around the axle.
     const bool on_wheel = ring >= 0.0;
+    // N58: the rays, 0..1: thin lines around the axle (their angle; the seam straight down, on the road) that break
+    // along their length; two widths, the pixel's size in radians keeping them from flickering far away.
+    float rays = 0.0;
+    [branch] if (ray_w > 0.0 && !on_wheel && max(body0.x + body0.y, front0.x + front0.y) > kSeen) {
+        const float ang = atan2(ray_z, ray_y);
+        const float fa = fp / max(ray_d, 0.2);
+        const float l1 = fnoise(float3(ang * 7.0, ray_d * 1.3, ray_id * 5.7), 1.0, fa * 7.0);
+        const float l2 = fnoise(float3(ang * 19.0, ray_d * 2.9, ray_id * 3.3 + 11.0), 1.0, fa * 19.0);
+        rays = ray_w * saturate(smoothstep(0.52, 0.72, l1) + 0.7 * smoothstep(0.6, 0.78, l2));
+    }
     const float blur = saturate(spin.x);
     const float3 sq = on_wheel ? float3(wm.x * 1.6 + wid * 7.31, lerp(wm.y, ring, blur) * 1.2, wm.z * (1.0 - blur) * 1.2 + wid * 3.17) : p;
     const float fq = on_wheel ? fp * 1.4 / wr : fp;
+    // N58b (the user, ATS 05/11: the tyre's mud "rounded" patches; photos of muddy truck tyres: a coat thickest at the
+    // shoulder, thinner towards the rim, its inner edge in radial fingers, more at the rim's lip, never round blots):
+    // a noise around the axle in the tyre's frame (on a circle: no seam), slow along the radius, so it runs in radial
+    // streaks that turn with the wheel; at speed they blur into rings, as the rest of the wheel's pattern.
+    float tyre_streak = 0.5;
+    [branch] if (on_wheel) {
+        const float2 dir = wm.yz / max(length(wm.yz), 1e-3);
+        const float fa = fq / max(ring, 0.2) + blur * 0.5;  // a pixel around the axle, in radians
+        const float s1 = fnoise(float3(dir * 4.0, ring * 1.6 + wid * 3.1), 1.0, fa * 4.0);
+        const float s2 = fnoise(float3(dir * 16.0 + 5.3, ring * 2.4 + wid * 1.7), 1.0, fa * 16.0);
+        tyre_streak = 0.45 * s1 + 0.55 * s2;
+    }
 )"  // two literals: MSVC 2022 caps one at 16380 characters (C2026)
 R"(
     const float side_film = on_wheel ? 0.0 : saturate(spin.z);  // N31: a trailer's body
     float weight, shape, detail;
     if (on_wheel) {
-        // The wheel: in the tyre's frame, the tread taking the most.
-        shape = fbm(sq, 3.0, fq);
+        // The wheel: in the tyre's frame, the tread taking the most. N58b: half of it in radial streaks.
+        shape = lerp(fbm(sq, 3.0, fq), tyre_streak, 0.3);
         detail = grain(sq, fq);
         weight = 0.55 + 0.45 * smoothstep(0.5, 0.97, ring);
     } else {
@@ -721,10 +766,17 @@ R"(
         const float top = 0.8 + 1.5 * reach + 0.5 * smoothstep(0.6, 1.0, reach) + 0.3 * hs;
         float edge = 0.5;  // D13f (as the spray's)
         [branch] if (!on_wheel && p.y < 1.25 * top) edge = fbm(sq + 31.7, 1.8, fq);
-        const float wb = on_wheel ? tyre : splash(p.y, top, edge, zone, fan, under, up);
+        // N58b: on a wheel the tread full, the side wall from the shoulder in, more at the rim's lip. N58c (the user, ATS
+        // 05/11: N58b's tyre "not realistic", light stripes over the whole side wall): the shoulder a solid coat, the
+        // fingers only where it thins out (~0.6-0.9 of the radius), little further in.
+        const float lip = 1.0 - smoothstep(0.0, 0.05, abs(ring - 0.56));
+        const float tyre_mud = saturate(lerp(0.04 + 1.15 * smoothstep(0.6, 0.93, ring), 1.0, tread) + 0.2 * lip);
+        const float wb = on_wheel ? tyre_mud : mud_splash(p.y, top, edge, zone, fan, rays, under, up);  // N58
         const float3 wl = pick(wb, mud_b, front_face, mud_f);
         const float wet_share = lerp(body0.x / max(mud_b, 1e-4), front0.x / max(mud_f, 1e-4), wl.z);
-        const float shape = fbm(sq * float3(1.0, 0.8, 1.0) + 4.4, 2.6, fq);  // clumps
+        float shape = fbm(sq * float3(1.0, 0.8, 1.0) + 4.4, 2.6, fq);  // clumps
+        // N58b: radial fingers, a few clumps in them; N58c: the fingers at the coat's thinning edge only.
+        if (on_wheel) shape = lerp(shape, tyre_streak, 0.6 * (1.0 - abs(smoothstep(0.6, 0.93, ring) * 2.0 - 1.0)));
         const float thick = fbm(sq + 12.9, 6.0, fq);
         const float hm = high(wl.y);
         const float t = thr(wl.y);
@@ -733,7 +785,7 @@ R"(
         am = max(am, wl.y * wl.x * 0.22);  // a thin smear around the clumps
         // Drops of two sizes thrown in the fan and the arches.
         const float drops = max(smoothstep(0.80, 0.85, fnoise(sq + 7.3, 14.0, fq)), smoothstep(0.81, 0.86, fnoise(sq + 2.9, 31.0, fq)));
-        am = max(am, drops * max(fan, zone * 0.7) * smoothstep(0.1, 0.45, wl.y) * 0.95);
+        am = max(am, drops * max(fan, zone * 0.7) * smoothstep(0.1, 0.45, wl.y) * 0.95);  // N58c: not in the rays (dots)
         am = saturate(am * (0.9 + 0.2 * detail)) * 0.96 * smoothstep(0.0, 0.2, wl.y);  // D11b
         // Wet or dry here: the thick parts stay wet the longest.
         const float lw = smoothstep(-0.12, 0.12, thick - (1.0 - wet_share) + (wet_share - 0.5) * 0.3);

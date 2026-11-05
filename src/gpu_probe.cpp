@@ -2290,8 +2290,14 @@ void Start(const std::wstring& dir, const Config& c) {
     {
         std::lock_guard<std::mutex> lock(g_mutex);
         if (!g_file) {
-            // One log per session; the previous one is kept as gpu_probe.prev.log.
+            // One log per session; the previous one is kept as gpu_probe.prev.log. N58 (the sessions of the user's
+            // prints, 02-03/11, were gone by the time they were read): the four before it as prev2..prev5.
             const std::wstring log = dir + L"\\gpu_probe.log", prev = dir + L"\\gpu_probe.prev.log";
+            for (int i = 5; i >= 2; --i) {
+                const std::wstring from = i == 2 ? prev : dir + L"\\gpu_probe.prev" + std::to_wstring(i - 1) + L".log";
+                MoveFileExW(from.c_str(), (dir + L"\\gpu_probe.prev" + std::to_wstring(i) + L".log").c_str(),
+                            MOVEFILE_REPLACE_EXISTING);
+            }
             MoveFileExW(log.c_str(), prev.c_str(), MOVEFILE_REPLACE_EXISTING);
             g_file = _wfopen(log.c_str(), L"wb");
         }

@@ -68,8 +68,12 @@ shader on a ray-traced truck to PNGs, to judge the look without the game.
 The tables are generated from the game's models; the repository has only the tool.
 
 1. Extract the vehicle models of every archive with an SCS archive extractor (HashFS v2), one folder per archive,
-   for example `probe/all_ats/<archive>/vehicle/...` (`probe/` is gitignored: game files never go into git).
-2. `python -I tools/premap/premap.py --all probe/all_ats probe/premap/ats ats` (and `ets2` likewise).
+   for example `probe/all_ats/<archive>/vehicle/...` (`*.pmg` and `*.pmd`: the descriptors give each variant's
+   pieces, drawn as one mesh per material; `probe/` is gitignored: game files never go into git), and the
+   truck definitions the same way (`/def/vehicle/truck/*.sii`, e.g. `probe/def_ats`): their `ext_model` paths are the
+   interiors seen from outside wherever their folder is.
+2. `python -I tools/premap/premap.py --all probe/all_ats probe/premap/ats ats probe/def_ats` (and `ets2` likewise).
+   Again after every game update: a model the update changed is no longer recognised.
 3. `tools/release/make_release.sh` packs `probe/premap` into the zip.
 
 ## Version and release

@@ -12,7 +12,7 @@
 
 **Install:** copy **everything** in the zip's `plugins` folder into `<game folder>\bin\win_x64\plugins\` (ETS2 or ATS) and start the game ([details](#installation)).
 
-> **Beta release.** Tested on ETS2 1.61 and ATS 1.61, single player, with and without the SnowyMoon graphics mod. Back up your profile if you want to be extra safe.
+> **Beta release.** Tested on ETS2 1.62 and ATS 1.62, single player, with and without the SnowyMoon graphics mod. Back up your profile if you want to be extra safe.
 
 ![A Volvo VNL with a road-grimed front pulling a lowboy with a clean JCB wheel loader](docs/img/readme/2026-10-31-ats-vnl2025-frente-suja-carga-limpa.jpg)
 
@@ -28,7 +28,7 @@ In the game, your truck leaves any dirt road looking showroom-new. With this plu
 - **Clean new cargo.** A new load on a flatbed or a lowboy (machines, tractors, vehicles) arrives **clean**, even on a dirty trailer, and then gets dirty on its own.
 - **A clean cab inside.** The dashboard and seats seen through the windows get no dust. Every stock truck of both games, all DLCs included, comes mapped.
 - **Rain washes** the dirt off slowly, and the road stays wet for a while after it stops.
-- **Wash at the fuel station.** Stop at a pump, pull the parking brake and press **F8**: truck and trailer come out clean. Free by default (the price can be charged from your in-game bank if you like).
+- **Wash at the fuel station.** Stop at a pump, pull the parking brake and press **F8**: truck and trailer come out clean. The price is charged from your in-game bank (it can be made free in the settings).
 - **Saved dirt.** Your truck and your trailer stay dirty from one session to the next, and the dirt follows the game's saves.
 - **Your rig only.** Traffic stays as it is. A company trailer and the quick job's vehicles start clean.
 - **Road trains, doubles and dollies** get dirty too.
@@ -56,7 +56,7 @@ In the game, your truck leaves any dirt road looking showroom-new. With this plu
   <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="After the wash: the truck is clean" width="32%">
 </p>
 
-*Washing at the fuel station (ATS): stop at a pump, pull the parking brake and press **F8**; the wash screen runs and the truck comes out clean. Here with the charge on (`charge = 1`); by default it is free.*
+*Washing at the fuel station (ATS): stop at a pump, pull the parking brake and press **F8**; the wash screen runs and the truck comes out clean. The price comes out of your in-game bank (`charge = 0` makes it free).*
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="The washed Volvo VNL and its lowboy at a Green Petrol pump, seen from outside" width="66%">
@@ -68,7 +68,7 @@ In the game, your truck leaves any dirt road looking showroom-new. With this plu
 
 | Item | Status |
 |---|---|
-| Games | ETS2 **1.61** and ATS **1.61** (tested versions). The same DLL works in both |
+| Games | ETS2 **1.62** and ATS **1.62** (tested versions; the tables come from the game's 1.62 models). The same DLL works in both |
 | System | Windows 10/11 64-bit |
 | Rendering | **DirectX 11** |
 | Stock trucks and trailers | All of them, every DLC included: the cab's inside and the cargo come mapped |
@@ -102,7 +102,7 @@ The file is `ets2_truck_dirt.ini` in the `plugins` folder; every key has a comme
 | `[dust]` | `level` | `-1` | **Test:** forces the dirt from `0.0` to `1.0`, to see the effect at once (nothing is saved); `-1` = the real dirt |
 | `[wash]` | `key` | `f8` | The wash key at the fuel station |
 | `[wash]` | `price_truck`, `price_trailer` | `120`, `180` | The wash price, in euros (ETS2) or dollars (ATS) |
-| `[wash]` | `charge` | `0` | `1` = charge the wash from your in-game bank; `0` = free |
+| `[wash]` | `charge` | `1` | `1` = charge the wash from your in-game bank; `0` = free |
 | `[lang]` | `code` | `auto` | The texts' language: the game's, or a code such as `en_gb` |
 | `[menu]` | `key` | `ctrl+f8` | The keys menu |
 | `[probe]` | `tint` | `2` | `2` draws the dirt; `0` draws nothing (the dirt is still worked out and saved) |

@@ -12,5 +12,8 @@ another format: 0
 2463/1135 moved, its size also another kind's: none
 144/74 int_ext's size, moved (only a cargo goes by size): none
 2463/1135 at the model's box: cargo
+4989/1643, a variant drawn as one, moved: int_ext
+4989/1643 at its pieces' box (a merged line by size only): int_ext
+600/200, a merged size also a piece's of another kind: none
 after Clear: none
 ok

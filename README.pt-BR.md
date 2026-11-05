@@ -12,7 +12,7 @@
 
 **Instalar:** copie **tudo** o que está na pasta `plugins` do zip para `<pasta do jogo>\bin\win_x64\plugins\` (ETS2 ou ATS) e abra o jogo ([detalhes](#instalação)).
 
-> **Versão beta.** Testada no ETS2 1.61 e no ATS 1.61, em single player, com e sem o mod gráfico SnowyMoon. Faça backup do seu perfil se quiser segurança extra.
+> **Versão beta.** Testada no ETS2 1.62 e no ATS 1.62, em single player, com e sem o mod gráfico SnowyMoon. Faça backup do seu perfil se quiser segurança extra.
 
 ![Um Volvo VNL com a frente suja de estrada puxando uma prancha com uma pá carregadeira JCB limpa](docs/img/readme/2026-10-31-ats-vnl2025-frente-suja-carga-limpa.jpg)
 
@@ -28,7 +28,7 @@ No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o
 - **Carga limpa ao ser carregada.** Uma carga nova numa prancha ou num lowboy (máquinas, tratores, veículos) chega **limpa**, mesmo com a carreta suja, e depois suja por conta própria.
 - **O interior fica limpo.** O painel e os bancos vistos pela janela não pegam poeira. Todos os caminhões originais dos dois jogos, com todas as DLCs, já vêm mapeados.
 - **A chuva lava** devagar, e a pista continua molhada um tempo depois que ela para.
-- **Lavagem no posto.** Pare numa bomba, puxe o freio de mão e aperte **F8**: o caminhão e a carreta saem limpos. De graça por padrão (o preço pode ser cobrado do seu banco no jogo, se você quiser).
+- **Lavagem no posto.** Pare numa bomba, puxe o freio de mão e aperte **F8**: o caminhão e a carreta saem limpos. O preço é cobrado do seu banco no jogo (dá para deixar de graça na configuração).
 - **A sujeira fica salva.** O seu caminhão e a sua carreta continuam sujos de uma sessão para outra, e a sujeira acompanha os saves do jogo.
 - **Só nos seus veículos.** O tráfego fica como está. Uma carreta de empresa e os veículos do frete rápido começam limpos.
 - **Rodotrens, bitrens e dollies** também sujam.
@@ -56,7 +56,7 @@ No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o
   <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="Depois da lavagem: o caminhão está limpo" width="32%">
 </p>
 
-*Lavagem no posto (ATS): pare numa bomba, puxe o freio de mão e aperte **F8**; a tela da lavagem roda e o caminhão sai limpo. Aqui com a cobrança ligada (`charge = 1`); por padrão é de graça.*
+*Lavagem no posto (ATS): pare numa bomba, puxe o freio de mão e aperte **F8**; a tela da lavagem roda e o caminhão sai limpo. O preço sai do seu banco no jogo (`charge = 0` deixa de graça).*
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="O Volvo VNL lavado com a prancha numa bomba da Green Petrol, visto de fora" width="66%">
@@ -68,7 +68,7 @@ No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o
 
 | Item | Situação |
 |---|---|
-| Jogos | ETS2 **1.61** e ATS **1.61** (versões testadas). A mesma DLL serve nos dois |
+| Jogos | ETS2 **1.62** e ATS **1.62** (versões testadas; as tabelas vêm dos modelos do 1.62). A mesma DLL serve nos dois |
 | Sistema | Windows 10/11 64 bits |
 | Renderização | **DirectX 11** |
 | Caminhões e carretas originais | Todos, com todas as DLCs: o interior e as cargas já vêm mapeados |
@@ -102,7 +102,7 @@ O arquivo é o `ets2_truck_dirt.ini` da pasta `plugins`; cada chave tem um comen
 | `[dust]` | `level` | `-1` | **Teste:** força a sujeira de `0.0` a `1.0`, para ver o efeito na hora (nada é salvo); `-1` = a sujeira real |
 | `[wash]` | `key` | `f8` | A tecla da lavagem no posto |
 | `[wash]` | `price_truck`, `price_trailer` | `120`, `180` | O preço da lavagem, em euro (ETS2) ou dólar (ATS) |
-| `[wash]` | `charge` | `0` | `1` = cobra a lavagem do seu banco no jogo; `0` = de graça |
+| `[wash]` | `charge` | `1` | `1` = cobra a lavagem do seu banco no jogo; `0` = de graça |
 | `[lang]` | `code` | `auto` | O idioma dos textos: o do jogo, ou um código como `pt_br` |
 | `[menu]` | `key` | `ctrl+f8` | O menu das teclas |
 | `[probe]` | `tint` | `2` | `2` desenha a sujeira; `0` não desenha (a sujeira continua sendo calculada e salva) |
