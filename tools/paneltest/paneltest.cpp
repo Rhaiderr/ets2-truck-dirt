@@ -267,7 +267,7 @@ void Actions() {
     Check(Near(r.p.Forced().reach[1], 1.f), "reach: the top is 1", r.p.Forced().reach[1]);
     r.Press(kToggle);
     const View closed = r.View();
-    Check(!closed.open && closed.badge && closed.title.find("ctrl+f9") != std::string::npos,
+    Check(!closed.open && closed.badge && closed.title.find("ctrl+f5") != std::string::npos,
           "closed with forced levels: they stay, with a badge");
     Check(r.Body(0, kWetMud) == 0.f, "... and stay in the model", r.Body(0, kWetMud));
     r.Press(kToggle);
@@ -398,7 +398,8 @@ void Drawing() {
 
 // ---- V6: the keys menu ----
 
-constexpr int kF8 = 0x77, kF9 = 0x78, kUp = 0x26, kDown = 0x28, kEnter = 0x0D, kDel = 0x2E, kEsc = 0x1B, kCtrl = 0x11;
+constexpr int kF5 = 0x74, kF7 = 0x76, kF8 = 0x77, kF9 = 0x78;
+constexpr int kUp = 0x26, kDown = 0x28, kEnter = 0x0D, kDel = 0x2E, kEsc = 0x1B, kCtrl = 0x11;
 
 lang::Catalog English() {
     lang::Table t;
@@ -423,11 +424,12 @@ void MenuTests() {
     menu::Menu m;
     m.Set(0, "");          // the wash key: not in the INI, its default
     m.Set(1, "ctrl+f10");  // the panel key from the INI
-    Check(m.Get(0).vk == kF8 && m.Get(1).vk == 0x79 && m.Get(1).ctrl, "read: f8 by default, ctrl+f10 from the INI");
+    Check(m.Get(0).vk == kF7 && m.Get(0).ctrl && m.Get(1).vk == 0x79 && m.Get(1).ctrl,
+          "read: ctrl+f7 by default, ctrl+f10 from the INI");
     std::vector<menu::Write> w;
     Check(!m.Key(kUp, true, false, false, false, &w), "closed: keys do nothing");
     m.Toggle();
-    Check(m.Open() && m.Row() == 0, "ctrl+f8 opens it on the first row");
+    Check(m.Open() && m.Row() == 0, "shift+f7 opens it on the first row");
     Check(!m.Key(kDown, false, false, false, false, &w) && m.Row() == 0,
           "a plain arrow does nothing while the game gets the keys");
     Check(m.Key(kDown, true, false, false, false, &w) && m.Row() == 1, "ctrl+down: the next row");
@@ -441,12 +443,12 @@ void MenuTests() {
           "G: [test] panel_key = g written");
     w.clear();
     m.Key(kEnter, true, false, false, false, &w);
-    m.Key(kF8, false, false, false, false, &w);
+    m.Key(kF7, true, false, false, false, &w);
     Check(w.empty() && m.Get(1).vk == 0x47 && m.LastStatus() == menu::Status::kTaken,
-          "F8 for the panel: refused, the wash has it");
+          "ctrl+f7 for the panel: refused, the wash has it");
     m.Key(kEnter, true, false, false, false, &w);
-    m.Key(kF8, true, false, false, false, &w);
-    Check(w.empty() && m.LastStatus() == menu::Status::kTaken, "ctrl+f8 for the panel: refused, the menu has it");
+    m.Key(kF7, false, true, false, false, &w);
+    Check(w.empty() && m.LastStatus() == menu::Status::kTaken, "shift+f7 for the panel: refused, the menu has it");
     m.Key(kEnter, true, false, false, false, &w);
     m.Key(0xBA, false, false, false, false, &w);  // ';' (VK_OEM_1): no name in the INI syntax
     Check(w.empty() && m.LastStatus() == menu::Status::kUnsupported, "a key the INI cannot name: refused");
@@ -460,29 +462,30 @@ void MenuTests() {
           "shift+f9 for the wash: [wash] key = shift+f9");
     w.clear();
     m.Key(kDel, true, false, false, false, &w);
-    Check(w.size() == 1 && w[0].value == "f8" && m.Get(0).vk == kF8 && !m.Get(0).shift, "ctrl+del: the wash back to f8");
+    Check(w.size() == 1 && w[0].value == "ctrl+f7" && m.Get(0).vk == kF7 && m.Get(0).ctrl && !m.Get(0).shift,
+          "ctrl+del: the wash back to ctrl+f7");
     w.clear();
     m.Key(kUp, true, false, false, false, &w);  // row 1: the panel
     m.Key(kDel, true, false, false, false, &w);
-    Check(w.size() == 1 && w[0].section == "test" && w[0].value == "ctrl+f9" && m.Get(1).vk == kF9 && m.Get(1).ctrl,
-          "ctrl+del on the panel: back to ctrl+f9");
+    Check(w.size() == 1 && w[0].section == "test" && w[0].value == "ctrl+f5" && m.Get(1).vk == kF5 && m.Get(1).ctrl,
+          "ctrl+del on the panel: back to ctrl+f5");
     const overlay::Menu v = m.MakeView(English(), false);
-    Check(v.open && v.rows.size() == 2 && v.rows[0].value == "F8" && v.rows[1].value == "Ctrl+F9" &&
+    Check(v.open && v.rows.size() == 2 && v.rows[0].value == "Ctrl+F7" && v.rows[1].value == "Ctrl+F5" &&
               v.rows[1].selected && v.status == "Saved",
           "the view: labels, values, the selected row, the status");
     Check(v.help.size() == 1 &&
-              v.help[0] == "Ctrl+Up/Down: choose, Ctrl+Enter: change, Ctrl+Del: default, Ctrl+F8: close",
+              v.help[0] == "Ctrl+Up/Down: choose, Ctrl+Enter: change, Ctrl+Del: default, Shift+F7: close",
           "the help line names the keys (with Ctrl while the game gets them)");
-    Check(m.MakeView(English(), true).help[0] == "Up/Down: choose, Enter: change, Del: default, Ctrl+F8, Esc: close",
+    Check(m.MakeView(English(), true).help[0] == "Up/Down: choose, Enter: change, Del: default, Shift+F7, Esc: close",
           "the help line without Ctrl when the game's keys are held back");
     Check(!m.Key(kEsc, false, false, false, false, &w) && m.Open(), "esc does not close while the game gets the keys");
-    Check(m.Key(kF8, true, false, false, false, &w) && !m.Open(), "ctrl+f8 closes it");
+    Check(m.Key(kF7, false, true, false, false, &w) && !m.Open(), "shift+f7 closes it");
     m.Toggle();
     Check(m.Key(kEsc, false, false, false, true, &w) && !m.Open(), "esc closes it with the game's keys held back");
     // D11p: the keys the hook keeps (a key seen by the game among them: the hook is not getting the keys).
     Check(menu::HookKeeps(kUp, false, false) && menu::HookKeeps(kEsc, false, false) && menu::HookKeeps(0x47, true, false) &&
-              menu::HookKeeps(kF8, true, false),
-          "the hook keeps arrows, Esc, letters, Ctrl+F8");
+              menu::HookKeeps(kF7, false, false) && menu::HookKeeps(kF7, true, false),
+          "the hook keeps arrows, Esc, letters, the F7 keys");
     Check(!menu::HookKeeps(kCtrl, true, false) && !menu::HookKeeps(0x5B, false, false) && !menu::HookKeeps(0x09, false, true) &&
               !menu::HookKeeps(0x73, false, true) && !menu::HookKeeps(kEsc, true, false) && !menu::HookKeeps(0x2C, false, false),
           "never Ctrl, Windows, Alt+Tab, Alt+F4, Ctrl+Esc, Print Screen");

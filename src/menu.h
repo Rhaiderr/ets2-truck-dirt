@@ -71,7 +71,7 @@ private:
     int row_ = 0;
     panel::Hotkey keys_[kItems];
     bool set_[kItems] = {};
-    panel::Hotkey menu_key_{0x77, true, false, false};  // ctrl+f8
+    panel::Hotkey menu_key_{0x76, false, true, false};  // shift+f7
     Status status_ = Status::kNone;
     int status_item_ = -1;  // kTaken: the row that has the key (kItems: the menu itself)
 };

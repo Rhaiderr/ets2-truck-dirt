@@ -100,11 +100,11 @@ The file is `ets2_truck_dirt.ini` in the `plugins` folder; every key has a comme
 |---|---|---|---|
 | `[dust]` | `rate` | `1.0` | How fast the rig gets dirty: `2.0` twice as fast, `0.5` half |
 | `[dust]` | `level` | `-1` | **Test:** forces the dirt from `0.0` to `1.0`, to see the effect at once (nothing is saved); `-1` = the real dirt |
-| `[wash]` | `key` | `f8` | The wash key at the fuel station |
+| `[wash]` | `key` | `ctrl+f7` | The wash key at the fuel station |
 | `[wash]` | `price_truck`, `price_trailer` | `120`, `180` | The wash price, in euros (ETS2) or dollars (ATS) |
 | `[wash]` | `charge` | `1` | `1` = charge the wash from your in-game bank; `0` = free |
 | `[lang]` | `code` | `auto` | The texts' language: the game's, or a code such as `en_gb` |
-| `[menu]` | `key` | `ctrl+f8` | The keys menu |
+| `[menu]` | `key` | `shift+f7` | The keys menu |
 | `[probe]` | `tint` | `2` | `2` draws the dirt; `0` draws nothing (the dirt is still worked out and saved) |
 | `[compat]` | `enforce` | `1` | After a game update, safely turns off the part of the drawing that no longer fits |
 

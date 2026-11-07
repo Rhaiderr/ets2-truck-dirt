@@ -13,7 +13,7 @@
 // and trailer.0 go to the rig tracker, which paints the player's rig red.
 // D5 (dirt_state): the dirt of the player's truck and own trailers is kept in
 // dirt_state.txt between sessions; company units start clean.
-// N10 (test_panel): with [test] panel = 1, panel_key (ctrl+f9) opens a panel
+// N10 (test_panel): with [test] panel = 1, panel_key (ctrl+f5) opens a panel
 // that forces any level of any layer, drawn over the game (gpu_probe).
 // D5 (wash, L7): the stations where the player refuels are remembered
 // (wash_spots.txt); stopped there with the parking brake on, the wash key
@@ -279,14 +279,14 @@ std::wstring IniPath() {
                   "; 1 = test panel: panel_key opens it; it forces any level of any dirt layer (nothing is saved\r\n"
                   "; from it: the real dirt goes on underneath)\r\n"
                   "panel = 0\r\n"
-                  "panel_key = ctrl+f9\r\n"
+                  "panel_key = ctrl+f5\r\n"
                   "[wash]\r\n"
                   "; D5: wash at the service station: at the pump (the game offers the refuel there, N36) or at a\r\n"
                   "; station where the truck was refuelled, stopped with the parking brake on, key washes the rig\r\n"
                   "enabled = 1\r\n"
                   "; N36: 1 = the game's own refuel offer marks the station, 0 = only the stations learnt at a refuel\r\n"
                   "game_station = 1\r\n"
-                  "key = f8\r\n"
+                  "key = ctrl+f7\r\n"
                   "price_truck = 120\r\n"
                   "price_trailer = 180\r\n"
                   "; 1 = charge the price through the game's own payment, 0 = free\r\n"
@@ -294,7 +294,7 @@ std::wstring IniPath() {
                   "[menu]\r\n"
                   "; V6: key opens the keys menu (wash key, test panel key); block_input = 1 keeps\r\n"
                   "; the game from getting the keys while the menu or the test panel is open\r\n"
-                  "key = ctrl+f8\r\n"
+                  "key = shift+f7\r\n"
                   "block_input = 1\r\n"
                   "[lang]\r\n"
                   "; the plugin's texts: auto = the game's language (English when the font lacks its letters), or a\r\n"
@@ -1348,10 +1348,10 @@ void MenuStep() {
 void MenuConfigure(const std::wstring& ini) {
     g.ini = ini;
     panel::Hotkey key;
-    const std::string text = IniString(ini, L"menu", L"key", L"ctrl+f8");
+    const std::string text = IniString(ini, L"menu", L"key", L"shift+f7");
     if (!panel::ParseHotkey(text, &key)) {
-        Log(SCS_LOG_TYPE_warning, "[menu] key = " + text + " not understood: ctrl+f8");
-        panel::ParseHotkey("ctrl+f8", &key);
+        Log(SCS_LOG_TYPE_warning, "[menu] key = " + text + " not understood: shift+f7");
+        panel::ParseHotkey("shift+f7", &key);
     }
     g.menu.SetMenuKey(key);
     for (int i = 0; i < menu::kItems; ++i) {
@@ -1478,10 +1478,10 @@ bool WashConfigure(const std::wstring& ini) {
     } else {
         Log(SCS_LOG_TYPE_message, "wash: the game's refuel offer not used ([wash] game_station = 0)");
     }
-    const std::string key = IniString(ini, L"wash", L"key", L"f8");
+    const std::string key = IniString(ini, L"wash", L"key", L"ctrl+f7");
     if (!panel::ParseHotkey(key, &g.wash_key)) {
-        Log(SCS_LOG_TYPE_warning, "[wash] key = " + key + " not understood: f8");
-        panel::ParseHotkey("f8", &g.wash_key);
+        Log(SCS_LOG_TYPE_warning, "[wash] key = " + key + " not understood: ctrl+f7");
+        panel::ParseHotkey("ctrl+f7", &g.wash_key);
     }
     // The game's payment: the tire plugin's approach (payment.h). Off by default: only one test call ever
     // (EUR 1 in ETS2), none in ATS, the charge after a save and reload not checked.
@@ -1691,12 +1691,12 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
     }
     const bool panel_on = GetPrivateProfileIntW(L"test", L"panel", 0, ini.c_str()) == 1;
     wchar_t key_text[64] = {};
-    GetPrivateProfileStringW(L"test", L"panel_key", L"ctrl+f9", key_text, 64, ini.c_str());
+    GetPrivateProfileStringW(L"test", L"panel_key", L"ctrl+f5", key_text, 64, ini.c_str());
     char key_utf8[64] = {};
     WideCharToMultiByte(CP_UTF8, 0, key_text, -1, key_utf8, sizeof(key_utf8), nullptr, nullptr);
     if (!panel::ParseHotkey(key_utf8, &g.panel_key)) {
-        Log(SCS_LOG_TYPE_warning, std::string("[test] panel_key = ") + key_utf8 + " not understood: ctrl+f9");
-        panel::ParseHotkey("ctrl+f9", &g.panel_key);
+        Log(SCS_LOG_TYPE_warning, std::string("[test] panel_key = ") + key_utf8 + " not understood: ctrl+f5");
+        panel::ParseHotkey("ctrl+f5", &g.panel_key);
     }
 
     if (telemetry) {

@@ -6,8 +6,8 @@
 // what it shows and its layout in quads over the embedded 8x8 font. The DLL
 // reads the keys (plugin.cpp) and draws the quads (panel_draw.h).
 //
-// - Only with [test] panel = 1 in the INI; panel_key (default ctrl+f9: ctrl+f8
-//   is the player's menu, V6) opens and closes it.
+// - Only with [test] panel = 1 in the INI; panel_key (default ctrl+f5: the
+//   game has its own teleport on ctrl+f9) opens and closes it.
 // - Rows: the unit (truck, trailer, both), one per layer (dirt::Layer), the
 //   reach of the forced layers, "all real" and "clean all".
 // - A layer starts from the level it shows and moves on a grid of 0.1 (0.01
@@ -62,7 +62,7 @@ struct View {
 
 class Panel {
 public:
-    void Enable(bool on, const std::string& key_name = "ctrl+f9");
+    void Enable(bool on, const std::string& key_name = "ctrl+f5");
     bool Enabled() const { return enabled_; }
     bool Open() const { return open_; }
     // A key; `shown` = the unit's layers as they are shown now (start of a new
@@ -95,7 +95,7 @@ std::string LearningNotice(bool truck, bool trailer);
 
 // ---- keys ----
 
-// A hotkey of the INI: "ctrl+f9", "F10", "ctrl+shift+p", "alt+home"... (Windows virtual-key codes).
+// A hotkey of the INI: "ctrl+f5", "shift+f7", "ctrl+shift+p", "alt+home"... (Windows virtual-key codes).
 struct Hotkey {
     int vk = 0;
     bool ctrl = false, shift = false, alt = false;

@@ -100,11 +100,11 @@ O arquivo é o `ets2_truck_dirt.ini` da pasta `plugins`; cada chave tem um comen
 |---|---|---|---|
 | `[dust]` | `rate` | `1.0` | A velocidade com que suja: `2.0` duas vezes mais rápido, `0.5` metade |
 | `[dust]` | `level` | `-1` | **Teste:** força a sujeira de `0.0` a `1.0`, para ver o efeito na hora (nada é salvo); `-1` = a sujeira real |
-| `[wash]` | `key` | `f8` | A tecla da lavagem no posto |
+| `[wash]` | `key` | `ctrl+f7` | A tecla da lavagem no posto |
 | `[wash]` | `price_truck`, `price_trailer` | `120`, `180` | O preço da lavagem, em euro (ETS2) ou dólar (ATS) |
 | `[wash]` | `charge` | `1` | `1` = cobra a lavagem do seu banco no jogo; `0` = de graça |
 | `[lang]` | `code` | `auto` | O idioma dos textos: o do jogo, ou um código como `pt_br` |
-| `[menu]` | `key` | `ctrl+f8` | O menu das teclas |
+| `[menu]` | `key` | `shift+f7` | O menu das teclas |
 | `[probe]` | `tint` | `2` | `2` desenha a sujeira; `0` não desenha (a sujeira continua sendo calculada e salva) |
 | `[compat]` | `enforce` | `1` | Depois de uma atualização do jogo, desliga com segurança a parte do desenho que deixou de servir |
 

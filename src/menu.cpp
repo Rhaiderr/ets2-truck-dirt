@@ -5,8 +5,8 @@
 namespace menu {
 
 const Item kItemList[kItems] = {
-    {"wash", "key", "menu.wash_key", "f8"},
-    {"test", "panel_key", "menu.panel_key", "ctrl+f9"},
+    {"wash", "key", "menu.wash_key", "ctrl+f7"},
+    {"test", "panel_key", "menu.panel_key", "ctrl+f5"},
 };
 
 namespace {
