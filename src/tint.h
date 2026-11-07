@@ -109,6 +109,18 @@ void OnPresent(ID3D11DeviceContext* c, const GameState& game);
 // half width of 0: off. D11f: `cavity` the same for the cab's whole cavity (the sleeper too), where only the faces
 // turned to its middle get no dust (the shell's outer faces turn away).
 void SetCabInside(bool known, const float eye[3], const float box[5], const float cavity[5]);
+// N40 step 1 (the user, 05/11: dirt on the glass without losing the game's glass): the truck's glass takes the
+// truck's dirt. At the game's own multiply draw of the glass (forward pass) the same draw is issued once more with
+// our pixel shader, so what is behind the glass is multiplied by the dirt's transmission; nothing else about the
+// forward pass is touched. [glass] on; off by default. Any thread.
+// `debug` ([glass] on): 2 = paint every surface the dirt reaches flat magenta, to see what it reaches;
+// 3 = paint each of its pixels where the shader thinks it is in the truck (tools/probetest checks that).
+void SetGlassDirt(bool on, float strength = 1.f, int debug = 0);
+// N40e, any thread: how much light there is for the dust on the glass to scatter (0 night .. 1 full day).
+void SetDaylight(float day);
+// N40b: a DrawIndexedInstanced outside a G-buffer pass (the glass of some trucks may be drawn instanced: the
+// catalog's glass shaders are all `.instanced` variants). Read-only unless it is the truck's glass.
+void OnForwardInstanced(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, INT base, UINT start_inst);
 // D11k (N44): the dirt's relief in rt0 (the G-buffer's normal) on or off ([dust] relief); any thread.
 void SetRelief(bool on);
 

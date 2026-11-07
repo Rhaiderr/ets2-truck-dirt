@@ -87,6 +87,7 @@ float g_eye[3] = {};
 float g_ws_front = 1e9f;
 float g_ws_base_y = 0.f, g_ws_slope = 0.f, g_ws_top = 0.f;  // D11j: the windshield's base height, dz/dy, top
 std::atomic<bool> g_ws_reset{false};  // a new truck: measure again
+std::string g_mp_hits;  // N61: the meshes read as the interior seen from outside (under g_mp_mutex)
 std::atomic<int> g_mp_int_ext{0};  // P1: the current truck's interior pieces found (MeshPrint): the boxes go
 std::atomic<bool> g_mp_reset{false};  // P1: a new truck
 // D11i: the windshield's measure (WindshieldDraw, WindshieldStep below); render thread.
@@ -114,6 +115,96 @@ struct Windshield {
     float to_truck[12] = {};  // the mesh -> the truck's frame
 };
 Windshield g_ws;
+// N40 step 1 (the user, 05/11: "sujar o vidro sem nada quebrar ou perder o vidro no visual"): the glass is not in
+// the G-buffer (the development notes on the engine's glass: `eut2.glass` is two forward passes, a multiply and
+// an add), so the dust pass cannot reach it. Everything the plugin tried in the forward pass before (D10c-D10g)
+// saved and restored the state around a redraw of its own, and the game's glass vanished with SnowyMoon. Here the
+// forward pass is not re-arranged at all: at the game's own multiply draw of the truck's glass -- the draw D11i
+// already recognises read-only to measure the windshield -- the very same DrawIndexed is issued once more with
+// only the pixel shader and one constant-buffer slot swapped in and put straight back. The blend is the game's
+// (DST_COLOR x SRC), so our colour is the glass's transmission: what is behind the glass is multiplied by the
+// dirt. Off by default ([glass] on).
+std::atomic<bool> g_glass_on{false};
+std::atomic<float> g_glass_strength{1.f};  // N40d: [glass] strength, how strong the veil is (1 = as designed)
+// N40i ([glass] on = 2, the user's session of 06/11 00h: the headlamps look veiled but the windows still look
+// clean, and the lamps' lenses go through the G-buffer anyway, so they may be showing the ordinary dust and not
+// our veil at all): every surface the veil lands on is painted flat magenta, so one shot says what we are really
+// painting instead of us reading intensity out of screenshots.
+std::atomic<int> g_glass_debug{0};  // [glass] on: 2 = paint it magenta, 3 = paint the pixel's place in the truck
+// N62: the glass shaders are compiled in a second wave (0 not yet, 2 ready, 3 failed), so the dust never waits.
+std::atomic<int> g_glass_compile{0};
+std::atomic<long long> g_glass_compile_ms{0};
+bool g_glass_failed = false;  // render thread: something went wrong, never again this session
+// Why it turned off: 10 no device, 11 the shader did not compile, 12 no pixel shader, 13 no constant buffer,
+// 3 the constants could not be written, 4 an exception.
+int g_glass_err = 0;
+long g_glass_hr = 0;
+ID3D11PixelShader* g_glass_ps = nullptr;       // for DEST_COLOR / ZERO
+ID3D11PixelShader* g_glass_ps_dual = nullptr;  // N40c: for ONE / SRC1_COLOR (1.62)
+ID3D11PixelShader* g_glass_ps_veil = nullptr;  // N40e: over the reflection, with our own blend
+// N62: the cab's own pass constants of this frame (its layers, its frame, the view), captured from the dust pass
+// and handed to the glass draws, so the glass gets the very dirt the body got.
+dust::Constants g_glass_consts = {};
+bool g_glass_consts_ok = false;   // the pass has run at least once
+bool g_glass_consts_new = false;  // not yet uploaded to our buffer
+ID3D11BlendState* g_glass_bs = nullptr;        // N40e: SRC_ALPHA / INV_SRC_ALPHA, the alpha left as it is
+std::atomic<float> g_daylight{1.f};            // N40e: how much light there is to scatter (SetDaylight)
+long long g_glass_veils = 0;                   // veil draws since the last StatsLine
+// N40e: the glass meshes whose tint pass we have just dirtied, so the reflection the game adds right after can be
+// told from every other additive draw of the truck (a lamp's glow). A ring, matched by buffer and range.
+struct GlassMesh {
+    const void* ib;
+    UINT start, count;
+    INT base;
+};
+constexpr int kGlassMeshes = 16;
+GlassMesh g_glass_meshes[kGlassMeshes] = {};
+int g_glass_mesh_n = 0;
+ID3D11Buffer* g_glass_cb = nullptr;
+float g_glass_sent = -1.f;                        // the amount already in g_glass_cb
+float g_glass_strength_sent = -1.f, g_glass_day_sent = -1.f;
+int g_glass_debug_sent = -1;
+long long g_glass_draws = 0, g_glass_missed = 0, g_glass_depth_n = 0, g_glass_blend_n = 0, g_glass_far = 0;
+long long g_glass_pass = 0, g_glass_res = 0, g_glass_map = 0;  // past the frame test; resources failed; map failed
+// N40b (the ATS session of 05/11 21:23: 1132 multiply draws in the forward pass, every one of them away from the
+// truck, and D11i read no glass mesh either, though the truck was tracked with 71 draws): what the truck's own
+// draws in the forward pass look like now, so the glass among them can be told. Every forward draw at the truck's
+// frame is tallied by its blend; the ones that multiply (the glass's own blend, as the .rs files say) get the dirt.
+struct ForwardBlend {
+    UINT8 src, dest, op;
+    bool depth_write, instanced;
+    long long n;
+};
+constexpr int kForwardBlends = 10;
+ForwardBlend g_fw[kForwardBlends];
+int g_fw_n = 0;
+long long g_glass_at_truck = 0, g_glass_instanced = 0, g_glass_dual = 0;
+
+void GlassDirtDraw(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, INT base, UINT start_inst,
+                   bool instanced);
+
+void TallyForward(ID3D11BlendState* bs, bool depth_write, bool instanced) {
+    UINT8 src = 0, dest = 0, op = 0;
+    if (bs) {
+        D3D11_BLEND_DESC d = {};
+        bs->GetDesc(&d);
+        const D3D11_RENDER_TARGET_BLEND_DESC& t = d.RenderTarget[0];
+        if (t.BlendEnable) src = UINT8(t.SrcBlend), dest = UINT8(t.DestBlend), op = UINT8(t.BlendOp);
+    }
+    for (int i = 0; i < g_fw_n; ++i)
+        if (g_fw[i].src == src && g_fw[i].dest == dest && g_fw[i].op == op && g_fw[i].depth_write == depth_write &&
+            g_fw[i].instanced == instanced) {
+            ++g_fw[i].n;
+            return;
+        }
+    if (g_fw_n < kForwardBlends) g_fw[g_fw_n++] = {src, dest, op, depth_write, instanced, 1};
+}  // since the last StatsLine: drawn, and glass draws left alone
+// The slot our constants go in, saved and put back, so it does not matter whether the game's shader uses it.
+constexpr UINT kGlassCbSlot = 13;
+// N62: the glass draws run the dust shader itself (dust_shader.h, GLASS): one variant per blend the game uses.
+ID3DBlob* g_blob_glass = nullptr;       // dual-source (1.62): two outputs
+ID3DBlob* g_blob_glass_mult = nullptr;  // DEST_COLOR / ZERO (older): one, multiplied
+ID3DBlob* g_blob_glass_over = nullptr;  // SRC_ALPHA / INV_SRC_ALPHA (ours, over a separate reflection pass)
 std::mutex g_err_mutex;
 std::string g_error;
 
@@ -508,6 +599,13 @@ void ReleaseObjects() {
         if (u) u->Release();
     ReleaseTimers();
     if (g_ps_clear) g_ps_clear->Release();
+    if (g_glass_ps) g_glass_ps->Release();
+    if (g_glass_ps_dual) g_glass_ps_dual->Release();
+    if (g_glass_ps_veil) g_glass_ps_veil->Release();
+    if (g_glass_bs) g_glass_bs->Release();
+    g_glass_ps_veil = nullptr, g_glass_bs = nullptr;
+    if (g_glass_cb) g_glass_cb->Release();
+    g_glass_ps = g_glass_ps_dual = nullptr, g_glass_cb = nullptr, g_glass_sent = g_glass_strength_sent = -1.f;
     g_vs = nullptr, g_ps = g_ps_spec = g_ps_norm = g_ps_pack = g_ps_clear = nullptr;
     g_pass_dss = g_pass_dss_keep = nullptr;
     g_pass_bs = g_refl_bs = nullptr, g_pass_rs = g_pass_rs_scissor = nullptr, g_pass_cb = nullptr;
@@ -553,6 +651,29 @@ void StartCompile() {
         }
         g_compile_ms.store(static_cast<long long>(GetTickCount64() - t0));
         g_compile_state.store(ok ? 2 : 3);  // after the blobs: MakeObjects reads them once it sees 2
+        // N62: the glass variants of the same shader, one per blend the game draws its glass with. A second wave,
+        // once the dust's own shaders are ready: each is as heavy as PACK and the dust must not wait for them.
+        if (!ok) return;
+        const ULONGLONG t1 = GetTickCount64();
+        const D3D_SHADER_MACRO glass[] = {{"GLASS", "1"}, {nullptr, nullptr}};
+        const D3D_SHADER_MACRO glass_mult[] = {{"GLASS", "1"}, {"GLASS_MULT", "1"}, {nullptr, nullptr}};
+        const D3D_SHADER_MACRO glass_over[] = {{"GLASS", "1"}, {"GLASS_OVER", "1"}, {nullptr, nullptr}};
+        bool gdone[3] = {};
+        std::thread gjobs[3] = {
+            std::thread([&] { gdone[0] = Compile(kPs, "ps_5_0", &g_blob_glass, glass); }),
+            std::thread([&] { gdone[1] = Compile(kPs, "ps_5_0", &g_blob_glass_mult, glass_mult); }),
+            std::thread([&] { gdone[2] = Compile(kPs, "ps_5_0", &g_blob_glass_over, glass_over); }),
+        };
+        for (std::thread& j : gjobs) j.join();
+        g_glass_compile_ms.store(static_cast<long long>(GetTickCount64() - t1));
+        if (gdone[0] && gdone[1] && gdone[2]) {
+            g_glass_compile.store(2);
+        } else {
+            for (ID3DBlob** b : {&g_blob_glass, &g_blob_glass_mult, &g_blob_glass_over})
+                if (*b) (*b)->Release(), *b = nullptr;
+            g_glass_compile.store(3);
+            Error("glass: the glass shaders were not made: the dirt on the glass stays off (N62)");
+        }
     }).detach();
 }
 
@@ -1278,6 +1399,12 @@ void RunPass(ID3D11DeviceContext* c, SavedState* saved, bool* saved_ok) {
             }
         }
         cb.spin[3] = relief ? 1.f : 0.f;  // D11m: the pack works the relief out for the NORM draw
+        // N62: the truck's own constants (the cab's where there is one) go to the glass draws of this frame, so
+        // the glass gets the dirt the body got, in the same frame of the same view.
+        if (kClasses[k].unit == 0 && !kClasses[k].cargo && (kClasses[k].cab || !g_glass_consts_ok)) {
+            g_glass_consts = cb;
+            g_glass_consts_ok = g_glass_consts_new = true;
+        }
         c->UpdateSubresource(g_pass_cb, 0, nullptr, &cb, 0, 0);
         // D11m: the dirt into the pack first (the class's only full shading), then the draws that take it.
         ID3D11ShaderResourceView* no_pack = nullptr;
@@ -1444,6 +1571,16 @@ void SetCabInside(bool known, const float eye[3], const float box[5], const floa
     g_ws_reset.store(true);
 }
 void SetRelief(bool on) { g_relief.store(on); }
+void SetDaylight(float day) { g_daylight.store(day > 0.f ? (day < 1.f ? day : 1.f) : 0.f); }
+void SetGlassDirt(bool on, float strength, int debug) {
+    g_glass_on.store(on);
+    g_glass_strength.store(strength > 0.f ? (strength < 4.f ? strength : 4.f) : 0.f);
+    g_glass_debug.store(debug);
+}
+void OnForwardInstanced(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, INT base, UINT start_inst) {
+    if (!g_on || g_pass.open || !g_ws.forward || !g_glass_on.load(std::memory_order_relaxed)) return;
+    GlassDirtDraw(c, count, inst, start, base, start_inst, true);
+}
 void SetDust(int unit, float level) {
     if (unit >= 0 && unit < rig::kUnits) g_dust[unit].store(level, std::memory_order_relaxed);
 }
@@ -1589,16 +1726,26 @@ namespace {
 // then its vertices are copied to the CPU (a copy binds nothing). The glass's most forward point at the windshield's
 // height and middle is where the cavity's box starts (the dashboard behind it; the hood ahead of it).
 constexpr int kWsMaxMeshes = 24;
-std::unordered_map<ID3D11BlendState*, bool> g_glass_blends;      // the multiply blend (referenced)
+std::unordered_map<ID3D11BlendState*, int> g_glass_blends;       // how it multiplies (referenced)
 std::unordered_map<ID3D11DepthStencilState*, bool> g_glass_depth;  // tested, not written (referenced)
 
-bool GlassBlend(ID3D11BlendState* bs) {
+// How a blend state multiplies the image under the glass: 0 it does not, 1 the colour as the source factor
+// (DEST_COLOR / ZERO), 2 the second output as the destination factor (ONE / SRC1_COLOR: dual-source blending, what
+// ATS and ETS2 1.62 use for the glass's tint pass) [verified: ATS 05/11 21:32, the truck's own forward draws came
+// as src 5 dest 2 (the glass's added reflection), src 2 dest 16 (this one), src 5 dest 6 and no blend].
+int GlassBlend(ID3D11BlendState* bs) {
     const auto it = g_glass_blends.find(bs);
     if (it != g_glass_blends.end()) return it->second;
     D3D11_BLEND_DESC d = {};
     bs->GetDesc(&d);
     const D3D11_RENDER_TARGET_BLEND_DESC& t = d.RenderTarget[0];
-    const bool glass = t.BlendEnable && t.SrcBlend == D3D11_BLEND_DEST_COLOR && t.DestBlend == D3D11_BLEND_ZERO;
+    const int glass = !t.BlendEnable || t.BlendOp != D3D11_BLEND_OP_ADD
+                          ? 0
+                          : t.SrcBlend == D3D11_BLEND_DEST_COLOR && t.DestBlend == D3D11_BLEND_ZERO
+                                ? 1
+                            : t.SrcBlend == D3D11_BLEND_ONE && t.DestBlend == D3D11_BLEND_SRC1_COLOR
+                                ? 2
+                                : t.SrcBlend == D3D11_BLEND_SRC_ALPHA && t.DestBlend == D3D11_BLEND_ONE ? 3 : 0;
     if (g_glass_blends.size() < 256) {
         bs->AddRef();
         g_glass_blends.emplace(bs, glass);
@@ -1664,7 +1811,7 @@ void WindshieldDraw(ID3D11DeviceContext* c, UINT count, UINT start, INT base) {
     float factor[4];
     UINT mask = 0;
     c->OMGetBlendState(&bs, factor, &mask);
-    const bool multiply = bs && GlassBlend(bs);
+    const bool multiply = bs && GlassBlend(bs) != 0;  // N40c: 1.62's dual-source blend counts too
     if (bs) bs->Release();
     if (!multiply) return;
     g_ws.seen.push_back({g_ib, start, count, base});
@@ -1684,6 +1831,216 @@ void WindshieldDraw(ID3D11DeviceContext* c, UINT count, UINT start, INT base) {
     g_ws.vb_offset = vb_offset, g_ws.start = start, g_ws.count = count, g_ws.base = base;
     memcpy(g_ws.to_truck, t, sizeof(t));
     g_ws.stage = 1;
+}
+
+// N40 step 1: how dirty the truck's glass is (0..1), from the same layers the dust pass draws (the forced levels of
+// the test panel and of [dust] level included). The front group: the windshield takes what the front of the cab
+// takes. Water alone (kWet) and the tyres' tread leave the glass clear.
+float GlassAmount() {
+    // N40f (the user, ATS 05/11 23:24: the veil was plain to see "but with that the truck went clean"): the first
+    // version added every layer up with weights, so it reached 1.0 while the truck itself showed a tenth of that --
+    // the state of that session was dust 0.127 with film 0.49 and soot 0.46, which the body only shows low down and
+    // the sum turned into a windscreen covered in dirt on a truck that looked washed. The glass follows what the
+    // whole truck shows instead: the dirt level, a little more (glass gathers what paint sheds), plus a share of the
+    // road's film, which is what really dulls a windscreen. [glass] strength is there for taste.
+    // N40g: 1.2 x the level went too far the other way. The state of both sessions was the same (dust 0.127, film
+    // 0.49, soot 0.46): at dusk the white cab looked washed, in daylight the very same truck looks properly dirty
+    // (the user, 05/11 23:32: "the truck is dirty again as expected"). So what the body shows is mostly the film
+    // and the soot, and the glass has to follow those: the film above all, which is exactly what dulls a
+    // windscreen. At that state this is 0.59, against 0.22 with the level alone and 1.00 with the first sum.
+    const float film = g_layers[0][0][dust::kFilm].load(std::memory_order_relaxed);
+    const float soot = g_layers[0][0][dust::kSoot].load(std::memory_order_relaxed);
+    const float a = 0.8f * film + 0.6f * g_dust[0].load(std::memory_order_relaxed) + 0.3f * soot;
+    return a < 0.f ? 0.f : a > 1.f ? 1.f : a;
+}
+
+// N40: our pixel shader and its one constant (made at the first glass draw; the device is already ours).
+// 1 ready, 0 not yet (the shaders are still being compiled: no error), -1 failed for good.
+int GlassResources(ID3D11DeviceContext* c) {
+    if (g_glass_ps && g_glass_ps_dual && g_glass_ps_veil && g_glass_bs && g_glass_cb) return 1;
+    StartCompile();  // N62: the glass runs the dust shader; its variants come from the same compile, second wave
+    const int glass_state = g_glass_compile.load();
+    if (glass_state < 2) return 0;  // still compiling: nothing drawn yet, and no error either
+    if (!g_blob_glass || !g_blob_glass_mult || !g_blob_glass_over) {
+        g_glass_err = 11;
+        return -1;
+    }
+    // Our own device pointer (g_dev) is only there once a G-buffer pass has made the dust pass's objects; the glass
+    // is drawn in the forward pass, which may come first, so the device comes from the context.
+    ID3D11Device* dev = nullptr;
+    c->GetDevice(&dev);
+    if (!dev) {
+        g_glass_err = 10;
+        return -1;
+    }
+    g_glass_err = 1;
+    for (int k = 0; k < 3; ++k) {
+        ID3D11PixelShader** out = k == 2 ? &g_glass_ps_veil : k ? &g_glass_ps_dual : &g_glass_ps;
+        ID3DBlob* const b = k == 2 ? g_blob_glass_over : k ? g_blob_glass : g_blob_glass_mult;
+        if (*out) continue;
+        const HRESULT hr = dev->CreatePixelShader(b->GetBufferPointer(), b->GetBufferSize(), nullptr, out);
+        if (FAILED(hr)) {
+            g_glass_err = 12, g_glass_hr = hr;
+            dev->Release();
+            return -1;
+        }
+    }
+    g_glass_err = 14;
+    if (!g_glass_bs) {
+        D3D11_BLEND_DESC bd = {};
+        bd.RenderTarget[0].BlendEnable = TRUE;
+        bd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+        bd.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+        bd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        bd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;  // the image's own alpha is left as it is
+        bd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+        bd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        const HRESULT hr = dev->CreateBlendState(&bd, &g_glass_bs);
+        if (FAILED(hr)) {
+            g_glass_err = 14, g_glass_hr = hr;
+            dev->Release();
+            return -1;
+        }
+    }
+    g_glass_err = 2;
+    if (!g_glass_cb) {
+        D3D11_BUFFER_DESC d = {};
+        d.ByteWidth = sizeof(PassCb);  // N62: the pass's own constants
+        d.Usage = D3D11_USAGE_DEFAULT;  // filled with UpdateSubresource, as the pass's: our Map detour stays out
+        d.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        const HRESULT hr = dev->CreateBuffer(&d, nullptr, &g_glass_cb);
+        if (FAILED(hr)) {
+            g_glass_err = 13, g_glass_hr = hr;
+            dev->Release();
+            return -1;
+        }
+    }
+    dev->Release();
+    g_glass_err = 0;
+    return 1;
+}
+
+// N40 step 1: a forward draw over the main view's depth. When it is the truck's glass being multiplied over the
+// image, the same draw again with our pixel shader. The same tests as WindshieldDraw (that one measures the mesh,
+// this one dirties it), in the cheapest order: the depth-stencil state we already hold, then the blend, then the
+// draw's matrix against the truck's frame.
+void GlassDirtBody(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, INT base, UINT start_inst,
+                   bool instanced) {
+    if (g_glass_failed || g_ws.main_view < 0 || !g_dss || g_draw_off || !count || count > 300000) return;
+    if (!g_glass_consts_ok) return;  // N62: the dust pass has not run yet, so there are no constants to draw with
+    const float strength = g_glass_strength.load(std::memory_order_relaxed);
+    const float amount = GlassAmount();
+    if (amount * strength < 0.02f && !g_glass_debug.load(std::memory_order_relaxed)) return;
+    const bool depth_ok = GlassDepth(g_dss);
+    if (depth_ok) ++g_glass_depth_n;
+    float m[12], f[12], inv[12];
+    // Step 1 is the outside cameras only: the interior camera draws nothing of the truck but the cabin (stencil
+    // ref 2), which the tracker never claims, so it has no frame for the truck there and this test never passes.
+    // The windscreen seen from the driver's seat is step 2 (it needs the cab's frame from the ref-2 draws, or the
+    // pane's own locator from the pre-map).
+    if (!CurrentMatrix(m) || !rig::GetFrame(g_ws.main_view, 0, f, false) || !Invert(f, inv)) {
+        ++g_glass_missed;
+        return;
+    }
+    float t[12];  // the mesh -> the truck: inv(truck -> camera) x (mesh -> camera)
+    for (int r = 0; r < 3; ++r)
+        for (int col = 0; col < 4; ++col)
+            t[r * 4 + col] = inv[r * 4] * m[col] + inv[r * 4 + 1] * m[4 + col] + inv[r * 4 + 2] * m[8 + col] +
+                             (col == 3 ? inv[r * 4 + 3] : 0.f);
+    // At the truck's frame: near its origin, hardly turned (the same test as N30's and D11i's).
+    if (t[3] * t[3] + t[7] * t[7] + t[11] * t[11] > 16.f || t[0] + t[5] + t[10] < 2.9f) {
+        ++g_glass_far;
+        return;
+    }
+    ++g_glass_at_truck;
+    if (instanced) ++g_glass_instanced;
+    // N40b: this is one of the truck's own forward draws. What blend it uses goes to the log; only the ones that
+    // multiply the image (the glass's blend) take the dirt.
+    ID3D11BlendState* bs = nullptr;
+    float factor[4] = {};
+    UINT mask = 0;
+    c->OMGetBlendState(&bs, factor, &mask);
+    TallyForward(bs, !depth_ok, instanced);
+    const int kind = bs ? GlassBlend(bs) : 0;
+    if (bs) bs->Release();
+    if (!kind || !depth_ok) return;
+    // N40e: the reflection the game adds over the glass right after its tint pass. Only for a mesh we have just
+    // dirtied: every other additive draw of the truck (a lamp's glow) is left alone.
+    bool veil = false;
+    if (kind == 3) {
+        for (int i = 0; i < kGlassMeshes && !veil; ++i)
+            veil = g_glass_meshes[i].ib == g_ib && g_glass_meshes[i].start == start &&
+                   g_glass_meshes[i].count == count && g_glass_meshes[i].base == base;
+        if (!veil) return;
+    } else {
+        g_glass_meshes[g_glass_mesh_n] = {g_ib, start, count, base};
+        g_glass_mesh_n = (g_glass_mesh_n + 1) % kGlassMeshes;
+    }
+    ++g_glass_blend_n;
+    if (kind == 2) ++g_glass_dual;
+    ++g_glass_pass;
+    const int ready = GlassResources(c);
+    if (ready == 0) return;  // the glass shaders are still being compiled
+    if (ready < 0) {
+        ++g_glass_res;
+        g_glass_failed = true;
+        return;
+    }
+    const float day = g_daylight.load(std::memory_order_relaxed);
+    const int debug = g_glass_debug.load(std::memory_order_relaxed);
+    // N62: the dust pass's own constants for this frame, plus what only the glass needs. Uploaded once a frame
+    // (every glass draw of the frame shares them), with UpdateSubresource as the pass does.
+    if (g_glass_consts_new || strength != g_glass_strength_sent || std::fabs(day - g_glass_day_sent) > 0.01f ||
+        debug != g_glass_debug_sent) {
+        g_glass_consts.glass[0] = strength;
+        g_glass_consts.glass[1] = day;
+        g_glass_consts.glass[2] = float(debug);
+        // N62b ([glass] on = 3): the position test of the shader itself (params.y = 2), in our own copy of the
+        // pass's constants, so the glass paints where it thinks each pixel is. tools/probetest checks it.
+        g_glass_consts.params[1] = debug == 3 ? 2.f : 0.f;
+        g_glass_consts.glass[3] = 0.f;
+        c->UpdateSubresource(g_glass_cb, 0, nullptr, &g_glass_consts, 0, 0);
+        g_glass_consts_new = false;
+        g_glass_strength_sent = strength, g_glass_day_sent = day, g_glass_debug_sent = debug;
+    }
+    // Only the pixel shader and slot b13, both put back at once. Nothing else is read or set: the targets, the
+    // depth-stencil state, the blend, the viewport, the buffers and every other slot stay the game's.
+    ID3D11PixelShader* ps = nullptr;
+    ID3D11Buffer* cb = nullptr;
+    c->PSGetShader(&ps, nullptr, nullptr);
+    c->PSGetConstantBuffers(kGlassCbSlot, 1, &cb);
+    // N40e: the veil needs a blend of ours, kept and put back with its factor and its mask.
+    ID3D11BlendState* bs_old = nullptr;
+    float bs_factor[4] = {};
+    UINT bs_mask = 0xFFFFFFFF;
+    if (veil) c->OMGetBlendState(&bs_old, bs_factor, &bs_mask);
+    g_busy = true;
+    if (veil) c->OMSetBlendState(g_glass_bs, nullptr, 0xFFFFFFFF);
+    c->PSSetShader(veil ? g_glass_ps_veil : kind == 2 ? g_glass_ps_dual : g_glass_ps, nullptr, 0);
+    c->PSSetConstantBuffers(kGlassCbSlot, 1, &g_glass_cb);
+    if (instanced) c->DrawIndexedInstanced(count, inst, start, base, start_inst);
+    else c->DrawIndexed(count, start, base);
+    if (veil) c->OMSetBlendState(bs_old, bs_factor, bs_mask);
+    c->PSSetShader(ps, nullptr, 0);
+    c->PSSetConstantBuffers(kGlassCbSlot, 1, &cb);
+    g_busy = false;
+    if (bs_old) bs_old->Release();
+    if (ps) ps->Release();
+    if (cb) cb->Release();
+    ++g_glass_draws;
+    if (veil) ++g_glass_veils;
+}
+
+void GlassDirtDraw(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, INT base, UINT start_inst,
+                   bool instanced) {
+    __try {
+        GlassDirtBody(c, count, inst, start, base, start_inst, instanced);
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        g_busy = false;
+        g_glass_err = 4;
+        g_glass_failed = true;
+    }
 }
 
 // A staging copy of `bytes` of `src` from `offset` (nullptr: not made).
@@ -1902,7 +2259,11 @@ int MeshPrint(ID3D11DeviceContext* c, int unit, UINT count, UINT start, INT base
 
 // At Present: one step of the mesh's reading.
 void MeshPrintStep(ID3D11DeviceContext* c) {
-    if (g_mp_reset.exchange(false)) g_mp_int_ext.store(0);  // a new truck: its interior found again
+    if (g_mp_reset.exchange(false)) {  // a new truck: its interior found again
+        g_mp_int_ext.store(0);
+        std::lock_guard<std::mutex> lock(g_mp_mutex);
+        g_mp_hits.clear();  // N61
+    }
     if (!g_mr.stage) return;
     const UINT isize = g_mr.ib_format == DXGI_FORMAT_R16_UINT ? 2 : 4;
     auto fail = [&]() {
@@ -1971,7 +2332,20 @@ void MeshPrintStep(ID3D11DeviceContext* c) {
     g_mp_read.fetch_add(1, std::memory_order_relaxed);
     if (g_mr.unit > 0) g_mp_trailer_read.fetch_add(1, std::memory_order_relaxed);
     g_mp_kind[kind].fetch_add(1, std::memory_order_relaxed);
-    if (kind == premap::kIntExt) g_mp_int_ext.fetch_add(1);
+    if (kind == premap::kIntExt) {
+        g_mp_int_ext.fetch_add(1);
+        // N61 (the user, ATS 05/11: "at the end of the last test the cab door went clean again"; the session's
+        // int_ext count grew from 10 to 17 as it ran): every mesh read as the interior seen from outside gets no
+        // dirt, so one of them being the door is what a clean door looks like. The log now says which they are and
+        // whether the table matched them by size alone (a merged "m" line, N58c, which does not check the place).
+        std::lock_guard<std::mutex> lock(g_mp_mutex);
+        if (std::count(g_mp_hits.begin(), g_mp_hits.end(), ';') < 12) {
+            char b[200];
+            snprintf(b, sizeof(b), " %u/%u [%.3f %.3f %.3f .. %.3f %.3f %.3f]%s;", g_mr.count, g_mr.vertices, lo[0],
+                     lo[1], lo[2], hi[0], hi[1], hi[2], by_size ? " by size (merged)" : "");
+            g_mp_hits += b;
+        }
+    }
     if (kind == premap::kNone) {
         std::lock_guard<std::mutex> lock(g_mp_mutex);
         std::string& misses = g_mp_misses[g_mr.unit > 0 ? 1 : 0];
@@ -2126,7 +2500,11 @@ bool BeforeDrawIndexed(ID3D11DeviceContext* c, UINT count, UINT start, INT base)
     g_verdict = -1;
     if (!g_on) return false;
     if (!g_pass.open) {
-        if (g_ws.forward) WindshieldDraw(c, count, start, base);  // D11i: read only
+        if (g_ws.forward) {
+            WindshieldDraw(c, count, start, base);  // D11i: read only
+            if (g_glass_on.load(std::memory_order_relaxed))
+                GlassDirtDraw(c, count, 1, start, base, 0, false);  // N40
+        }
         return false;
     }
     if (++g_sample_draw % kSample) return BeforeDrawBody(c, count, start, base);
@@ -2233,19 +2611,58 @@ std::string StatsLine() {
             snprintf(b, sizeof(b), " | windshield (D11i): not measured (%d glass mesh(es) read)", g_ws.measured);
         line += b;
     }
+    {  // N40 step 1
+        if (!g_glass_on.load())
+            snprintf(b, sizeof(b), " | glass dirt (N40): off ([glass] on = 0)");
+        else if (g_glass_compile.load() < 2 && !g_glass_failed)
+            snprintf(b, sizeof(b), " | glass dirt (N40): the glass shaders are still being compiled (%d)",
+                     g_glass_compile.load());
+        else if (g_glass_debug.load() != 0 && !g_glass_failed)
+            snprintf(b, sizeof(b), " | glass dirt (N40): [glass] on = %d (2 magenta, 3 the pixel's place): "
+                                   "%lld draw(s) (dirt %.2f, daylight %.2f)",
+                     g_glass_debug.load(), g_glass_draws, GlassAmount(), g_daylight.load());
+        else if (g_glass_failed)
+            snprintf(b, sizeof(b), " | glass dirt (N40): off after an error (%s, hr 0x%08lx)",
+                     g_glass_err == 10 ? "no device" : g_glass_err == 11 ? "the shader did not compile"
+                     : g_glass_err == 12 ? "no pixel shader" : g_glass_err == 13 ? "no constant buffer"
+                     : g_glass_err == 3 ? "the constants could not be written" : "an exception",
+                     (unsigned long)g_glass_hr);
+        else
+            snprintf(b, sizeof(b),
+                     " | glass dirt (N40): %lld draw(s) (dirt %.2f); forward draws at the truck %lld (%lld "
+                     "instanced), elsewhere %lld, no frame %lld; glass depth %lld, multiply %lld (no resources %lld, "
+                     "no map %lld, dual-source %lld, veils over the reflection %lld, daylight %.2f)",
+                     g_glass_draws, GlassAmount(), g_glass_at_truck, g_glass_instanced, g_glass_far, g_glass_missed,
+                     g_glass_depth_n, g_glass_blend_n, g_glass_res, g_glass_map, g_glass_dual, g_glass_veils,
+                     g_daylight.load());
+        g_glass_draws = g_glass_missed = g_glass_depth_n = g_glass_blend_n = g_glass_far = 0;
+        g_glass_pass = g_glass_res = g_glass_map = g_glass_at_truck = g_glass_instanced = g_glass_dual = 0;
+        g_glass_veils = 0;
+        line += b;
+        // N40b: every blend the truck's own forward draws used (D3D11_BLEND values), so the glass's pass can be
+        // told from the log of one session.
+        for (int i = 0; i < g_fw_n; ++i) {
+            snprintf(b, sizeof(b), "%s src %u dest %u op %u%s%s x%lld", i ? "," : " | the truck's forward blends: ",
+                     g_fw[i].src, g_fw[i].dest, g_fw[i].op, g_fw[i].depth_write ? " (depth written)" : "",
+                     g_fw[i].instanced ? " instanced" : "", g_fw[i].n);
+            line += b;
+        }
+        g_fw_n = 0;
+    }
     {  // P1
-        std::string misses;
+        std::string misses, hits;
         {
             std::lock_guard<std::mutex> lock(g_mp_mutex);
             misses = (g_mp_misses[0].empty() ? std::string(" -") : g_mp_misses[0]) + " trailers'" +
                      (g_mp_misses[1].empty() ? std::string(" -") : g_mp_misses[1]);
+            hits = g_mp_hits.empty() ? std::string(" -") : g_mp_hits;  // N61
         }
         snprintf(b, sizeof(b), " | premap (P1): %d pieces; meshes read %d (the trailers' %d; failed %d): int_ext %d, int %d, ext %d, "
-                 "cargo %d, none %d (cache emptied %d); cargo draws marked %lld (N57); matched by size %d (N57c); ranges taken by part %lld, parts %zu (N57b); this truck's interior pieces %d, boxes on but off on %lld draws read as the outside's (N58b); first misses%s",
+                 "cargo %d, none %d (cache emptied %d); cargo draws marked %lld (N57); matched by size %d (N57c); ranges taken by part %lld, parts %zu (N57b); this truck's interior pieces %d, boxes on but off on %lld draws read as the outside's (N58b); read as the interior seen from outside (N61):%s first misses%s",
                  premap::Pieces(), g_mp_read.load(), g_mp_trailer_read.load(), g_mp_failed.load(), g_mp_kind[premap::kIntExt].load(),
                  g_mp_kind[premap::kInt].load(), g_mp_kind[premap::kExt].load(), g_mp_kind[premap::kCargo].load(),
                  g_mp_kind[premap::kNone].load(),
-                 g_mp_pruned.load(), g_cargo_marked.load(), g_mp_by_size.load(), g_mp_by_part.load(), g_mp_parts.load(), g_mp_int_ext.load(), g_known_marked.load(), misses.c_str());
+                 g_mp_pruned.load(), g_cargo_marked.load(), g_mp_by_size.load(), g_mp_by_part.load(), g_mp_parts.load(), g_mp_int_ext.load(), g_known_marked.load(), hits.c_str(), misses.c_str());
         line += b;
     }
     snprintf(b, sizeof(b), " | indirect draws (N28): %lld, in a G-buffer pass %lld | matrix lower in cb0 (N29): %lld draws",

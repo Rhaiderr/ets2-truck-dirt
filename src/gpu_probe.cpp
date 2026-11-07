@@ -1614,9 +1614,18 @@ void STDMETHODCALLTYPE HookDraw(ID3D11DeviceContext* c, UINT n, UINT start) {
     g_orig_draw(c, n, start);
 }
 
+void GuardedTintInstanced(ID3D11DeviceContext* c, UINT n, UINT inst, UINT start, INT base, UINT start_inst) {
+    __try {
+        tint::OnForwardInstanced(c, n, inst, start, base, start_inst);
+    } __except (TintFilter(GetExceptionInformation())) {
+        TintFailed(c);
+    }
+}
+
 void STDMETHODCALLTYPE HookDrawIndexedInstanced(ID3D11DeviceContext* c, UINT n, UINT inst, UINT start, INT base,
                                                 UINT start_inst) {
     OnDraw(c, kDrawIndexedInstanced, n, inst, start, base, start_inst);
+    if (TintLive(c)) GuardedTintInstanced(c, n, inst, start, base, start_inst);  // N40b
     g_orig_draw_indexed_inst(c, n, inst, start, base, start_inst);
 }
 

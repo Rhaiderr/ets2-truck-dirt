@@ -154,12 +154,25 @@ struct Layers {
 // the red one-output shader of V3 never upset it. [estimate] SnowyMoon reads
 // every pixel shader the game creates; keep ours as plain as possible.
 inline constexpr char kPixelShader[] = R"(
+// N62 (the user, 06/11: the glass must be dirty "the same way as the truck -- dust or salt or soot, mud too,
+// only denser and not uniform"; the veil was "just opaque"): the GLASS variant runs this very shader on the
+// truck's glass, in the game's own forward draw of it. It takes nothing from the G-buffer (the glass is not in
+// it): the pixel's depth comes from SV_Position.w, which the rasteriser interpolates exactly, and its normal from
+// the derivatives of the position it gives. The dirt that comes out is the same dirt as the body's, with its own
+// layers, colours and patterns, fixed to the truck. It writes the game's dual-source blend: the second output
+// lets less of the scene through, the first adds the dirt's own colour.
+#ifndef GLASS
 Texture2D<float4> g_rt0 : register(t0);
 #ifdef REFL
 Texture2D<uint4> g_rt3 : register(t1);  // N25: a copy of rt3, as the game wrote it
 #endif
 Texture2D<uint4> g_pack : register(t2);  // D11m: what PACK wrote (the other variants)
+#endif
+#ifdef GLASS
+cbuffer C : register(b13) {  // the game's own slots stay as they are (the plugin saves and restores only b13)
+#else
 cbuffer C : register(b0) {
+#endif
     float4 vp;            // x, y, 1/w, 1/h
     float4 px, py, pw;    // camera -> clip rows x, y, w
     float4 u0, u1, u2;    // camera -> unit rows
@@ -180,6 +193,8 @@ cbuffer C : register(b0) {
     float4 cavity_hi;       //   turn towards its middle
     float4 dash0;           // D11j: the windshield measured (D11i): its front z + 3 cm, the base's height, dz/dy, its top
     float4 dash1;           //   the front zone's half width, its floor, its back (the eye's z), w 1 = on
+    float4 glass;           // N62 (GLASS): x how strong the dirt is on the glass, y the daylight, z 1 = paint it
+                            //   magenta ([glass] on = 2), w -
 };
 // Lattice hash (D. Hoskins' hash13): no visible grid even far from the origin.
 float hash(float3 p) {
@@ -352,8 +367,25 @@ float4 shade(float4 pos) {
     // coverage; black: no coverage; grey: every level 0; red: rt0's normal not a unit vector; blue: no depth;
     // magenta: no position; yellow: no frame of the unit) and rt3's emittance goes, so the reflection cannot hide it.
     const bool diag = params.y > 2.5;
+#ifdef GLASS
+    // N62: no G-buffer here, so the depth comes from the rasteriser's own interpolation of SV_Position, which is
+    // exact and smooth (the half float in rt0 could not even be differentiated: D3c). Its w is the clip w
+    // [verified: N62b, tools/probetest with [glass] on = 3: taking it for 1/w placed every pixel 6 cm from the
+    // camera and the dirt came out flat, which is what the user saw]. The camera depth follows from the
+    // projection's own w row rather than from any assumption about it; should a driver hand us 1/w after all, the
+    // depth comes out absurd and the reciprocal is taken instead.
+    float wc = abs(pos.w);
+    float zc = (abs(pw.z) > 1e-6) ? (wc - pw.w) / pw.z : -wc;
+    if (!(zc < -0.1)) {
+        wc = 1.0 / max(wc, 1e-6);
+        zc = (abs(pw.z) > 1e-6) ? (wc - pw.w) / pw.z : -wc;
+    }
+    const float4 g = float4(0, 0, 0, zc);
+    const float z = min(g.w, -0.05);
+#else
     const float4 g = g_rt0.Load(int3(pos.xy, 0));
     const float z = min(g.w, -0.05);  // camera space: in front of the camera z < 0
+#endif
     // Camera-space position: the pixel's NDC and the projection, solved for x and y at depth z.
     const float2 ndc = float2((pos.x - vp.x) * vp.z * 2.0 - 1.0, 1.0 - (pos.y - vp.y) * vp.w * 2.0);
     const float wz = pw.z * z + pw.w;
@@ -365,29 +397,45 @@ float4 shade(float4 pos) {
     const float3 pe = float3((b0 * a11 - a01 * b1) / det, (a00 * b1 - b0 * a10) / det, z);
     // Into the unit: y up from the ground, +z = rear, wheels at their config positions.
     const float3 p = float3(dot(u0.xyz, pe) + u0.w, dot(u1.xyz, pe) + u1.w, dot(u2.xyz, pe) + u2.w);
+#ifdef GLASS
+    // N62: the pane's own normal, from how the position changes across the pixel; turned to face the camera.
+    float3 gn = normalize(cross(ddx(pe), ddy(pe)) + 1e-6);
+    gn = dot(gn, pe) > 0.0 ? -gn : gn;
+    const float3 n = normalize(float3(dot(u0.xyz, gn), dot(u1.xyz, gn), dot(u2.xyz, gn)) + 1e-6);
+#else
     const float3 n = normalize(float3(dot(u0.xyz, g.xyz), dot(u1.xyz, g.xyz), dot(u2.xyz, g.xyz)) + 1e-6);
+#endif
     // Pixel footprint (m): one pixel's height at this depth, stretched where the
     // surface is seen at a grazing angle. From the projection, not from ddx/ddy:
     // the depth in rt0 is a half float, and its steps made rings ("ondulações")
     // where the derivatives were used [verified: D3c test, roof at mid distance].
     const float3 view_dir = normalize(pe);
+#ifdef GLASS
+    const float facing = max(abs(dot(n, view_dir)), 0.25);  // N62: our own normal (the unit's frame is a rotation)
+#else
     const float facing = max(abs(dot(normalize(g.xyz), view_dir)), 0.25);
+#endif
     const float fp = 2.0 * abs(z) * vp.w / max(abs(py.y), 1e-4) / facing;
     // The normal-mapped normal only nudges the face weights (no hard thresholds on it).
     const float3 ns = n;
     s_p = p, s_n = n, s_fp = fp, s_g = g;  // D11k
 
     const float dust = params.x;
+#ifdef GLASS
+    if (params.w < 0.5 || !solvable) return none;  // N62: no normal or depth of the game's to check
+#else
     if (params.w < 0.5 || !solvable || !(g.w < -0.05) || dot(g.xyz, g.xyz) < 0.25) {
         if (diag)
             return float4(params.w < 0.5 ? float3(1, 1, 0) : !solvable ? float3(1, 0, 1) : !(g.w < -0.05) ? float3(0, 0, 1)
                                                                                                    : float3(1, 0, 0), 1);
         return none;
     }
+#endif
     if (params.y > 1.5 && params.y < 2.5) return float4(p, 1);  // position test: the pixel's position in the unit
     // N41 (the user, 29/10: the dust got inside the cab once N30's redraw of the glass was gone): on the truck's
     // passes a pixel inside a box around the driver's seat (the seats, the dashboard, the bunk; the cab's shell lies
     // outside it) gets no dust; cyan in the diagnosis. Nothing in the game's forward pass.
+#ifndef GLASS  // N62: the glass is the cab's own window; these zones keep the dust off what is behind it
     if (inside_lo.w > 0.5 && all(p > inside_lo.xyz) && all(p < inside_hi.xyz))
         return diag ? float4(0, 1, 1, 1) : none;
     // D11f (the user, 29/10: still dust in the cab, the sleeper's back in the print): the cavity, a larger box up to
@@ -396,12 +444,15 @@ float4 shade(float4 pos) {
     if (cavity_lo.w > 0.5 && all(p > cavity_lo.xyz) && all(p < cavity_hi.xyz) &&
         dot(n, normalize(0.5 * (cavity_lo.xyz + cavity_hi.xyz) - p)) > 0.15)
         return diag ? float4(0, 0.6, 1, 1) : none;
+)"  // seven literals: MSVC 2022 caps one at 16380 characters (C2026)
+R"(
     // D11j (the user, 30/10: the dashboard's top still dusty): it slopes down to the glass, facing up and ahead, away
     // from the cavity's middle. Behind the windshield's slanted plane (vertical below its base), ahead of the eye: the
     // cab's front, no dust whichever way a face turns; the hood and the wipers lie ahead of the plane.
     if (dash1.w > 0.5 && abs(p.x) < dash1.x && p.y > dash1.y && p.y < dash0.w && p.z < dash1.z &&
         p.z > dash0.x + max(p.y - dash0.y, 0.0) * dash0.z)
         return diag ? float4(0.3, 0.6, 1, 1) : none;
+#endif
     if (dust <= 0.0 && dot(body0 + front0, float4(1, 1, 1, 1)) + body1.x + body1.y + front1.x + front1.y + body2.x +
                            front2.x <= 0.0)
         return diag ? float4(0.35, 0.35, 0.35, 1) : none;
@@ -723,6 +774,8 @@ R"(
     }
     // The dust (D3, as before).
     over_worn(acc, sacc, col, a, 0.012, saturate(a * 1.05), tk, tg);  // dust is matte
+)"  // six literals: MSVC 2022 caps one at 16380 characters (C2026)
+R"(
     // N39: road soot (oil, grease, rubber, the street's grime): dark brown-black, a faint oily sheen. Over the dust
     // (the low parts stay dark under a dusty cab, as in the user's photo, 29/10), under the mud. Not worn off the
     // tread as the rest (it is the road's own grime): the tread just takes less of it than the rims and side walls.
@@ -732,16 +785,30 @@ R"(
         // darker low down; then (D11d) the darkest grime low down and on the wheels over it. D11g (the user, 30/10:
         // "the upper part too strong in colour and intensity"): up high a light brown haze, at most ~35%; low down
         // as before (~85%, near black).
+        // N60 (the user, ATS 05/11: as the soot builds up the tread goes "very shiny, as if it had oil around
+        // it"; on the tread he expected "something more matte, cleaning itself over time on asphalt until it looks
+        // like the rubber it is, since the contact patch wears all the time", with the road's grime "less
+        // noticeable than it is today"): on the tread the road's grime is thin, matte and sanded off as the tyre
+        // rolls -- `tk` already does that for the other layers (N31), the soot was left out of it because it is
+        // the road's own grime. It still is, only far less of it: at most about a quarter of the side walls' coat,
+        // and what the road has worn (body1.w) takes most of the rest with it. The rims and the side walls keep
+        // what they had, grease near the hub included.
+        const float on_tread = on_wheel ? tread : 0.0;
+        // N60b (the user, ATS 05/11 23:13: "the bottom of the wheel is darker again"): with the grime nearly gone
+        // the bare rubber showed where the tread faces the camera, at the bottom of the tyre, and against beige
+        // side walls that reads as a dark band. A little more of the road's grime stays, still matte: about 45% of
+        // it on a worn tread instead of 30%.
+        const float tread_keep = 1.0 - 0.55 * on_tread * (0.3 + 0.7 * saturate(body1.w));
         const float lowdown = smoothstep(3.0, 0.8, p.y);
         // D14: a grey-brown haze at first, low down too; darker as the level rises (near black low down from ~0.6).
         const float3 coat = lerp(float3(0.27, 0.22, 0.16), float3(0.06, 0.05, 0.04), lowdown * smoothstep(0.1, 0.6, sl));
-        const float coat_a = soot_a * lerp(0.45, 0.8, lowdown);  // D14: up high a haze up to ~40%
+        const float coat_a = soot_a * lerp(0.45, 0.8, lowdown) * tread_keep;  // D14: up high a haze up to ~40%
         over(acc, sacc, coat * (0.85 + 0.3 * tone), coat_a, 0.05, coat_a);
         const float hs = high(sl);
         const float top = lerp(1.1, 2.1, reach2.x) + 0.4 * hs;
         float edge = 0.5;  // D13f (as the spray's)
         [branch] if (!on_wheel && p.y < 1.25 * top) edge = fbm(sq + 105.3, 1.4, fq);
-        const float wb = on_wheel ? 0.95 - 0.3 * tread
+        const float wb = on_wheel ? 0.95 - 0.6 * tread  // N60/N60b: the tread takes a third of the side walls
                                   : max(splash(p.y, top, edge, zone, fan, under, up),
                                         rear * 0.6 * (1.0 - up) * smoothstep(top + 0.8, top * 0.4, p.y));
         const float3 wl = pick(wb, soot_b, front_face, soot_f);
@@ -754,11 +821,14 @@ R"(
         ak *= lerp(1.0, 0.7 + 0.5 * run, vertical * 0.4);
         // D11k (N44, the user 30/10: "mixed with a little oil near the chassis and the tank, blacker and denser"): low
         // on the body, from ~1.5 m down, denser, near black and glossier.
-        const float oily = on_wheel ? 0.25 : smoothstep(1.5, 0.6, p.y);
+        // N60: no oily sheen on the tread (the rims and the side walls keep theirs).
+        const float oily = on_wheel ? 0.25 * (1.0 - tread) : smoothstep(1.5, 0.6, p.y);
         ak = saturate(ak * (0.9 + 0.2 * detail) * (1.0 + 0.6 * oily)) * smoothstep(0.0, 0.05, wl.y);  // D11b, D14
+        ak *= tread_keep;  // N60
         const float3 c = lerp(lerp(float3(0.024, 0.021, 0.018), float3(0.06, 0.05, 0.04), smear), float3(0.03, 0.026, 0.021),
                               0.5 * oily) * (0.9 + 0.2 * detail);
-        over(acc, sacc, c, ak, 0.08 + 0.06 * smear + 0.22 * oily, ak);
+        // N60: matte on the tread (0.08 -> ~0.015), as the rubber is.
+        over(acc, sacc, c, ak, (0.08 + 0.06 * smear + 0.22 * oily) * (1.0 - 0.85 * on_tread), ak);
         // D11k: drops of oil up close (~2-6 mm, stretched downwards on upright faces), glossy and slightly raised.
         [branch] if (!on_wheel && fp < 0.008 && oily > 0.0) {
             float3 dd;
@@ -874,7 +944,59 @@ float3 unoct(float2 e) {
     n.y += n.y >= 0.0 ? -t : t;
     return normalize(n);
 }
-#ifdef PACK
+#ifdef GLASS
+// N62: the dirt on the glass, lit by the daylight since nothing else lights it for us. One entry point per blend
+// the game draws its glass with:
+//  - dual-source (1.62): result = o0 + what is on the screen x o1, so o1 lets less of the scene through and o0
+//    puts the dirt's own colour in -- the dirt covers the glass as it covers the paint;
+//  - GLASS_MULT (DEST_COLOR / ZERO, older versions): only a multiply is possible, so the glass is multiplied by
+//    the dirt's colour where it covers;
+//  - GLASS_OVER (our own blend, over a reflection the game added in a pass of its own): plain alpha.
+// shade() is called once and once only in each of them: it is the whole shader, and a second call doubles both
+// the code and the time it takes to compile (N62b: with two, the compile outlived a 90 s test run).
+// glass.z: 2 = paint the glass where the dirt reaches it, 3 = paint each pixel where the shader places it in the
+// truck (the plugin sets the shader's own position test for that; tools/probetest checks it).
+float4 glass_dirt(float4 pos, out float a) {
+    const float4 d = shade(pos);
+    a = min(saturate(d.a) * glass.x, 0.9);
+    const float3 lit = glass.z > 1.5 ? d.rgb : d.rgb * (0.12 + 0.88 * glass.y);
+    return float4(lit, a);
+}
+#if defined(GLASS_MULT)
+float4 main(float4 pos : SV_Position) : SV_Target0 {
+    if (glass.z > 0.5 && glass.z < 1.5) return float4(0, 0, 0, 1);
+    float a;
+    const float4 d = glass_dirt(pos, a);
+    if (glass.z > 1.5) return float4(d.rgb, 1);  // the position test: shade() gives the place, unlit
+    return float4(lerp(float3(1, 1, 1), d.rgb, a), 1);
+}
+#elif defined(GLASS_OVER)
+float4 main(float4 pos : SV_Position) : SV_Target0 {
+    if (glass.z > 0.5 && glass.z < 1.5) return float4(5, 0, 2, 1);
+    float a;
+    const float4 d = glass_dirt(pos, a);
+    if (glass.z > 1.5) return float4(d.rgb, 1);
+    return float4(d.rgb, a);
+}
+#else
+void main(float4 pos : SV_Position, out float4 o0 : SV_Target0, out float4 o1 : SV_Target1) {
+    if (glass.z > 0.5 && glass.z < 1.5) {  // [glass] on = 2
+        o0 = float4(5, 0, 2, 0);
+        o1 = float4(0, 0, 0, 1);
+        return;
+    }
+    float a;
+    const float4 d = glass_dirt(pos, a);
+    if (glass.z > 1.5) {  // [glass] on = 3: the place itself, nothing of the screen left
+        o0 = float4(d.rgb, 0);
+        o1 = float4(0, 0, 0, 1);
+        return;
+    }
+    o0 = float4(d.rgb * a, 0);
+    o1 = float4(1.0 - a, 1.0 - a, 1.0 - a, 1);
+}
+#endif
+#elif defined(PACK)
 uint4 main(float4 pos : SV_Position) : SV_Target0 {
     const float4 d = shade(pos);
     uint4 o = 0;
@@ -971,6 +1093,7 @@ struct Constants {
     float cavity_hi[4];        // D11f: its high corner, -
     float dash0[4];            // D11j: the windshield: front z + 3 cm, base height, dz/dy, top height
     float dash1[4];            // D11j: the front zone: half width, floor, back z (the eye), on
+    float glass[4];            // N62: on the glass: how strong, the daylight, 1 = paint it magenta, -
 };
 static_assert(sizeof(Constants) % 16 == 0, "constant buffer size");
 

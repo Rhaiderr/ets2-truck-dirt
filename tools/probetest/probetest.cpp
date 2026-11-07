@@ -654,6 +654,16 @@ int main(int argc, char** argv) {
     ID3D11Texture2D* fwd_tex = nullptr;
     ID3D11RenderTargetView* fwd_rtv = nullptr;
     ID3D11BlendState* glass_bs = nullptr;
+    // N40c: what ATS and ETS2 1.62 use for the glass's tint pass: dual-source blending, ONE / SRC1_COLOR, where the
+    // shader's second output multiplies the image [verified: ATS 05/11 21:32, the truck's forward blends in the
+    // plugin's log]. The first glass quad is drawn this way, the others the old way (DEST_COLOR / ZERO), so both
+    // shapes are tested.
+    ID3D11BlendState* glass_bs_dual = nullptr;
+    // N40e: the reflection the game adds over the glass right after its tint pass (SRC_ALPHA / ONE), where the
+    // plugin puts its veil with a blend of its own.
+    ID3D11BlendState* glass_bs_add = nullptr;
+    ID3D11PixelShader* glass_ps_add = nullptr;  // adds nothing of its own: the check below is about the veil
+    ID3D11PixelShader* glass_ps_dual = nullptr;
     ID3D11DepthStencilState* glass_dss = nullptr;
     {
         D3D11_TEXTURE2D_DESC td = {};
@@ -678,6 +688,31 @@ int main(int argc, char** argv) {
         if (FAILED(dev->CreateTexture2D(&td, nullptr, &fwd_tex)) || FAILED(dev->CreateRenderTargetView(fwd_tex, nullptr, &fwd_rtv)) ||
             FAILED(dev->CreateBlendState(&bd, &glass_bs)) || FAILED(dev->CreateDepthStencilState(&dd, &glass_dss)))
             return Fail("glass pass objects");
+        bd.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;  // N40c
+        bd.RenderTarget[0].DestBlend = D3D11_BLEND_SRC1_COLOR;
+        if (FAILED(dev->CreateBlendState(&bd, &glass_bs_dual))) return Fail("dual-source glass blend");
+        bd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;  // N40e
+        bd.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+        if (FAILED(dev->CreateBlendState(&bd, &glass_bs_add))) return Fail("additive glass blend");
+        const char* const add_src = "float4 main(float4 pos : SV_Position) : SV_Target0 { return float4(0, 0, 0, 0); }";
+        ID3DBlob* add_blob = nullptr;
+        if (FAILED(D3DCompile(add_src, strlen(add_src), "add", nullptr, nullptr, "main", "ps_5_0", 0, 0, &add_blob,
+                              nullptr)) ||
+            FAILED(dev->CreatePixelShader(add_blob->GetBufferPointer(), add_blob->GetBufferSize(), nullptr,
+                                          &glass_ps_add)))
+            return Fail("additive glass shader");
+        add_blob->Release();
+        // The same result as the old pass: nothing added, the image multiplied by (0, 0, 1).
+        const char* const dual_src =
+            "void main(float4 pos : SV_Position, out float4 o0 : SV_Target0, out float4 o1 : SV_Target1) {"
+            " o0 = float4(0, 0, 0, 0); o1 = float4(0, 0, 1, 1); }";
+        ID3DBlob* dual_blob = nullptr;
+        if (FAILED(D3DCompile(dual_src, strlen(dual_src), "dual", nullptr, nullptr, "main", "ps_5_0", 0, 0,
+                              &dual_blob, nullptr)) ||
+            FAILED(dev->CreatePixelShader(dual_blob->GetBufferPointer(), dual_blob->GetBufferSize(), nullptr,
+                                          &glass_ps_dual)))
+            return Fail("dual-source glass shader");
+        dual_blob->Release();
     }
     // D10d: a UAV bound with the glass in slot 1, as the game may bind one with its transparent draws: tint's redraw
     // of the glass must leave it bound (restoring with OMSetRenderTargets alone unbound it and hid the game's glass).
@@ -711,8 +746,13 @@ int main(int argc, char** argv) {
     const DWORD t0 = GetTickCount();
     int frames = 0;
     int tint_errors = 0;
+    // N62: the glass runs the dust shader, compiled in a second wave after the dust's own (each variant is as
+    // heavy as PACK). With the dirt on the glass on, the frames have to go on until it is ready.
+    std::string ini_path = argv[1];
+    ini_path = ini_path.substr(0, ini_path.find_last_of("\\/") + 1) + "ets2_truck_dirt.ini";
+    const int glass_mode = static_cast<int>(GetPrivateProfileIntA("glass", "on", 0, ini_path.c_str()));
     // > census_s = 10 from the test INI; and N25's rt3 shader, compiled on a thread after the first pass (3-5 s), in use.
-    while (GetTickCount() - t0 < 20000) {
+    while (GetTickCount() - t0 < (glass_mode ? 90000u : 20000u)) {
         // The "after" shader with a ranged binding, the "before" one with a plain binding.
         const UINT first = 0, num = 48;
         if (ctx1) ctx1->PSSetConstantBuffers1(0, 1, &cb, &first, &num);
@@ -810,7 +850,19 @@ int main(int argc, char** argv) {
             for (size_t g = 0; g < glass.size(); ++g) {
                 const UINT first = UINT((parts.size() + g) * 16), num = 16;
                 if (ctx1) ctx1->VSSetConstantBuffers1(0, 1, &ring, &first, &num);
+                // N40c: the first truck glass the way 1.62 draws it, the rest the old way.
+                ctx->OMSetBlendState(g == 0 ? glass_bs_dual : glass_bs, nullptr, 0xFFFFFFFF);
+                ctx->PSSetShader(g == 0 ? glass_ps_dual : gps, nullptr, 0);
                 ctx->DrawIndexed(6, UINT(19 + g) * 6, 0);
+            }
+            {  // N40e: the first truck glass gets its reflection added, as the game does
+                const UINT first = UINT(parts.size() * 16), num = 16;
+                if (ctx1) ctx1->VSSetConstantBuffers1(0, 1, &ring, &first, &num);
+                ctx->OMSetBlendState(glass_bs_add, nullptr, 0xFFFFFFFF);
+                ctx->PSSetShader(glass_ps_add, nullptr, 0);
+                ctx->DrawIndexed(6, 19 * 6, 0);
+                ctx->OMSetBlendState(glass_bs, nullptr, 0xFFFFFFFF);
+                ctx->PSSetShader(gps, nullptr, 0);  // as the "game" had it, for the state check below
             }
             {  // D11i: the windshield (degenerate)
                 const UINT first = UINT((parts.size() + glass.size()) * 16), num = 16;
@@ -995,15 +1047,16 @@ int main(int argc, char** argv) {
         st_rt3->Release();
         st_rt0->Release();
         // The mode under test, from the INI next to the DLL.
-        std::string ini = argv[1];
-        ini = ini.substr(0, ini.find_last_of("\\/") + 1) + "ets2_truck_dirt.ini";
+        const std::string& ini = ini_path;
         const int mode = static_cast<int>(GetPrivateProfileIntA("probe", "tint", 2, ini.c_str()));
         char level_text[32] = {};
         GetPrivateProfileStringA("dust", "level", "-1", level_text, sizeof(level_text), ini.c_str());
         const float level = static_cast<float>(atof(level_text));
-        // N40: the glass code went to the vidro-futuro branch: the forward pass is never touched (the glass checks
-        // below expect nothing changed). N41: the part inside the cab's box around the eye gets no dust.
-        const bool glass_on = false;
+        // N40 step 1: with [glass] on = 1 the truck's glass (the game's own multiply draw, redrawn with our pixel
+        // shader) must take the dust, and nothing else: not the traffic's glass, not a truck glass behind another
+        // surface, not a pixel without glass. With it off the forward pass is not touched at all and nothing
+        // changes. N41: the part inside the cab's box around the eye gets no dust.
+        const bool glass_on = glass_mode != 0;
         const int inside = inside_seen;
         printf("mode %d (dust level %.2f): truck parts red %d / dusty %d / gray %d, traffic red %d / dusty %d, "
                "stencil bits 0xf0 left on %d px, bad low bits %d px, state not restored %d frames\n",
@@ -1104,7 +1157,7 @@ int main(int argc, char** argv) {
             }
             return diff;
         };
-        const bool dirt_expected = glass_on && (mode == 4 || (mode == 2 && level > 0.f));
+        const bool dirt_expected = glass_on && mode == 2 && level > 0.f;
         const float multiplied[3] = {0.f, 0.f, kImage[2]};  // the image under a glass (DEST_COLOR x (0, 0, 1))
         std::vector<float> img;
         if (!read_image(&img)) return Fail("image readback");
@@ -1118,6 +1171,33 @@ int main(int argc, char** argv) {
                "changed %d, no glass changed %d\n", truck_glass_dirty, traffic_glass ? 1 : 0, hidden_glass ? 1 : 0,
                no_glass ? 1 : 0);
         bool glass_ok = truck_glass_dirty == (dirt_expected ? 2 : 0) && !traffic_glass && !hidden_glass && !no_glass;
+        // N62b ([glass] on = 3): the glass paints each of its pixels where the shader thinks it is in the truck's
+        // frame. Without the G-buffer the shader works that out from SV_Position.w alone, and the whole look
+        // depends on it: a wrong depth puts every pixel at one place and the dirt comes out flat (the user, 06/11:
+        // "the tone is better but it is completely uniform"). The truck's frame here is the camera moved to its
+        // origin, as the parts' own position test (above).
+        if (glass_mode == 3) {
+            // Only the first quad: it is the one drawn the way 1.62 draws its glass (dual-source), where the
+            // shader's output lands on the screen as it is. The second is multiplied into the image, which keeps
+            // only what the image is not zero in (its blue), so its place cannot be read back whole.
+            float worst = 0.f;
+            for (int g = 0; g < 1; ++g) {
+                float rgb_p[3] = {};
+                int px = 0, py = 0;
+                if (!spot(glass[g].pos, &px, &py)) continue;
+                for (int k = 0; k < 3; ++k) rgb_p[k] = img[(size_t(py) * kG + px) * 3 + k];
+                const float want[3] = {glass[g].pos[0] - kOrigin[0][0], glass[g].pos[1] - kOrigin[0][1],
+                                       glass[g].pos[2] - kOrigin[0][2]};
+                const float err = std::sqrt((rgb_p[0] - want[0]) * (rgb_p[0] - want[0]) +
+                                            (rgb_p[1] - want[1]) * (rgb_p[1] - want[1]) +
+                                            (rgb_p[2] - want[2]) * (rgb_p[2] - want[2]));
+                worst = (std::max)(worst, err);
+                printf("glass place (N62b): quad %d at (%.2f %.2f %.2f), the shader says (%.2f %.2f %.2f), off by %.3f m\n",
+                       g, want[0], want[1], want[2], rgb_p[0], rgb_p[1], rgb_p[2], err);
+            }
+            glass_ok = worst < 0.05f;
+            printf(glass_ok ? "glass place ok\n" : "FAIL: glass place (worst %.3f m)\n", worst);
+        }
         // The interior camera: no truck in sight, the cabin's parts with stencil ref 2 at the eye's frame (10 draws:
         // the frame needs 8), the windshield drawn at it, traffic glass beside. The eye's frame in camera space: the
         // camera 3 cm above the eye, unturned. Quads around model-space points (row 8): the windshield 3 m ahead
@@ -1192,9 +1272,10 @@ int main(int argc, char** argv) {
         printf("glass dirt (D8), interior camera: windshield in the arc changed %d (%.3f %.3f %.3f), outside it changed %d "
                "(%.3f %.3f %.3f), traffic glass changed %d\n", in_changed[0] ? 1 : 0, rgb_in[0][0], rgb_in[0][1],
                rgb_in[0][2], in_changed[1] ? 1 : 0, rgb_in[1][0], rgb_in[1][1], rgb_in[1][2], in_changed[2] ? 1 : 0);
-        glass_ok = glass_ok && in_changed[0] == dirt_expected && in_changed[1] == dirt_expected && !in_changed[2];
-        if (mode == 4 && glass_on)  // the diagnosis: the arc green, the rest of the windshield magenta
-            glass_ok = glass_ok && rgb_in[0][1] > rgb_in[0][0] + 0.1f && rgb_in[1][0] > rgb_in[1][1] + 0.1f;
+        // N40 step 1 is the outside cameras only: in the interior camera the truck has no frame (its only draws
+        // there are the cabin's, stencil ref 2, which the tracker never claims), so nothing of the windscreen
+        // changes yet -- including the traffic's glass beside it.
+        glass_ok = glass_ok && !in_changed[0] && !in_changed[1] && !in_changed[2];
         printf(glass_ok ? "glass dirt ok\n" : "FAIL: glass dirt\n");
         ok = ok && glass_ok;
         if (rival) {
@@ -1209,7 +1290,10 @@ int main(int argc, char** argv) {
     ring->Release();
     for (IUnknown* u : {static_cast<IUnknown*>(glass_uav), static_cast<IUnknown*>(glass_uav_buf)})
         if (u) u->Release();
-    for (IUnknown* u : {static_cast<IUnknown*>(fwd_rtv), static_cast<IUnknown*>(fwd_tex), static_cast<IUnknown*>(glass_bs),
+    for (IUnknown* u : {static_cast<IUnknown*>(glass_bs_dual), static_cast<IUnknown*>(glass_bs_add),
+                        static_cast<IUnknown*>(glass_ps_add),
+                        static_cast<IUnknown*>(glass_ps_dual),
+                        static_cast<IUnknown*>(fwd_rtv), static_cast<IUnknown*>(fwd_tex), static_cast<IUnknown*>(glass_bs),
                         static_cast<IUnknown*>(glass_dss), static_cast<IUnknown*>(game_sampler)})
         u->Release();
     gib->Release();

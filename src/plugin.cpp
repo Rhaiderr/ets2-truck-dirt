@@ -269,6 +269,12 @@ std::wstring IniPath() {
                   "rate = 1.0\r\n"
                   "; test: forces the dust level of truck and trailer, 0.0 to 1.0 (-1 = the real level)\r\n"
                   "level = -1\r\n"
+                  "[glass]\r\n"
+                  "; N40 (being tested): 1 = the truck's glass takes the truck's dirt, 0 = clean glass,\r\n"
+                  ";   2 = paint the glass the dirt reaches magenta (to see what it reaches)\r\n"
+                  "on = 0\r\n"
+                  "; how strong the dirt on the glass is (0.5 = half, 2 = twice)\r\n"
+                  "strength = 1.0\r\n"
                   "[test]\r\n"
                   "; 1 = test panel: panel_key opens it; it forces any level of any dirt layer (nothing is saved\r\n"
                   "; from it: the real dirt goes on underneath)\r\n"
@@ -962,6 +968,17 @@ void DustStep() {
     // A trailer keeps its dirt while detached (the player's own stays dirty; a company's or a new one
     // starts clean through DustSync); no trailer config = nothing to draw.
     const bool trailer = g.trailer.wheel_count > 0;
+    // N40e: how much light there is for the dust on the glass to scatter, from the game's clock (minutes): full
+    // between 8h and 17h, nothing between 21h and 5h, the hour in between a ramp. Dust on glass is only seen
+    // because it scatters light; at night a veil of its own would glow on its own.
+    {
+        const float h = float(g.game_time % 1440u) / 60.f;
+        const float day = h <= 5.f || h >= 21.f ? 0.1f
+                          : h < 8.f             ? 0.1f + 0.9f * (h - 5.f) / 3.f
+                          : h <= 17.f           ? 1.f
+                                                : 0.1f + 0.9f * (21.f - h) / 4.f;
+        tint::SetDaylight(day);
+    }
     gpu_probe::SetDust(g.dust.Level(0), trailer ? g.dust.Level(1) : 0.f);
     gpu_probe::SetLayers(ShownLayers(0), trailer ? ShownLayers(1) : dust::Layers{});
     // N57: the load on the trailer, clean when picked up (a job's cargo on the trailer's cargo accessory).
@@ -1645,6 +1662,17 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
     g.dust_forced = ds.override_level >= 0.f;
     // D11k (N44): [dust] relief = 0 keeps the dirt flat (no change to the G-buffer's normal).
     tint::SetRelief(GetPrivateProfileIntW(L"dust", L"relief", 1, ini.c_str()) != 0);
+    // N40 step 1: [glass] on = 1 lets the truck's glass take the truck's dirt (off by default while it is tested).
+    {
+        const int glass_mode = GetPrivateProfileIntW(L"glass", L"on", 0, ini.c_str());
+        const float strength = float(atof(IniString(ini, L"glass", L"strength", L"1.0").c_str()));
+        tint::SetGlassDirt(glass_mode != 0, strength, glass_mode >= 2 ? glass_mode : 0);
+        if (glass_mode == 2)
+            ConfigLog("[glass] on = 2: the glass the veil reaches is painted magenta (N40, to see what it reaches)");
+        else if (glass_mode)
+            ConfigLog("[glass] on = 1, strength " + std::to_string(strength) +
+                      ": the truck's glass takes the truck's dirt (N40, being tested)");
+    }
     // N41: [dust] cab_inside = half width, below, above, ahead of, behind the eye (m); 0 = off. D11f: cab_cavity, the same.
     for (const auto& [key, box] : {std::pair<const wchar_t*, float*>{L"cab_inside", g.cab_inside},
                                    std::pair<const wchar_t*, float*>{L"cab_cavity", g.cab_cavity}}) {
