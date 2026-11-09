@@ -2,13 +2,17 @@
 
 **English** | [Português (Brasil)](README.pt-BR.md) | [Developers](README-dev.md)
 
-> Realism plugin (mod) for **Euro Truck Simulator 2** and **American Truck Simulator** (ETS2 / ATS): your truck, your trailers and your cargo get dirty as you drive, with dust, mud, road spray, salt and road grime, following the ground and the weather. Built on the SCS Telemetry SDK.
-
 [![Download ets2-truck-dirt.zip](https://img.shields.io/github/v/release/Rhaiderr/ets2-truck-dirt?label=Download%20ets2-truck-dirt.zip&style=for-the-badge&logo=github&color=2ea44f)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-yellow?style=for-the-badge&logo=buymeacoffee&logoColor=white)](https://buymeacoffee.com/leonardoarouck)
 [![PIX](https://img.shields.io/badge/PIX-Support%20via%20Pix-32BCAD?style=for-the-badge&logo=pix&logoColor=white)](#-pix-key-brazil)
 
 **[⬇ Download the latest version (zip)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)** · [all versions](https://github.com/Rhaiderr/ets2-truck-dirt/releases)
+
+![ETS2 & ATS Truck Dirt](images/projects/ets2-truck-dirt.png)
+
+*Illustrative promotional artwork, not an in-game screenshot.*
+
+> Realism plugin (mod) for **Euro Truck Simulator 2** and **American Truck Simulator** (ETS2 / ATS): your truck, your trailers and your cargo get dirty as you drive, with dust, mud, road spray, salt and road grime, following the ground and the weather. Built on the SCS Telemetry SDK.
 
 **Install:** copy **everything** in the zip's `plugins` folder into `<game folder>\bin\win_x64\plugins\` (ETS2 or ATS) and start the game ([details](#installation)).
 
@@ -131,6 +135,15 @@ Open an [issue](../../issues) with:
 ## Building
 
 See the [developers' README](README-dev.md): requirements, how to build, the tests and the code layout.
+
+## Explore my other mods
+
+| [ETS2 & ATS Tire Wear](https://github.com/Rhaiderr/ets2-tire-wear) | [BR Brasil - Clima Real](https://github.com/Rhaiderr/ets2-brbrasil-climate) |
+| --- | --- |
+| [![ETS2 & ATS Tire Wear](images/projects/ets2-tire-wear.png)](https://github.com/Rhaiderr/ets2-tire-wear) | [![BR Brasil - Clima Real](images/projects/ets2-brbrasil-climate.png)](https://github.com/Rhaiderr/ets2-brbrasil-climate) |
+| Visual tire wear and blowouts for ETS2 and ATS. | Regional summer dashboard temperatures for ETS2 + BR Brasil. |
+
+*Illustrative cover artwork; see each project for requirements and compatibility.*
 
 ## Support my work
 
