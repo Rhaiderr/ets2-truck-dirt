@@ -1,0 +1,24 @@
+ok   one arm found                                              1.000
+ok   the pivot is where the arm turns                           0.000
+ok   the axis is the one it turns about                         1.000
+ok   half the sweep is 40 degrees                               40.000
+ok   it is turning                                              1.000
+ok   its length is unknown until the mesh is read               0.000
+ok   it asks for that mesh's vertices                           1.000
+ok   and asks only once                                         0.000
+ok   the blade is as long as the mesh reaches                   0.680
+ok   and it points somewhere                                    1.000
+ok   the blade lies across the axis, on the glass               0.000
+ok   a part that never turns is not an arm                      0.000
+ok   a wheel turns, but not at the windscreen                   0.000
+ok   a part that barely moves is not an arm                     0.000
+ok   a part that travels is not turning about a pivot           0.000
+ok   without the windscreen measured, nothing is learned        0.000
+ok   both arms found                                            2.000
+ok   the left one comes first                                   -0.510
+ok   each keeps its own pivot                                   0.470
+ok   the log counts them                                        2.000
+ok   turning while it sweeps                                    1.000
+ok   parked: it is still there, but not turning                 0.000
+ok   and what it swept is remembered                            40.000
+done (0 failures)

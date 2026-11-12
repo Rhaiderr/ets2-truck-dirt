@@ -127,6 +127,13 @@ The dirt lives in `Documents\<game>\TruckDirt\dirt_state.txt`, one line per truc
 
 ## Problems and feedback
 
+**FPS lower than usual?** Restart the game first. A long session, or the first minutes after a game update, can
+sit well below what the same place gives on a fresh start: measured here on 06/11/2026, the same spot in the
+cabin camera went from 46-60 FPS to 70-80 after a restart, with the plugin doing exactly the same work in both
+(its own log counts the frames). The cabin camera is the heavy one in any case, because it is the only one that
+draws the mirrors: with the mirrors on their highest settings the game puts out two to three times the draw calls
+of the exterior camera. If a restart does not bring it back, open an issue with the log.
+
 Open an [issue](../../issues) with:
 - the game (ETS2 or ATS), the truck, the trailer and the cargo;
 - the file `Documents\<game>\TruckDirt\gpu_probe.log` (it lists file paths on your PC, which may contain your Windows user name: check it before posting);

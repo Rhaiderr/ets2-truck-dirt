@@ -15,8 +15,8 @@ ok   enabled: starts closed                                         0.000
 ok   closed: the other keys do nothing                              0.000
 ok   the panel key opens it                                         0.000
 ok   starts on the dust, truck + trailer                            1.000
-ok   one row per item, the selected one marked                      12.000
-ok   up from the first row wraps to the last                        11.000
+ok   one row per item, the selected one marked                      16.000
+ok   up from the first row wraps to the last                        15.000
 ok   down from the last row wraps to the first                      0.000
 ok   right on the unit: the next unit                               0.000
 ok   left on the unit wraps                                         2.000
@@ -55,6 +55,16 @@ ok   all real: nothing forced                                       0.000
 ok   all real: the real levels are shown again                      0.631
 ok   all real twice: nothing changes                                0.000
 ok   closed, nothing forced: no badge                               0.000
+ok   the arc starts at the INI's value                              0.450
+ok   right moves the pivot onto the 0.1 grid                        0.500
+ok   fine left moves it by 0.01                                     0.490
+ok   end sets it to 1                                               1.000
+ok   and it does not pass 1                                         1.000
+ok   nor go under 0                                                 0.000
+ok   real gives the INI's value back                                0.450
+ok   and none of it forces a dirt level                             0.000
+ok   the sweep row shows the angle                                  1.000
+ok   the INI can put its numbers in                                 0.500
 ok   hotkey: ctrl+f9                                                0.000
 ok   hotkey: spaces and case, back to text                          0.000
 ok   hotkey: f24                                                    0.000
@@ -73,7 +83,7 @@ ok   font: 'A' as in font8x8                                        0.000
 ok   font: 127 is solid, space is empty                             64.000
 ok   scale: 1 at 720p, 2 at 1080p and 1440p, 4 at 4K                2.000
 ok   layout: closed and nothing forced: nothing drawn               0.000
-ok   layout: open panel inside the screen, 720p to 4K               305.000
+ok   layout: open panel inside the screen, 720p to 4K               394.000
 ok   layout: glyphs on whole pixels at the font's scale             0.000
 ok   view: label, value, bar and forced mark of a row               0.400
 ok   view: "wet mud", not forced                                    0.000

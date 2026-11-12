@@ -118,6 +118,38 @@ void SetCabInside(bool known, const float eye[3], const float box[5], const floa
 void SetGlassDirt(bool on, float strength = 1.f, int debug = 0);
 // N40e, any thread: how much light there is for the dust on the glass to scatter (0 night .. 1 full day).
 void SetDaylight(float day);
+
+// N64: how much the wipers' blades have taken of the dust inside the arc they sweep, 0..1 (the dirt model keeps
+// all of this). N64c: `before` is the same for the moment the stroke now running started and `phase` is where the
+// blade is across the sweep (-1..1, or 9 when no stroke is running), so the clearing travels with the blade
+// instead of appearing at once; `dir` is which way it goes. N65: `jet` is how much of the layers a dry blade
+// cannot touch (the film, the soot, and the rest of the mud and salt) the washer jet has taken inside the arc.
+void SetWipe(float wipe, float before = 0.f, float phase = 9.f, float dir = 1.f, float jet = 0.f);
+// N64: the arc on the windshield the plugin measures ([glass] wiper): the pivots' distance from the middle as a
+// share of its half width (0 = no wiping at all), their height and the blade's length as shares of its height,
+// and half the sweep in radians.
+void SetWiperArc(float pivot_x, float pivot_y, float length, float sweep);
+// N64k: how bright a surface of this dirt is on the glass, in the scene's own units ([glass] brightness). The
+// forward target holds radiance before the tone map, so a reflectance of 0..1 written there is nearly black.
+void SetGlassBright(float bright);
+// N68: which truck is being driven, as telemetry gives it ("vehicle.volvo.fh_2024"). Its wiper blades come from
+// the pre-map, and are taken the first time the windscreen has been measured (the pane tells which cabin it is).
+void SetTruckId(const char* id);
+// N70: where the blades ARE, as the game's own glass-drop pass is told every frame it runs
+// [verified: the development notes on the engine's glass, section 6]. One pane's blades as segments in the
+// pane's own 2D plane, in metres: `mid` the middle of each blade, `dir` the vector along its rubber (|dir| = the
+// blade), `len` the blade (0 = an empty slot), `half` the pane's half size. A truck with a split windscreen sends
+// one of these per panel, so a read says nothing about the blades it does not carry. gpu_probe fills it from the
+// `.wipe` pass's constants; any thread.
+struct WipeLines {
+    float half[2] = {};
+    float mid[4][2] = {};
+    float dir[4][2] = {};
+    float len[4] = {};
+    bool wipers = false;  // what telemetry says the switch is doing (the parked angle is read while it is off)
+    bool rain = false;    // rain seen on the GPU in the last second (the pass may only run while it rains)
+};
+void SetWipeLines(const WipeLines& w);
 // N40b: a DrawIndexedInstanced outside a G-buffer pass (the glass of some trucks may be drawn instanced: the
 // catalog's glass shaders are all `.instanced` variants). Read-only unless it is the truck's glass.
 void OnForwardInstanced(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, INT base, UINT start_inst);

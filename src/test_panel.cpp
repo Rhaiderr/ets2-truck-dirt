@@ -99,12 +99,20 @@ void Panel::Move(float step, const dirt::Coat shown[dirt::kUnits]) {
         for (int u = first; u <= last; ++u) forced_.reach[u] = v;
         return;
     }
+    if (row_ >= kRowArc && row_ <= kRowArcLast) {  // N64h: the arc's numbers are the panel's own, not a unit's
+        arc_[row_ - kRowArc] = (std::min)(1.f, (std::max)(0.f, Snap(arc_[row_ - kRowArc], step)));
+        return;
+    }
     const auto l = static_cast<dirt::Layer>(row_ - kRowLayer);
     const float v = Snap(shown[first].body[l], step);
     for (int u = first; u <= last; ++u) SetLayer(u, l, v, shown[u]);
 }
 
 void Panel::SetValue(float v, const dirt::Coat shown[dirt::kUnits]) {
+    if (row_ >= kRowArc && row_ <= kRowArcLast) {  // N64h
+        arc_[row_ - kRowArc] = v;
+        return;
+    }
     const int first = target_ == kTrailer ? 1 : 0;
     const int last = target_ == kTruck ? 0 : 1;
     for (int u = first; u <= last; ++u) {
@@ -130,7 +138,7 @@ bool Panel::Press(Key k, const dirt::Coat shown[dirt::kUnits]) {
     }
     if (!open_) return false;
     const dirt::Forced before = forced_;
-    const bool value_row = row_ >= kRowLayer && row_ <= kRowReach;
+    const bool value_row = row_ >= kRowLayer && row_ <= kRowArcLast;
     switch (k) {
         case kUp: row_ = (row_ + kRows - 1) % kRows; break;
         case kDown: row_ = (row_ + 1) % kRows; break;
@@ -148,7 +156,12 @@ bool Panel::Press(Key k, const dirt::Coat shown[dirt::kUnits]) {
             if (value_row) SetValue(k == kOne ? 1.f : 0.f, shown);
             break;
         case kReal:
-            if (value_row) RowReal();
+            if (row_ >= kRowArc && row_ <= kRowArcLast) {  // N64h: back to the INI's defaults
+                const float d[kArcValues] = {0.45f, 0.02f, 0.48f, 0.47f, 0.20f};
+                arc_[row_ - kRowArc] = d[row_ - kRowArc];
+            } else if (value_row) {
+                RowReal();
+            }
             break;
         case kEnter:
             if (row_ == kRowTarget) target_ = static_cast<Target>((target_ + 1) % kTargets);
@@ -192,11 +205,26 @@ View Panel::MakeView(const dirt::Coat shown[dirt::kUnits]) const {
         if (r.forced) r.bar = (std::max)(0.f, forced_.reach[first]);
         v.rows.push_back(r);
     }
+    {  // N64h: the wipers' arc. The values are the panel's own, so they are never marked forced.
+        static const char* const kArcName[kArcValues] = {"wiper pivot x", "wiper pivot y", "wiper blade",
+                                                         "wiper sweep", "glass light"};
+        for (int i = 0; i < kArcValues; ++i) {
+            ViewRow r;
+            r.label = kArcName[i];
+            char text[32];
+            if (i == 3) snprintf(text, sizeof(text), "%.2f  (%.0f deg)", arc_[i], arc_[i] * 90.f);
+            else if (i == 4) snprintf(text, sizeof(text), "%.2f  (x%.0f)", arc_[i], arc_[i] * kGlassBrightMax);
+            else snprintf(text, sizeof(text), "%.2f", arc_[i]);
+            r.value = text;
+            r.bar = arc_[i];
+            v.rows.push_back(r);
+        }
+    }
     v.rows.push_back({"all real", "", -1.f, false, false});
     v.rows.push_back({"clean all", "", -1.f, false, false});
     v.rows[row_].selected = true;
     v.help = {"ctrl+up/down: row  ctrl+left/right: -/+0.1", "ctrl+shift+left/right: -/+0.01",
-              "ctrl+home/end: 0/1  ctrl+del: real", "ctrl+enter: unit, all real, clean all",
+              "ctrl+home/end: 0/1  ctrl+del: real (wiper: the INI's)", "ctrl+enter: unit, all real, clean all",
               key_name_ + ": close (the forced levels stay)"};
     return v;
 }

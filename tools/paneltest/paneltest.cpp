@@ -394,6 +394,49 @@ void Drawing() {
     Check(notice_in && crisp_notice && added > 20, "layout: the open panel with the notice, inside and crisp", double(added));
 }
 
+
+// N64h: the wipers' arc lives in the panel too, so it can be lined up against the blades on the screen without
+// restarting the game. Its four numbers are the panel's own: they belong to no unit and are never "forced".
+void Arc() {
+    using namespace panel;
+    Rig r;
+    r.Press(kToggle);  // the keys do nothing while it is closed
+    r.Go(kRowArc);
+    const float start = r.p.Arc()[0];
+    Check(start > 0.f && start < 1.f, "the arc starts at the INI's value", start);
+    r.Press(kRight);  // on the grid of 0.1, as every other row of the panel: 0.45 goes to 0.50
+    Check(std::fabs(r.p.Arc()[0] - 0.5f) < 1e-4f, "right moves the pivot onto the 0.1 grid", r.p.Arc()[0]);
+    r.Press(kFineLeft);
+    Check(std::fabs(r.p.Arc()[0] - 0.49f) < 1e-4f, "fine left moves it by 0.01", r.p.Arc()[0]);
+    r.Press(kOne);
+    Check(r.p.Arc()[0] == 1.f, "end sets it to 1", r.p.Arc()[0]);
+    r.Press(kRight);
+    Check(r.p.Arc()[0] == 1.f, "and it does not pass 1", r.p.Arc()[0]);
+    r.Press(kZero);
+    r.Press(kLeft);
+    Check(r.p.Arc()[0] == 0.f, "nor go under 0", r.p.Arc()[0]);
+    r.Press(kReal);
+    Check(std::fabs(r.p.Arc()[0] - start) < 1e-4f, "real gives the INI's value back", r.p.Arc()[0]);
+    Check(!r.p.Forced().Any(), "and none of it forces a dirt level", 0.0);
+    // The sweep row says the angle it means.
+    r.Go(kRowArc + 3);
+    r.Press(kOne);
+    Check(r.View().rows[kRowArc + 3].value.find("90 deg") != std::string::npos, "the sweep row shows the angle",
+          r.p.Arc()[3]);
+    // N64k: the last row is not the arc's -- it is how bright the dirt on the glass is, and it says the factor.
+    r.Go(kRowArcLast);
+    r.Press(kOne);
+    Check(r.View().rows[kRowArcLast].value.find("x50") != std::string::npos, "the glass light row shows the factor",
+          r.p.Arc()[4]);
+    r.Press(kReal);
+    Check(std::fabs(r.p.Arc()[4] - 0.20f) < 1e-4f, "real gives the INI's brightness back", r.p.Arc()[4]);
+    Check(!r.p.Forced().Any(), "and it forces no dirt level either", 0.0);
+    const float set[panel::kArcValues] = {0.3f, 0.1f, 0.5f, 0.4f, 0.7f};
+    r.p.SetArc(set);
+    Check(r.p.Arc()[2] == 0.5f, "the INI can put its numbers in", r.p.Arc()[2]);
+    Check(r.p.Arc()[4] == 0.7f, "the brightness among them", r.p.Arc()[4]);
+}
+
 }  // namespace
 
 // ---- V6: the keys menu ----
@@ -577,6 +620,7 @@ int main() {
     Values();
     Pairs();
     Actions();
+    Arc();
     Keys();
     Drawing();
     MenuTests();

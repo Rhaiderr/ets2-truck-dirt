@@ -59,6 +59,21 @@ constexpr float kSamePose = 0.03f;     // a box draw seen again at the same loca
 constexpr double kPromoteMove = 1.0;   // world move of the unit before a box draw joins (m)
 constexpr int kMinHeld = 2;            // known draws matching the previous frame's pose to hold it
 constexpr size_t kMaxPending = 20000;
+// N76 (the user, 12/11: on a plain box trailer the dirt "blinked"). A draw is claimed as it is drawn; before its unit
+// is anchored in the frame it is checked against the predicted pose (the last motion carried on), within kMemberTol.
+// A camera turned by the mouse, or the trailer swinging, takes the tail of a 13.6 m box past 10 cm from that guess,
+// and the part goes without its dirt for that frame. A draw of the mesh the unit claimed in the previous frame of the
+// same view, within kRescueMove and kRescueTurn of where it was, is the same part: no traffic copy of the model sits
+// within 35 cm of ours.
+constexpr float kRescueMove = 0.35f, kRescueTurn = 0.06f;
+// N76b (the user, 12/11, after the rescue: the box trailer "still blinks", the truck steady; the census: restored
+// rising ~500 a second for the whole drive, the trailer's known parts 45 -> 83). A mesh joining from the map dropped
+// the copies of it at that place not matched this frame or the last (D13: buffers the game let go). The box trailer
+// draws one part from two buffers in turn, more than a frame apart: each joining dropped the other copy, which joined
+// again from the map at its next draw and dropped the first -- and the draw that joins has already gone by without its
+// dirt. A copy is gone once it has not been matched for kStaleFrames (~2 s): a buffer let go still goes at the next
+// joining, and the ATS lowboy's growth (D13) stays checked.
+constexpr long long kStaleFrames = 120;
 constexpr float kCabVoteMag = 0.015f;  // the cab's move (m, 2 m from the pivot) from which members vote
 constexpr float kCabVoteDiff = 0.008f; // one hypothesis must fit this much better
 constexpr float kCabRest = 0.015f;     // below this move an unclassified part may anchor the frame
@@ -266,10 +281,19 @@ struct FrameDraw {
     uint32_t count;  // N47
 };
 
+struct Claim {  // N76
+    uint64_t key;
+    Mat m;
+    int unit;
+    bool cab;
+    uint64_t part;
+};
+
 struct View {
     Track unit[kUnits];
     int group = -1;
     std::vector<FrameDraw> draws;
+    std::vector<Claim> claims, claims_prev;  // N76: this frame's claims, and the previous frame's
 };
 
 struct Box {
@@ -994,7 +1018,7 @@ int Learn(int u, int view, const std::vector<FrameDraw>& d, const Mat& f, const 
     auto stale_copies = [&](const Mat& local, uint32_t count) {
         if (!count || !learn) return;
         for (const auto& cp : FindLodPlace(u, local, view, now, count).copies)
-            if (cp.second->seen_frame < now - 1) older.push_back({cp.first, cp.second->local, count});
+            if (cp.second->seen_frame < now - kStaleFrames) older.push_back({cp.first, cp.second->local, count});  // N76b
     };
     if (learn) IndexPlaces(u);
     const long long indexed = g_place_index[u].version;
@@ -1180,7 +1204,7 @@ int Learn(int u, int view, const std::vector<FrameDraw>& d, const Mat& f, const 
         auto& list = it->second;
         for (auto m = list.begin(); m != list.end(); ++m) {
             // Not one matched this frame or the last (the game drew that buffer again).
-            if (m->count != o.count || Dist(m->local.t, o.at.t) > 1e-5f || m->seen_frame >= now - 1) continue;
+            if (m->count != o.count || Dist(m->local.t, o.at.t) > 1e-5f || m->seen_frame >= now - 1) continue;  // (N76b: the older list's own test)
             list.erase(m);
             --g_known_n[u];
             ++g_members_version[u];
@@ -1315,7 +1339,10 @@ void BeginFrame() {
         g_in_changed[u] = false;
         g_cfg[u] = g_in_cfg[u];
         g_box[u] = MakeBox(g_cfg[u]);
-        for (View& v : g_views) v.unit[u] = Track();  // new layout of this unit: forget what it learned
+        for (View& v : g_views) {
+            v.unit[u] = Track();  // new layout of this unit: forget what it learned
+            v.claims.clear(), v.claims_prev.clear();  // N76
+        }
         for (auto& t : g_tracked_once) t[u] = false;
         g_members[u].clear();
         g_known_n[u] = 0;
@@ -1564,6 +1591,7 @@ int Classify(int view, int group, const DrawKey& key, const float m[12], bool in
         ++tr.seen;
         const bool cab_moves = u == 0 && g_has_cab;
         if (!tr.cur) {
+            float best = 0.f;  // N76c
             for (const Member& mb : it->second) {
                 // N18: only a part sure to be this unit's anchors its frame. A truck part where the boxes overlap
                 // (behind the cab, over the fifth wheel) goes to the trailer while the rig is in line (C10); as
@@ -1577,16 +1605,25 @@ int Classify(int view, int group, const DrawKey& key, const float m[12], bool in
                 if (cab_moves && !on_cab && !IsChassis(mb) && g_cab_mag > kCabRest) continue;
                 const Mat f = Mul(mm, Inv(on_cab ? Mul(g_cab, mb.rest) : mb.local));
                 // This view's previous frame first, then the other views of its group.
-                for (int o = 0; o < kMaxViews && !tr.cur; ++o) {
+                // N76c (the user, 12/11: the box trailer's dirt still "blinks", the truck's steady; its saved map: the
+                // same parts at x 0 and +-0.41 m). One mesh drawn at several places -- the row of markers across the
+                // box's front, 0.4132 m apart -- has a member for each, and the first of them within kAnchorMove
+                // (1 m) of the predicted frame anchored it: with the neighbour's place, the unit's frame, and all its
+                // dirt, sat 41 cm to the side for that frame. The member whose frame lies nearest the prediction
+                // anchors it: the prediction is good to centimetres, the places 41 cm apart.
+                for (int o = 0; o < kMaxViews; ++o) {
                     const int vi = o == 0 ? view : (o <= view ? o - 1 : o);
                     const Track& p = g_views[vi].unit[u];
                     if (vi != view && g_views[vi].group != group) continue;
-                    if (p.prev && MatClose(f, p.f_pred)) {
+                    if (!p.prev || !MatClose(f, p.f_pred)) continue;
+                    const float dist = Dist(f.t, p.f_pred.t);
+                    if (!tr.cur || dist < best) {
+                        best = dist;
                         tr.cur = true;
                         tr.f_cur = f;
                     }
+                    break;
                 }
-                if (tr.cur) break;
             }
         }
         // Not re-anchored (no rigid mesh drawn yet, or none in sight): the
@@ -1624,10 +1661,27 @@ int Classify(int view, int group, const DrawKey& key, const float m[12], bool in
                 ++g_stats.cab_claims;
                 if (cab) *cab = true;
             }
+            if (v.claims.size() < 4096) v.claims.push_back({k, mm, u, on_cab, part ? *part : 0});  // N76
             return u;
         }
         ++misses;
     }
+    // N76: claimed last frame at nearly this place: the same part, its unit's pose guessed a little off.
+    if (misses)
+        for (const Claim& c : v.claims_prev) {
+            if (c.key != k || !MatClose(mm, c.m, kRescueMove, kRescueTurn)) continue;
+            const Track& tr = v.unit[c.unit];
+            if (!g_cfg[c.unit].wheels || (!tr.cur && !tr.prev)) break;
+            ++g_stats.claimed, ++g_stats.rescued;
+            if (c.cab) {
+                ++g_stats.cab_claims;
+                if (cab) *cab = true;
+            }
+            if (part) *part = c.part;
+            if (v.claims.size() < 4096) v.claims.push_back({k, mm, c.unit, c.cab, c.part});
+            g_stats.missed += misses - 1;
+            return c.unit;
+        }
     g_stats.missed += misses;
     return -1;
 }
@@ -1638,6 +1692,8 @@ void EndFrame(std::string* debug) {
     int tracked[kUnits] = {}, members[kUnits] = {};
     for (int vi = 0; vi < kMaxViews; ++vi) {
         View& v = g_views[vi];
+        v.claims_prev.swap(v.claims);  // N76: this frame's claims are the next one's reference
+        v.claims.clear();
         if (v.draws.empty()) {
             for (Track& t : v.unit) {
                 if (t.prev && ++t.miss > kLostAfter) t = Track();  // view not drawn (mirrors in the exterior camera)

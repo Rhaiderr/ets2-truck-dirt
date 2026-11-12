@@ -307,6 +307,139 @@ void Tread() {
           a.TreadWear(0) - b.TreadWear(0));
 }
 
+
+// N64: the wipers. A dry blade takes the dust inside the arc it sweeps, and the arc then fills again with the very
+// dust that lands on the truck -- no decay law of its own, which is what keeps it honest when the truck is already
+// as dirty as it gets (where a "the wipe fades in N seconds" rule would leave the arc clean for ever).
+void Wipers() {
+    {
+        dirt::Model m;
+        DriveAt(m, 0, 5 * kDirtKm, "dirt", 50.f);
+        const float dirty = m.Level(0);
+        Check(dirty > 0.6f && m.Wipe() == 0.f, "before wiping, the arc is as dirty as the glass", m.Wipe());
+        m.Wipers(0.5, false);
+        Check(m.Wipe() == 0.f, "the wipers off take nothing", m.Wipe());
+        // N64c (the user, 06/11: "ela não deve limpar tudo na primeira passada, ela deve ir limpando apos algumas
+        // passadas 5 por ex"): one stroke takes 45% of what there is to take, so the first one clears visibly but
+        // partly and the fifth is near the limit. A stroke is kSweepSeconds, so these steps are strokes.
+        // Wipe() counts the stroke now running, because the glass behind the blade already shows it. So these
+        // read it with the wipers off, which is the value the whole arc settles at.
+        m.Wipers(0.9, true);
+        m.Wipers(0.0, false);
+        const float one = m.Wipe();
+        Check(one > 0.35f && one < 0.50f, "the first stroke clears part of it, not all", one);
+        m.Wipers(0.9, true);
+        m.Wipers(0.0, false);
+        const float two = m.Wipe();
+        Check(two > one + 0.15f && two < 0.70f, "the second clears more, still not all", two);
+        for (int i = 0; i < 3; ++i) m.Wipers(0.9, true);  // strokes 3, 4 and 5
+        m.Wipers(0.0, false);
+        const float five = m.Wipe();
+        Check(five > 0.80f && five < 0.88f, "by the fifth it is nearly at the limit", five);
+        for (int i = 0; i < 10; ++i) m.Wipers(0.9, true);
+        m.Wipers(0.0, false);
+        const float many = m.Wipe();
+        Check(many > five && many > 0.88f && many <= 0.90f + 1e-4f,
+              "a dry blade never takes more than 90%: 10% of the dust stays", many);
+        // N64c: the cleaning front. While a stroke runs, the glass shows what the blades had taken before it ahead
+        // of the blade and what they have taken behind it, and the blade walks the sweep from one end to the other.
+        dirt::Model f;
+        DriveAt(f, 0, 5 * kDirtKm, "dirt", 50.f);
+        Check(f.Phase() == 9.f, "with the wipers off no stroke is running", f.Phase());
+        f.Wipers(0.45, true);  // half a stroke
+        Check(f.Phase() > -0.1f && f.Phase() < 0.1f, "half a stroke in, the blade is halfway across", f.Phase());
+        Check(f.WipeBefore() < f.Wipe() - 0.3f, "and the front has the two sides of it apart", f.WipeBefore());
+        f.Wipers(0.5, true);  // over the end: the next stroke, the other way
+        Check(f.Dir() < 0.f, "the next stroke goes back the other way", f.Dir());
+        f.Wipers(0.1, false);
+        Check(f.Phase() == 9.f, "switched off, no stroke is running", f.Phase());
+        Check(m.Level(0) == dirty, "wiping the glass leaves the body alone", m.Level(0));
+        // The arc fills again with the dust of the road, at the rate the body gets it.
+        DriveAt(m, 0, 0.5 * kDirtKm, "dirt", 50.f);
+        const float after = m.Wipe();
+        Check(after < many - 0.1f, "driving on fills the swept arc again", after);
+        // The arc and the glass around it take the same dust by the same saturating law, so the gap between them
+        // closes only as the dust saturates: the swept part stays a little cleaner for a good while, and that is
+        // what it should do. [verificado: 1 - arc and 1 - level fall by the same factor at every step, so
+        // level - arc = (k - 1) (1 - level), which goes to 0 only as level goes to 1]
+        DriveAt(m, 0, 5 * kDirtKm, "dirt", 50.f);
+        Check(m.Wipe() > 0.1f && m.Wipe() < 0.25f, "a while later the arc is still a little cleaner", m.Wipe());
+        DriveAt(m, 0, 30 * kDirtKm, "dirt", 50.f);
+        Check(m.Wipe() < 0.05f, "once the dust saturates, the arc is as dirty as the rest", m.Wipe());
+    }
+    {   // A truck already as dirty as it gets: the arc still fills, because it is a level and not a timer.
+        dirt::Model m;
+        DriveAt(m, 0, 40 * kDirtKm, "dirt", 50.f);
+        m.Wipers(5.0, true);
+        m.Wipers(0.0, false);
+        Check(m.Wipe() > 0.85f, "saturated truck: the blade still clears the arc", m.Wipe());
+        DriveAt(m, 0, 10 * kDirtKm, "dirt", 50.f);
+        Check(m.Wipe() < 0.2f, "saturated truck: and the arc fills again", m.Wipe());
+    }
+    {   // N65: the jet. Inside the arc it takes everything, the film and the soot included; outside it nothing
+        // changes, so only a wash ever leaves the whole pane clean.
+        dirt::Model m;
+        DriveAt(m, 0, 20 * kDirtKm, "dirt", 50.f);
+        m.Wipers(10.0, true);
+        Check(m.Wipe() <= 0.90f + 1e-4f && m.Jet() == 0.f, "dry, the blades leave the film and the soot", m.Jet());
+        const float body = m.Layers(0).body[dirt::kFilm];
+        m.Washer();
+        Check(m.Wipe() > 0.999f && m.Jet() > 0.999f, "the jet takes everything inside the arc", m.Jet());
+        Check(m.Layers(0).body[dirt::kFilm] == body, "and nothing outside it: the body is untouched",
+              m.Layers(0).body[dirt::kFilm]);
+        // It comes back as those very layers grow again, and only then: a dry dirt road builds dust and grit,
+        // which are the blade's own, so it leaves the jet's work alone. Asphalt builds the soot (N39).
+        DriveAt(m, 0, 5.0, "dirt", 50.f);
+        Check(m.Jet() > 0.95f, "a dry dirt road does not undo the jet: it builds no film or soot", m.Jet());
+        DriveAt(m, 0, 20.0, "asphalt", 70.f);
+        const float some = m.Jet();
+        Check(some < 0.95f && some > 0.f, "asphalt builds the soot, and the arc takes it back", some);
+        DriveAt(m, 0, 600.0, "asphalt", 70.f);
+        Check(m.Jet() < 0.25f, "far enough and little of the jet's work is left", m.Jet());
+        m.Washer();
+        for (int i = 0; i < 6; ++i) m.Weather(120, true, 1.f);  // 12 game hours of it
+        Check(m.Jet() < 0.05f, "a long rain levels the pane too", m.Jet());
+    }
+    {   // A wash and the rain both leave the arc no cleaner than the glass around it.
+        dirt::Model m;
+        DriveAt(m, 0, 5 * kDirtKm, "dirt", 50.f);
+        m.Wipers(5.0, true);
+        m.Reset(0);
+        Check(m.Level(0) == 0.f && m.Wipe() == 0.f, "washed: nothing is cleaner than anything", m.Wipe());
+        DriveAt(m, 0, 5 * kDirtKm, "dirt", 50.f);
+        m.Wipers(5.0, true);
+        const float before = m.Wipe();
+        m.Weather(60, true, 1.f);
+        Check(m.Wipe() <= before + 1e-4f, "the rain takes the dust off the arc too", m.Wipe());
+    }
+    {   // What the save keeps and brings back.
+        dirt::Model m;
+        DriveAt(m, 0, 5 * kDirtKm, "dirt", 50.f);
+        m.Wipers(5.0, true);
+        m.Wipers(0.0, false);
+        const float level = m.Level(0), wipe = m.Wipe();
+        dirt::Model back;
+        back.Set(0, level);
+        back.SetArcWipe(m.ArcWipe());
+        Check(std::fabs(back.Wipe() - wipe) < 1e-4f, "what the blades took survives a save and a load", back.Wipe());
+        m.Washer();
+        dirt::Model jetted;
+        jetted.Set(0, level);
+        jetted.SetArcWipe(m.ArcWipe());
+        jetted.SetArcOther(m.ArcOther());
+        Check(jetted.Jet() > 0.999f, "the jet's work survives it too", jetted.Jet());
+        // N64e (the game, 06/11: a clean windscreen on a truck at full dirt): what the blades took is a share of
+        // its own, so a level forced from the INI or the test panel cannot turn it into something else. On a truck
+        // whose real dust is almost nothing, nothing has been wiped until the wipers actually run.
+        dirt::Model clean;
+        DriveAt(clean, 0, 0.001, "dirt", 50.f);
+        Check(clean.Level(0) < 0.01f && clean.Wipe() == 0.f, "an almost clean truck: nothing wiped", clean.Wipe());
+        clean.Configure({1.f, 1.f});  // the INI forcing the shown level to the maximum
+        Check(clean.Level(0) == 1.f && clean.Wipe() == 0.f, "and forcing the shown level changes nothing",
+              clean.Wipe());
+    }
+}
+
 }  // namespace
 
 // N12: the wheel constants of the dirt pass (dust::Wheels) and the way the
@@ -455,6 +588,7 @@ int main() {
         Check(m.Level(0) == 0.f, "a teleport (> 1 km in one step) is ignored", m.Level(0));
     }
     Layers();
+    Wipers();
     Tread();
     Wheels();
     Levels();

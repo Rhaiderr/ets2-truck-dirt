@@ -127,6 +127,13 @@ A sujeira fica em `Documentos\<jogo>\TruckDirt\dirt_state.txt`, uma linha por ca
 
 ## Problemas e feedback
 
+**FPS mais baixo que o normal?** Reinicie o jogo primeiro. Uma sessão longa, ou os primeiros minutos depois de uma
+atualização do jogo, podem ficar bem abaixo do que o mesmo lugar dá com o jogo recém-aberto: medido aqui em
+06/11/2026, o mesmo ponto na câmera da cabine foi de 46-60 FPS para 70-80 depois de reabrir, com o plugin fazendo
+exatamente o mesmo trabalho nos dois casos (o log dele conta os quadros). A câmera da cabine é a mais pesada de
+qualquer forma, porque é a única que desenha os espelhos: com os espelhos no máximo, o jogo emite duas a três
+vezes mais draws do que na câmera externa. Se reiniciar não resolver, abra uma issue com o log.
+
 Abra uma [issue](../../issues) com:
 - o jogo (ETS2 ou ATS), o caminhão, a carreta e a carga;
 - o arquivo `Documentos\<jogo>\TruckDirt\gpu_probe.log` (ele lista caminhos de arquivos do seu PC, que podem conter seu nome de usuário do Windows: revise antes de postar);

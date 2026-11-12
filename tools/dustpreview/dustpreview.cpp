@@ -143,7 +143,22 @@ void Wheel(float3 o, float3 d, float3 c, float r, float x0, float x1, int mat, i
         const float x = o.x + d.x * t;
         if (t > 0.0 && t < h.t && x >= x0 && x <= x1) {
             h.t = t;
-            h.n = float3(0, normalize(oc + dd * t));
+            const float2 rad = normalize(oc + dd * t);
+            // N72: a tread pattern on the running surface. Until here the tyre was a smooth cylinder, so no
+            // preview could ever show what the dirt does with the tread's own relief -- and that relief is what
+            // splits the band: `tread` in the shader reads the game's normal (rt0), so a groove's wall, whose
+            // normal tilts across the wheel, takes the side wall's dirt while the rib's crown takes the
+            // tread's. Four circumferential grooves and sipes every ~40 mm, as a tilt of the normal.
+            const float across = (x - x0) / max(x1 - x0, 1e-3);  // 0..1 over the tyre's width
+            float du = 0.0;
+            [unroll] for (int gi = 0; gi < 4; ++gi) {
+                const float e = (across - (0.2 + 0.2 * gi)) / 0.035;
+                du += -2.0 * e * exp(-e * e);  // the slope of a notch
+            }
+            const float v = atan2(rad.y, rad.x) * r;  // around the tyre, m
+            const float dv = sin(v * (6.2831853 / 0.040)) * 0.35;
+            const float2 tang = float2(-rad.y, rad.x);
+            h.n = normalize(float3(du * 1.10, rad + tang * dv * 0.50));
             h.mat = mat;
         }
     }
@@ -441,6 +456,29 @@ void LayerShots(std::vector<Shot>& out) {
     out.push_back({"wheel_dust_010", wheel_close, 0.1f});
     layer("layer_soot", front34, kSoot, 0.8f, 0.4f, 0.f);
     layer("layer_soot_close", wheel_close, kSoot, 0.8f, 0.4f, 0.f);
+    // N71 (the user, ATS 07/11, a print of the drive wheels with a little soot): the tread read lighter than the
+    // side walls, the other way round from a real tyre, whose contact patch is the darkest part of the wheel.
+    // A close view of the drive wheels as in his print: the road's soot, a little dust, the tread worn by asphalt.
+    const Camera tread_close = LookAt(-1.95f, 1.15f, -0.55f, -0.95f, 0.45f, 2.2f);
+    Shot clean = {"tread_clean", tread_close, 0.f};
+    clean.roll = 0.125f;
+    out.push_back(clean);
+    s = layer("tread_soot_close", tread_close, kSoot, 0.5f, 0.4f, 0.f);
+    s->dust = 0.35f;
+    s->layers[0].body[kTread] = 0.25f;  // a while off the dirt, the road only starting to scrub the tread
+    s->roll = 0.125f;
+    // N75: the same wheels straight off a dirt road (no asphalt yet: tread wear 0), then after the asphalt.
+    Shot tyre_dirt = {"tread_dirt_road", tread_close, 0.6f};
+    tyre_dirt.roll = 0.125f;
+    out.push_back(tyre_dirt);
+    Shot tyre_paved = tyre_dirt;
+    tyre_paved.name = "tread_dirt_then_asphalt";
+    tyre_paved.layers[0].body[kTread] = 0.75f;
+    out.push_back(tyre_paved);
+    s = layer("tread_soot_close_heavy", tread_close, kSoot, 0.85f, 0.4f, 0.f);
+    s->dust = 0.6f;
+    s->layers[0].body[kTread] = 0.8f;
+    s->roll = 0.125f;
     s = layer("layer_soot_light", front34, kSoot, 0.4f, 0.4f, 0.f);
     s = layer("mix_motorway", front34, kSoot, 0.8f, 0.4f, 0.f);
     s->dust = 0.6f;
@@ -669,6 +707,35 @@ void CloseShots(std::vector<Shot>& out) {
         k.flat = true;
         out.push_back(k);
     };
+    // N73: the whole front wheel from outside and low, as the user's print of 07/11 that showed a dark band
+    // across the bottom of the tyre. The ground is at y = 0 here and the wheel rests on it, as in the game.
+    const Camera low_wheel = LookAt(3.1f, 0.55f, -3.4f, 1.04f, 0.40f, -1.79f);
+    Shot lw = {"wheel_bottom", low_wheel, 0.35f};
+    lw.layers[0].body[::dust::kSoot] = 0.5f, lw.layers[0].reach[::dust::kSoot] = 0.4f;
+    lw.layers[0].body[::dust::kTread] = 0.25f;
+    out.push_back(lw);
+    Shot lwd = {"wheel_bottom_dirty", low_wheel, 0.8f};
+    lwd.layers[0].body[::dust::kSoot] = 0.85f, lwd.layers[0].reach[::dust::kSoot] = 0.5f;
+    lwd.layers[0].body[::dust::kTread] = 0.25f;
+    out.push_back(lwd);
+    // N72: a tyre at arm's length, on the sunlit side, where the grains and their relief show: a little soot
+    // and dust, the tread part worn by asphalt, the wheel turned an eighth so the pattern is not head on.
+    const Camera tyre = LookAt(2.20f, 1.05f, 0.25f, 1.05f, 0.58f, 1.70f);
+    Shot t = {"close_tyre", tyre, 0.35f};
+    t.layers[0].body[::dust::kSoot] = 0.5f, t.layers[0].reach[::dust::kSoot] = 0.4f;
+    t.layers[0].body[::dust::kTread] = 0.25f;
+    t.roll = 0.125f;
+    out.push_back(t);
+    static const std::string tyre_flat = "close_tyre_flat";
+    t.name = tyre_flat.c_str();
+    t.flat = true;
+    out.push_back(t);
+    Shot td = {"close_tyre_dirty", tyre, 0.8f};
+    td.layers[0].body[::dust::kSoot] = 0.8f, td.layers[0].reach[::dust::kSoot] = 0.4f;
+    td.layers[0].body[::dust::kGrit] = 0.5f, td.layers[0].reach[::dust::kGrit] = 0.5f;
+    td.layers[0].body[::dust::kTread] = 0.25f;
+    td.roll = 0.125f;
+    out.push_back(td);
     add("close_dust", cab, 1.f, -1, 0.f, 0.f);
     add("close_soot_chassis", low, 0.f, ::dust::kSoot, 0.9f, 0.f);
     add("close_dry_mud", low, 0.f, ::dust::kDryMud, 0.85f, 0.f);

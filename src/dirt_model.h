@@ -125,6 +125,33 @@ public:
     Coat Layers(int unit) const;
     // Every layer as the simulation has it, without any override (what is saved).
     Coat Real(int unit) const;
+    // N64: the truck's wipers, for `seconds` of real time (a blade sweeps in real time, not in the game's clock).
+    // A dry blade takes the loose dust inside the arc it sweeps and leaves the film and the soot (the user,
+    // 06/11), and it takes several strokes to get there (N64c): kStrokeTakes of what is left per stroke, down to
+    // kBladeTakes and no further -- "com poeira ainda deveria ficar uns 10% sujo se não passar água".
+    void Wipers(double seconds, bool on);
+    // N65: the washer jet. Inside the arc it takes everything, the film and the soot included, so the swept part
+    // comes out as clean glass while the rest of the pane stays dirty until the truck is washed.
+    void Washer();
+    // N64: how much of the dust is missing inside that arc, 0 (as dirty as the rest of the glass) .. 1 (none left).
+    float Wipe() const;
+    // N64c: what the blades had taken before the stroke now running. While a stroke is on its way the glass
+    // shows this ahead of the blade and Wipe() behind it, so the cleaning follows the blade across the pane. With
+    // the wipers off the two are the same.
+    float WipeBefore() const;
+    // N64c: where the blade is inside the stroke now running, -1 .. 1 across the sweep, and which way it goes
+    // (+1 / -1). Phase() returns 9 when no stroke is running, and then the whole arc shows Wipe().
+    float Phase() const;
+    float Dir() const { return wiper_dir_ > 0 ? 1.f : -1.f; }
+    // N65: how much of the layers a dry blade cannot touch (film, soot, and the rest of the mud and salt) the jet
+    // has taken inside the arc, 0 .. 1.
+    float Jet() const { return 1.f - arc_other_; }
+    // N64/N65: what the arc holds, as the simulation has it (what is saved), and restoring it.
+    float ArcWipe() const { return wipe_; }
+    float ArcOther() const { return arc_other_; }
+    void SetArcWipe(float share);
+    void SetArcOther(float share);
+
     // The road wetness, 0 = dry .. 1 = soaked.
     float Wetness() const { return static_cast<float>(wet_); }
     // N31: the share of the wheels' dirt the road wore off the tread, 0 .. kTreadWearMax.
@@ -140,11 +167,26 @@ public:
 
 private:
     void Splash(float* coat, float* reach, const double* rate_km, double km, float height);
+    float Swept(float arc) const;  // N64c: what one stroke of the blades leaves behind it
     void Age(float* coat, float* reach, double minutes, double wet, bool raining, float intensity, bool on_snow);
 
     Settings settings_;
     Forced forced_;
     float level_[kUnits] = {};  // dust (kept apart: the D3 code path, unchanged)
+    // N64: the share of the dust that is missing inside the wipers' arc, 0 (as dirty as the rest of the glass)
+    // .. kBladeTakes. N64e: a share and not a level, because what the glass is drawn with is not always level_[0]
+    // -- the INI and the test panel can force it -- and a share of two levels near zero is noise, which is what
+    // put a clean windscreen on a truck at full dirt. Only the truck has a windshield, so there is one of these
+    // and not one per unit. It still follows the dust: every step the dust lands on the arc as it lands on the
+    // rest, with the same law, so the share closes on its own and nothing here is a timer.
+    float wipe_ = 0.f;
+    // N65: what share of the body's OTHER layers (film, soot, salt, mud) is still inside the arc, 1 = all of them,
+    // 0 = the jet took them. Not a level of its own like arc_: those layers grow by rates of their own and a copy
+    // of the whole coat for one windscreen would be a lot of state, so this follows them as a share and closes
+    // again as they grow. [estimativa]
+    float arc_other_ = 1.f;
+    double wiper_phase_ = -1.0;  // N64c: 0..1 inside the stroke; < 0 = no stroke running
+    int wiper_dir_ = 1;          // which way this stroke goes
     Coat coat_[kUnits];         // the D4 layers (coat_[u].body[kDust] unused: level_)
     Ground last_[kUnits] = {kAsphalt, kAsphalt};  // last real ground, for "static"
     double inherit_km_[kUnits] = {};               // km driven on "static" since the last real ground

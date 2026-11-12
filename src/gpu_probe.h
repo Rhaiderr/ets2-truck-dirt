@@ -80,6 +80,11 @@ void SetPose(const Pose& pose);
 // V2: both cameras without a weather mod, glass drops in the interior camera).
 // False when the probe stopped or has not updated it for 2 s.
 bool RainActive();
+// N70: copy the `def.glassdrops.*.wipe` constants on every draw of that pass and hand the blades to tint
+// (where they become the stroke the glass is cleaned by). Off unless [glass] on, since it costs one 688-byte
+// GPU-to-staging copy per glass draw -- and that pass only runs in the interior camera.
+void SetWipeWanted(bool on);
+
 // D3: dust level of each unit (0 truck, 1 trailer) for the dust pass.
 void SetDust(float truck, float trailer);
 // N5: the D4 layers of each unit for the dust pass.

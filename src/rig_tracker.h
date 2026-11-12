@@ -187,6 +187,7 @@ struct Stats {
     long long handed = 0;     // members dropped because the draw is the other unit's (C10)
     long long skipped = 0;  // searches left out: the view's search backs off while nothing of the unit is drawn
     long long missed = 0;  // draws of a known mesh not claimed (off its pose, or the same model in traffic)
+    long long rescued = 0;  // N76: of the unclaimed, kept by the unit: claimed last frame at nearly the same place
     long long cab_claims = 0;  // claimed draws that move with the cab
     int cab_members = 0, chassis_members = 0;  // members known to move with the cab / with the chassis
     int tracked_views[kUnits] = {};  // views where the unit is known now

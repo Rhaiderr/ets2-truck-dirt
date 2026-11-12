@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstring>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -22,6 +23,7 @@
 #include "dust_shader.h"
 #include "premap.h"
 #include "rig_tracker.h"
+#include "wiper.h"
 
 namespace tint {
 namespace {
@@ -86,6 +88,12 @@ bool g_eye_known = false;
 float g_eye[3] = {};
 float g_ws_front = 1e9f;
 float g_ws_base_y = 0.f, g_ws_slope = 0.f, g_ws_top = 0.f;  // D11j: the windshield's base height, dz/dy, top
+// N64b: how wide the windshield is, half of it, in the truck's frame (0 = not measured). D11i only looks at
+// |x| < 0.7 m -- the pane's middle, so that a mirror's or a headlamp's glass cannot be taken for it -- and the dash
+// zone's dash1.x is a constant 0.9 m that has nothing to do with this truck's glass (and is switched off
+// altogether on a premapped truck). The wipers' arc needs the real width, so it is measured here, on the same
+// vertices, as the widest |x| among those sitting on the plane D11i fits.
+float g_ws_half = 0.f;
 std::atomic<bool> g_ws_reset{false};  // a new truck: measure again
 std::string g_mp_hits;  // N61: the meshes read as the interior seen from outside (under g_mp_mutex)
 std::atomic<int> g_mp_int_ext{0};  // P1: the current truck's interior pieces found (MeshPrint): the boxes go
@@ -149,6 +157,19 @@ bool g_glass_consts_ok = false;   // the pass has run at least once
 bool g_glass_consts_new = false;  // not yet uploaded to our buffer
 ID3D11BlendState* g_glass_bs = nullptr;        // N40e: SRC_ALPHA / INV_SRC_ALPHA, the alpha left as it is
 std::atomic<float> g_daylight{1.f};            // N40e: how much light there is to scatter (SetDaylight)
+// N64: the wipers. `g_wipe` is how much the blades have taken inside the arc they sweep (0 = as dirty as the rest
+// of the glass, 1 = the dust gone), from the dirt model; the four numbers of the arc come from [glass] wiper and
+// are shares of the windshield the plugin measures in the game, so they fit any truck without per-truck data.
+std::atomic<float> g_wipe{0.f};
+std::atomic<float> g_wipe_before{0.f};  // N64c: what they had taken when the stroke now running started
+std::atomic<float> g_wipe_phase{9.f};   // N64c: the blade across the sweep, -1..1 (9 = no stroke running)
+std::atomic<float> g_wipe_dir{1.f};     // N64c: which way the stroke goes
+std::atomic<float> g_jet{0.f};          // N65: how much of the other layers the jet took inside the arc
+std::atomic<float> g_glass_bright{10.f};  // N64k: the dirt's radiance on the glass, in the scene's units
+std::atomic<float> g_wiper_px{0.f};     // the pivots' distance from the middle, a share of the half width (0 = off)
+std::atomic<float> g_wiper_py{0.f};     // their height, a share of the pane's height
+std::atomic<float> g_wiper_len{0.f};    // the blade's length, a share of the pane's height
+std::atomic<float> g_wiper_sweep{0.f};  // half the sweep (radians)
 long long g_glass_veils = 0;                   // veil draws since the last StatsLine
 // N40e: the glass meshes whose tint pass we have just dirtied, so the reflection the game adds right after can be
 // told from every other additive draw of the truck (a lamp's glow). A ring, matched by buffer and range.
@@ -162,7 +183,8 @@ GlassMesh g_glass_meshes[kGlassMeshes] = {};
 int g_glass_mesh_n = 0;
 ID3D11Buffer* g_glass_cb = nullptr;
 float g_glass_sent = -1.f;                        // the amount already in g_glass_cb
-float g_glass_strength_sent = -1.f, g_glass_day_sent = -1.f;
+float g_glass_strength_sent = -1.f, g_glass_day_sent = -1.f, g_wipe_sent = -1.f, g_bright_sent = -1.f;
+float g_jet_sent = -1.f, g_phase_sent = -99.f;
 int g_glass_debug_sent = -1;
 long long g_glass_draws = 0, g_glass_missed = 0, g_glass_depth_n = 0, g_glass_blend_n = 0, g_glass_far = 0;
 long long g_glass_pass = 0, g_glass_res = 0, g_glass_map = 0;  // past the frame test; resources failed; map failed
@@ -1396,6 +1418,10 @@ void RunPass(ID3D11DeviceContext* c, SavedState* saved, bool* saved_ok) {
                 cb.dash0[0] = g_ws_front + 0.03f, cb.dash0[1] = g_ws_base_y, cb.dash0[2] = g_ws_slope;
                 cb.dash0[3] = g_ws_top;
                 cb.dash1[0] = 0.9f, cb.dash1[1] = g_eye[1] - 1.0f, cb.dash1[2] = g_eye[2];
+                // N64b: the windshield itself, for the wipers' arc. Apart from dash1, whose box is the dashboard's.
+                cb.pane[0] = g_ws_half;
+                cb.pane[1] = g_ws_front < 1e8f && g_ws_half > 0.f && g_ws_top > g_ws_base_y + 0.3f ? 1.f : 0.f;
+                cb.pane[2] = cb.pane[3] = 0.f;
             }
         }
         cb.spin[3] = relief ? 1.f : 0.f;  // D11m: the pack works the relief out for the NORM draw
@@ -1572,6 +1598,98 @@ void SetCabInside(bool known, const float eye[3], const float box[5], const floa
 }
 void SetRelief(bool on) { g_relief.store(on); }
 void SetDaylight(float day) { g_daylight.store(day > 0.f ? (day < 1.f ? day : 1.f) : 0.f); }
+
+void SetWipe(float wipe, float before, float phase, float dir, float jet) {
+    const auto clamp01 = [](float v) { return v > 0.f ? (v < 1.f ? v : 1.f) : 0.f; };
+    g_wipe.store(clamp01(wipe));
+    g_wipe_before.store(clamp01(before));
+    // 9 (or anything past 8) means no stroke is running and the whole arc shows what the blades have taken.
+    g_wipe_phase.store(phase >= -1.f && phase <= 1.f ? phase : 9.f);
+    g_wipe_dir.store(dir < 0.f ? -1.f : 1.f);
+    g_jet.store(clamp01(jet));
+}
+
+void SetWiperArc(float pivot_x, float pivot_y, float length, float sweep) {
+    g_wiper_px.store(pivot_x > 0.f ? (pivot_x < 1.f ? pivot_x : 1.f) : 0.f);  // 0 = no arc, nothing is wiped
+    g_wiper_py.store(pivot_y > -0.5f ? (pivot_y < 1.f ? pivot_y : 1.f) : -0.5f);
+    g_wiper_len.store(length > 0.05f ? (length < 2.f ? length : 2.f) : 0.05f);
+    g_wiper_sweep.store(sweep > 0.05f ? (sweep < 1.5f ? sweep : 1.5f) : 0.05f);
+}
+void SetGlassBright(float bright) { g_glass_bright.store(bright > 0.f ? (bright < 200.f ? bright : 200.f) : 0.f); }
+// N68: the blades of the truck being driven, from the game's own cabin model and animation (tools/premap), and
+// what the glass draw needs of them. Worked out once, the first time the windscreen has been measured -- the
+// pane is what tells which of the truck's cabins is on it.
+std::mutex g_blade_mutex;
+std::string g_truck_id;
+std::atomic<bool> g_blades_done{false};  // N69c: read on every glass draw, so the early-out is lock-free
+int g_blade_n = 0;
+float g_blade_rows[6][4] = {};
+char g_blade_note[160] = "not looked for yet";
+
+void SetTruckId(const char* id) {
+    std::lock_guard<std::mutex> lock(g_blade_mutex);
+    const std::string s = id ? id : "";
+    if (s == g_truck_id) return;
+    g_truck_id = s;
+    g_blades_done.store(false);  // a different truck: look again once its windscreen is measured
+    g_blade_n = 0;
+    snprintf(g_blade_note, sizeof(g_blade_note), "waiting for the windscreen");
+}
+
+// Render thread, after the windscreen measurement. Fills the rows the shader reads.
+void TakeBlades() {
+    if (g_blades_done.load(std::memory_order_relaxed)) return;
+    std::lock_guard<std::mutex> lock(g_blade_mutex);
+    if (g_blades_done.load() || g_truck_id.empty()) return;
+    if (!(g_ws_half > 0.f) || !(g_ws_top > g_ws_base_y + 0.3f)) return;  // not measured yet
+    g_blades_done.store(true);
+    premap::Blade b[premap::kMaxBlades];
+    const int n = premap::Blades(g_truck_id.c_str(), g_ws_base_y, g_ws_front, b);
+    if (n <= 0) {
+        snprintf(g_blade_note, sizeof(g_blade_note), "%s is not in the tables, the INI's fan stays",
+                 g_truck_id.c_str());
+        return;
+    }
+    int out = 0;
+    for (int i = 0; i < n && out < 2; ++i) {
+        float ax[3] = {b[i].axis[0], b[i].axis[1], b[i].axis[2]};
+        float an = std::sqrt(ax[0] * ax[0] + ax[1] * ax[1] + ax[2] * ax[2]);
+        if (!(an > 1e-4f) || !(b[i].sweep > 0.05f)) continue;
+        for (float& v : ax) v /= an;
+        // The arm at rest, in the plane it turns in (the axis taken out of it), and how far it reaches.
+        float arm[3] = {b[i].arm[0], b[i].arm[1], b[i].arm[2]};
+        const float along = arm[0] * ax[0] + arm[1] * ax[1] + arm[2] * ax[2];
+        for (int k = 0; k < 3; ++k) arm[k] -= along * ax[k];
+        const float reach = std::sqrt(arm[0] * arm[0] + arm[1] * arm[1] + arm[2] * arm[2]);
+        if (!(reach > 0.05f)) continue;
+        for (float& v : arm) v /= reach;
+        // The rubber runs along the arm, centred on the bone the game calls the blade's centre: so what it
+        // sweeps is a ring from reach - length/2 to reach + length/2, not a disc around the pivot.
+        const float half = 0.5f * (b[i].length > 0.05f ? b[i].length : 0.6f);
+        float* r0 = g_blade_rows[out * 3 + 0];
+        float* r1 = g_blade_rows[out * 3 + 1];
+        float* r2 = g_blade_rows[out * 3 + 2];
+        r0[0] = b[i].pivot[0], r0[1] = b[i].pivot[1], r0[2] = b[i].pivot[2];
+        r0[3] = (std::max)(reach - half, 0.02f);
+        r1[0] = ax[0], r1[1] = ax[1], r1[2] = ax[2];
+        r1[3] = reach + half;
+        r2[0] = arm[0], r2[1] = arm[1], r2[2] = arm[2];
+        r2[3] = b[i].sweep;  // signed by the axis the animation gave
+        ++out;
+    }
+    g_blade_n = out;
+    if (out > 0)
+        snprintf(g_blade_note, sizeof(g_blade_note),
+                 "%d blade(s) of %s: pivots %.2f and %.2f, rubber %.2f-%.2f and %.2f-%.2f m, sweeps %.0f and %.0f deg",
+                 out, g_truck_id.c_str(), g_blade_rows[0][0], out > 1 ? g_blade_rows[3][0] : 0.f,
+                 g_blade_rows[0][3], g_blade_rows[1][3], out > 1 ? g_blade_rows[3][3] : 0.f,
+                 out > 1 ? g_blade_rows[4][3] : 0.f, g_blade_rows[2][3] * 57.2957795f,
+                 out > 1 ? g_blade_rows[5][3] * 57.2957795f : 0.f);
+    else
+        snprintf(g_blade_note, sizeof(g_blade_note), "%s: the tables' blades did not make sense",
+                 g_truck_id.c_str());
+}
+
 void SetGlassDirt(bool on, float strength, int debug) {
     g_glass_on.store(on);
     g_glass_strength.store(strength > 0.f ? (strength < 4.f ? strength : 4.f) : 0.f);
@@ -1921,6 +2039,354 @@ int GlassResources(ID3D11DeviceContext* c) {
     return 1;
 }
 
+// N67d: the arc the glass draw uses. The INI's fan (or the test panel's rows) is the fallback; once the learner
+// has the truck's own arms, their pivot, their sweep and the angle they are at THIS frame take over, which is
+// what makes the clearing follow the blade instead of sitting still. [glass] wiper = 0 still turns it all off,
+// and the blade's length stays the INI's until the mesh is read (N67, step 3).
+struct Arc {
+    float px, py, len, half, phase, dir;
+    bool learned;
+};
+
+Arc CurrentArc(float model_phase, float model_dir) {
+    auto cl = [](float v, float lo, float hi) { return v < lo ? lo : v > hi ? hi : v; };
+    Arc a{g_wiper_px.load(std::memory_order_relaxed),    g_wiper_py.load(std::memory_order_relaxed),
+          g_wiper_len.load(std::memory_order_relaxed),   g_wiper_sweep.load(std::memory_order_relaxed),
+          model_phase, model_dir, false};
+    if (!(a.px > 0.f)) return a;  // [glass] wiper = 0
+    const float H = g_ws_top - g_ws_base_y;
+    if (!(g_ws_half > 0.f) || !(H > 0.3f)) return a;
+    wiper::Blade b[wiper::kBlades];
+    const int n = wiper::Get(b);
+    if (n < 1) return a;
+    float sx = 0.f, sy = 0.f, sh = 0.f, sa = 0.f, sl = 0.f;
+    bool turning = false;
+    for (int i = 0; i < n; ++i) {
+        sx += std::fabs(b[i].pivot[0]), sy += b[i].pivot[1];
+        sh += b[i].half, sa += b[i].angle, sl += b[i].length;
+        turning = turning || b[i].turning;
+    }
+    const float inv = 1.f / float(n);
+    sh *= inv;
+    if (!(sh > 0.05f)) return a;  // it has not swept enough yet to say where its arc is
+    a.px = cl(sx * inv / g_ws_half, 0.05f, 1.f);
+    a.py = cl((sy * inv - g_ws_base_y) / H, -0.5f, 1.f);
+    a.half = cl(sh, 0.05f, 1.5f);
+    if (sl > 0.f) a.len = cl(sl * inv / H, 0.05f, 2.f);  // 0 = the mesh has not been read, the INI's stays
+    a.learned = true;
+    if (!turning) {  // parked: the arc is known, but no stroke is running
+        a.phase = 9.f;
+        return a;
+    }
+    a.phase = cl((sa * inv) / sh, -1.f, 1.f);
+    static float prev = 0.f;
+    a.dir = a.phase >= prev ? 1.f : -1.f;
+    prev = a.phase;
+    return a;
+}
+
+// ---- N69: the arms' live angle, from the wiper model's own bone palette ----
+//
+// ---- N70: where each blade IS, from the game's own glass-drop constants ----
+//
+// [verified: the development notes on the engine's glass, section 6, 06/11] Every frame the
+// `def.glassdrops.*.wipe` pass runs, the game hands it up to four blades as segments in the pane's own 2D plane,
+// in metres: row 14/15 one tip, row 16/17 the vector to the other (whose length is the blade), row 10 the
+// reciprocal of that length (0 = an empty slot), row 5.xy the pane's half size. This is the one number N67 (learn
+// the arm from the draw matrices) and N69 (read the bone palette) both failed to measure -- and the game was
+// carrying it in a constant buffer the plugin already copies.
+//
+// It needs no conversion. The plane's x is the truck's x and its y runs up the pane, and each arm turns about the
+// pane's own normal to within 6.5 deg, so THE ANGLE OF THE BLADE IN THAT PLANE IS THE ANGLE OF THE ARM. The
+// rubber runs along the arm (the premap's ring is reach +- length/2, and the FH's 0.91 - 0.21 is exactly its
+// 0.70 blade), so `dir` is the radial direction: the pivot is `m - s * r_mid * dir_hat` for one of two signs, and
+// the right sign is the one whose pivot lands on the x the premap already knows. Nothing below needs the pane's
+// origin, so the +-6 cm estimate of the note's 6.4 is never leaned on.
+//
+// The phase is then |theta - theta_parked| / sweep: the same 0..1 the shader's per-pixel `t` is, so the ring and
+// the blade speak of one thing. The parked angle is read while telemetry says the wipers are off; the premap's
+// own rest arm, projected into the pane, is the fallback and, in the log, the check on it.
+//
+// What is NOT known yet, and only the game can say (note 6.8): whether this pass runs at all in dry weather. The
+// log counts the reads that came with no rain, so one clear-weather session answers it.
+std::mutex g_wline_mutex;
+struct WipeState {
+    float phase = 9.f;   // where the blade is across its stroke, 0 parked .. 1 far end; 9 = not known
+    float theta = 0.f;   // its angle in the pane's plane (rad)
+    float rest = 9.f;    // the parked angle, read while the wipers are off (9 = never seen parked)
+    float lo = 9.f, hi = -9.f;  // the range of angles seen, so the far end is known even without a park
+    float arm = 9.f;     // the premap's rest arm, projected into the pane -- the check on `rest`
+    float sign = 0.f;    // which way row 16/17 runs along the arm
+    float px = 0.f;      // the pivot x this implies, against the premap's own
+    float len = 0.f;     // the blade the game gave
+    int slot = -1;       // which component of the cbuffer this blade is
+    uint64_t t_ms = 0;   // when it was last read: stale means no stroke at all
+};
+WipeState g_wline[2];
+float g_wline_half[2] = {};
+long long g_wline_reads = 0, g_wline_dry = 0, g_wline_unmatched = 0;
+char g_wline_note[320] = "no .wipe draw seen yet";
+
+float WrapPi(float a) {
+    while (a > 3.14159265f) a -= 6.28318531f;
+    while (a < -3.14159265f) a += 6.28318531f;
+    return a;
+}
+
+// The premap's rest arm (truck frame, already in the plane it turns in) as an angle in the pane's own 2D plane:
+// x is the truck's x and y runs up the pane, which leans back by the slant the plugin measures.
+float ArmAngleInPane(const float* arm) {
+    const float s = g_ws_slope, n = std::sqrt(1.f + s * s);
+    return std::atan2((arm[1] + arm[2] * s) / n, arm[0]);
+}
+
+void TakeWipeLines(const WipeLines& w) {
+    if (g_blade_n <= 0) return;  // nothing to match against yet
+    const uint64_t now = GetTickCount64();
+    std::lock_guard<std::mutex> lock(g_wline_mutex);
+    g_wline_half[0] = w.half[0], g_wline_half[1] = w.half[1];
+    ++g_wline_reads;
+    if (!w.rain) ++g_wline_dry;
+    bool any = false;
+    for (int j = 0; j < g_blade_n && j < 2; ++j) {
+        const float* r0 = g_blade_rows[j * 3 + 0];  // pivot, inner radius
+        const float* r1 = g_blade_rows[j * 3 + 1];  // axis, outer radius
+        const float* r2 = g_blade_rows[j * 3 + 2];  // rest arm, signed sweep
+        const float rubber = r1[3] - r0[3], r_mid = 0.5f * (r0[3] + r1[3]);
+        // Which component of the cbuffer is this blade: the one whose length matches its rubber and whose
+        // implied pivot sits at the x the premap gives. Names and order are never trusted (note 6.5/6.9).
+        int best_i = -1;
+        float best_s = 1.f, best_err = 1e9f, best_px = 0.f;
+        for (int i = 0; i < 4; ++i) {
+            if (!(w.len[i] > 0.05f)) continue;
+            const float dn = std::sqrt(w.dir[i][0] * w.dir[i][0] + w.dir[i][1] * w.dir[i][1]);
+            if (!(dn > 0.05f)) continue;
+            if (std::fabs(dn - w.len[i]) > 0.25f * w.len[i]) continue;  // |dir| has to BE the blade
+            if (std::fabs(w.len[i] - rubber) > 0.15f) continue;         // and the same blade as the premap's
+            for (int s = -1; s <= 1; s += 2) {
+                const float px = w.mid[i][0] - float(s) * r_mid * w.dir[i][0] / dn;
+                const float err = std::fabs(px - r0[0]);
+                if (err < best_err) best_err = err, best_i = i, best_s = float(s), best_px = px;
+            }
+        }
+        if (best_i < 0 || best_err > 0.25f) continue;  // this pane says nothing about this blade
+        any = true;
+        WipeState& st = g_wline[j];
+        const float th = std::atan2(best_s * w.dir[best_i][1], best_s * w.dir[best_i][0]);
+        st.slot = best_i, st.sign = best_s, st.px = best_px, st.len = w.len[best_i];
+        st.theta = th, st.t_ms = now, st.arm = ArmAngleInPane(r2);
+        if (th < st.lo) st.lo = th;
+        if (th > st.hi) st.hi = th;
+        if (!w.wipers) st.rest = th;  // parked: this is where the stroke starts
+        float rest = st.rest;
+        if (rest > 8.f) {
+            // Never seen parked: the end of the range it has swept that lies nearer the premap's rest arm.
+            rest = st.hi > st.lo
+                       ? (std::fabs(WrapPi(st.lo - st.arm)) < std::fabs(WrapPi(st.hi - st.arm)) ? st.lo : st.hi)
+                       : st.arm;
+        }
+        const float sweep = std::fabs(r2[3]);
+        if (!(sweep > 0.05f)) continue;
+        const float t = std::fabs(WrapPi(th - rest)) / sweep;
+        st.phase = t < 0.f ? 0.f : (t > 1.f ? 1.f : t);
+    }
+    if (!any) ++g_wline_unmatched;
+    const float kDeg = 57.2957795f;
+    const WipeState& a = g_wline[0];
+    const WipeState& b = g_wline[1];
+    snprintf(g_wline_note, sizeof(g_wline_note),
+             "pane half %.2f x %.2f, %lld read(s), %lld with no rain, %lld matching no blade"
+             "; left slot %d len %.2f pivot x %.2f (files %.2f) theta %.0f rest %.0f arm %.0f phase %.2f"
+             "; right slot %d len %.2f pivot x %.2f (files %.2f) theta %.0f rest %.0f arm %.0f phase %.2f",
+             w.half[0], w.half[1], g_wline_reads, g_wline_dry, g_wline_unmatched, a.slot, a.len, a.px,
+             g_blade_rows[0][0], a.theta * kDeg, a.rest > 8.f ? 999.f : a.rest * kDeg,
+             a.arm > 8.f ? 999.f : a.arm * kDeg, a.phase, b.slot, b.len, b.px,
+             g_blade_n > 1 ? g_blade_rows[3][0] : 0.f, b.theta * kDeg, b.rest > 8.f ? 999.f : b.rest * kDeg,
+             b.arm > 8.f ? 999.f : b.arm * kDeg, b.phase);
+}
+
+// Where the game says the blade is, or 9 when it has not said so lately. No live blade, no stroke drawn: the
+// user, 06/11, on the glass animating with the truck's power off ("da a entender q o plugin n esta de fato
+// seguindo a paleta"). A pass that stops (the rain ends, the camera leaves the cab) stops the stroke too.
+float WipePhase(int i) {
+    if (i < 0 || i >= 2) return 9.f;
+    std::lock_guard<std::mutex> lock(g_wline_mutex);
+    const WipeState& st = g_wline[i];
+    if (st.phase > 8.f || GetTickCount64() - st.t_ms > 400) return 9.f;
+    return st.phase;
+}
+
+
+// See the note above TakeBlades. The pre-map gives the pivot and the axis; the game's own constants give where
+// the arm is. Everything here runs on the render thread, inside BeforeDrawBody.
+constexpr int kBoneRows = 64;        // float4 rows of the draw's constants to look through
+constexpr float kBoneAxisDot = 0.97f;  // the rotation must be about the arm's own axis
+constexpr float kBonePivot = 0.06f;  // m: how far its translation may be from pivot - R x pivot
+constexpr float kBoneStill = 0.015f;  // rad: under this the arm is parked, not turning
+
+constexpr int kBoneBudget = 24;      // draws a frame to look through before giving up until the next one
+
+float g_bone_angle[2] = {};          // where each arm stands, rad from rest, signed about its axis
+bool g_bone_found[2] = {};           // this arm has been read at least once (so "no rotation" means parked)
+long long g_bone_hits = 0, g_bone_scans = 0, g_bone_mats = 0, g_bone_turning = 0;
+int g_bone_frame = -1;               // the frame the arms were last read in
+int g_bone_budget_frame = -1, g_bone_budget = 0;
+// N69b: the closest a candidate ever came to being an arm, so a failure says which test it failed.
+// N69d: and the other layout -- a palette of absolute bone transforms, where the arm's own translation IS the
+// pivot. If neither ever comes close, the wiper model's draw is not reaching this at all.
+float g_bone_best_dot = 0.f, g_bone_best_err = 9.f, g_bone_best_abs = 9.f;
+
+// b = a x c, both 3x4 (row-major, translation in column 3).
+void Compose(const float a[12], const float c[12], float out[12]) {
+    for (int r = 0; r < 3; ++r)
+        for (int k = 0; k < 4; ++k)
+            out[r * 4 + k] = a[r * 4] * c[k] + a[r * 4 + 1] * c[4 + k] + a[r * 4 + 2] * c[8 + k] +
+                             (k == 3 ? a[r * 4 + 3] : 0.f);
+}
+
+// The signed angle of rotation `rot` about `axis`, measured on `ref` (a unit vector across the axis).
+float AngleAbout(const float rot[12], const float axis[3], const float ref[3]) {
+    float w[3];
+    for (int r = 0; r < 3; ++r) w[r] = rot[r * 4] * ref[0] + rot[r * 4 + 1] * ref[1] + rot[r * 4 + 2] * ref[2];
+    const float cr[3] = {ref[1] * w[2] - ref[2] * w[1], ref[2] * w[0] - ref[0] * w[2], ref[0] * w[1] - ref[1] * w[0]};
+    const float s = axis[0] * cr[0] + axis[1] * cr[1] + axis[2] * cr[2];
+    const float c = ref[0] * w[0] + ref[1] * w[1] + ref[2] * w[2];
+    return std::atan2(s, c);
+}
+
+// One draw of the truck: is its constant buffer the wiper model's bone palette? If it is, the arms' angles are
+// taken from it. `m` is this draw's model -> camera matrix, already found by the caller.
+void WiperBones(const uint8_t* ptr, UINT width, const float m[12]) {
+    if (g_blade_n <= 0 || !ptr) return;
+    // Once the arms have been read this frame there is nothing more to look for, and a frame that finds
+    // nothing stops after a few draws: the scan is not free.
+    const int frame = int(g_cost_frames);
+    if (g_bone_frame == frame) return;
+    if (g_bone_budget_frame != frame) g_bone_budget_frame = frame, g_bone_budget = kBoneBudget;
+    if (--g_bone_budget < 0) return;
+    float inv[12];
+    if (!Invert(m, inv)) return;
+    const size_t at = size_t(g_cb0_first) * 16;
+    const size_t have = width > at ? (width - at) / 16 : 0;
+    const int rows = int(have < kBoneRows ? have : kBoneRows);
+    if (rows < 4) return;
+    float buf[kBoneRows * 4];
+    if (!ReadRows(ptr + at, buf, size_t(rows) * 16)) return;
+    ++g_bone_scans;
+    bool any = false;
+    for (int k = 0; k + 4 <= rows; ++k) {
+        if (!MatrixAt(buf + k * 4)) continue;
+        ++g_bone_mats;
+        float skin[12];
+        Compose(buf + k * 4, inv, skin);  // the bone's own movement, in the truck's frame
+        // N69d: the other layout, measured whether or not this one turns -- a bone's absolute transform sits
+        // AT the pivot, so the distance from one says whether the wiper model is in front of us at all.
+        for (int i = 0; i < g_blade_n && i < 2; ++i) {
+            const float* pv = g_blade_rows[i * 3 + 0];
+            const float dx = skin[3] - pv[0], dy = skin[7] - pv[1], dz = skin[11] - pv[2];
+            const float d = std::sqrt(dx * dx + dy * dy + dz * dz);
+            if (d < g_bone_best_abs) g_bone_best_abs = d;
+        }
+        // Its rotation's axis and angle.
+        const float tr = skin[0] + skin[5] + skin[10];
+        const float ca = 0.5f * (tr - 1.f);
+        const float ang = std::acos(ca < -1.f ? -1.f : (ca > 1.f ? 1.f : ca));
+        if (!(ang > kBoneStill)) continue;
+        ++g_bone_turning;
+        float ax[3] = {skin[9] - skin[6], skin[2] - skin[8], skin[4] - skin[1]};
+        const float an = std::sqrt(ax[0] * ax[0] + ax[1] * ax[1] + ax[2] * ax[2]);
+        if (!(an > 1e-5f)) continue;
+        for (float& v : ax) v /= an;
+        for (int i = 0; i < g_blade_n && i < 2; ++i) {
+            const float* pv = g_blade_rows[i * 3 + 0];
+            const float* bx = g_blade_rows[i * 3 + 1];
+            const float* arm = g_blade_rows[i * 3 + 2];
+            const float dot = ax[0] * bx[0] + ax[1] * bx[1] + ax[2] * bx[2];
+            if (std::fabs(dot) > g_bone_best_dot) g_bone_best_dot = std::fabs(dot);
+            if (std::fabs(dot) < kBoneAxisDot) continue;
+            // An arm turns about its pivot: the translation has to be pivot - R x pivot, to centimetres.
+            float err = 0.f;
+            for (int r = 0; r < 3; ++r) {
+                const float rp = skin[r * 4] * pv[0] + skin[r * 4 + 1] * pv[1] + skin[r * 4 + 2] * pv[2];
+                const float want = pv[r] - rp;
+                err += (skin[r * 4 + 3] - want) * (skin[r * 4 + 3] - want);
+            }
+            if (std::sqrt(err) < g_bone_best_err) g_bone_best_err = std::sqrt(err);
+            if (err > kBonePivot * kBonePivot) continue;
+            g_bone_angle[i] = AngleAbout(skin, bx, arm);
+            g_bone_found[i] = true;
+            any = true;
+            break;
+        }
+    }
+    if (any) {
+        ++g_bone_hits;
+        g_bone_frame = frame;
+    } else if (g_bone_found[0] || g_bone_found[1]) {
+        // The palette is there but nothing is turning: the arms are parked at rest.
+        bool identity = false;
+        for (int k = 0; k + 4 <= rows && !identity; ++k) {
+            if (!MatrixAt(buf + k * 4)) continue;
+            float skin[12];
+            Compose(buf + k * 4, inv, skin);
+            const float tr = skin[0] + skin[5] + skin[10];
+            identity = tr > 2.99f && std::fabs(skin[3]) < 0.01f && std::fabs(skin[7]) < 0.01f &&
+                       std::fabs(skin[11]) < 0.01f;
+        }
+        if (identity) {
+            g_bone_angle[0] = g_bone_angle[1] = 0.f;
+            g_bone_frame = frame;
+        }
+    }
+}
+
+// Where each arm stands across its own stroke, 0 parked .. 1 at the far end; 9 = not read, use the estimate.
+float BonePhase(int i) {
+    if (i < 0 || i >= 2 || !g_bone_found[i] || i >= g_blade_n) return 9.f;
+    const float sweep = g_blade_rows[i * 3 + 2][3];
+    if (!(std::fabs(sweep) > 0.05f)) return 9.f;
+    const float t = g_bone_angle[i] / sweep;
+    return t < 0.f ? 0.f : (t > 1.f ? 1.f : t);
+}
+
+
+// N69f: the same ring test, on the CPU, from the very rows that go to the shader -- so the log can be held
+// against the screen. Three points across the measured pane, at half its height.
+void RingOnCpu(char* out, size_t n) {
+    if (g_blade_n <= 0 || !(g_ws_half > 0.f) || !(g_ws_top > g_ws_base_y + 0.3f)) {
+        snprintf(out, n, "no blades or no pane");
+        return;
+    }
+    const float y = 0.5f * (g_ws_base_y + g_ws_top);
+    const float z = g_ws_front + (y - g_ws_base_y) * g_ws_slope;
+    int at = 0;
+    for (int s = 0; s < 3 && at < int(n) - 24; ++s) {
+        const float x = (s - 1) * 0.6f * g_ws_half;  // left of middle, middle, right of middle
+        const float p[3] = {x, y, z};
+        float best = 0.f;
+        for (int i = 0; i < g_blade_n && i < 2; ++i) {
+            const float* g0 = g_blade_rows[i * 3 + 0];
+            const float* g1 = g_blade_rows[i * 3 + 1];
+            const float* g2 = g_blade_rows[i * 3 + 2];
+            float d[3] = {p[0] - g0[0], p[1] - g0[1], p[2] - g0[2]};
+            const float along = d[0] * g1[0] + d[1] * g1[1] + d[2] * g1[2];
+            for (int k = 0; k < 3; ++k) d[k] -= along * g1[k];
+            const float r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+            if (!(r > 1e-3f) || g2[3] == 0.f) continue;
+            const float u[3] = {d[0] / r, d[1] / r, d[2] / r};
+            const float cr[3] = {g2[1] * u[2] - g2[2] * u[1], g2[2] * u[0] - g2[0] * u[2], g2[0] * u[1] - g2[1] * u[0]};
+            const float ang = std::atan2(g1[0] * cr[0] + g1[1] * cr[1] + g1[2] * cr[2],
+                                         g2[0] * u[0] + g2[1] * u[1] + g2[2] * u[2]);
+            const float t = ang / g2[3];
+            const bool in_r = r > g0[3] && r < g1[3];
+            const float cov = in_r && t > 0.f && t < 1.f ? 1.f : 0.f;
+            if (cov > best) best = cov;
+        }
+        at += snprintf(out + at, n - at, "%s%+.2f m: r/t %s", s ? ", " : "", x, best > 0.5f ? "SWEPT" : "clear");
+    }
+}
+
+
 // N40 step 1: a forward draw over the main view's depth. When it is the truck's glass being multiplied over the
 // image, the same draw again with our pixel shader. The same tests as WindshieldDraw (that one measures the mesh,
 // this one dirties it), in the cheapest order: the depth-stencil state we already hold, then the blend, then the
@@ -1928,6 +2394,9 @@ int GlassResources(ID3D11DeviceContext* c) {
 void GlassDirtBody(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, INT base, UINT start_inst,
                    bool instanced) {
     if (g_glass_failed || g_ws.main_view < 0 || !g_dss || g_draw_off || !count || count > 300000) return;
+    // N69c: the truck's id and its windscreen's measurement arrive in either order, so this is tried here too
+    // (one atomic load once it is done), not only from inside the measurement, which happens once.
+    TakeBlades();
     if (!g_glass_consts_ok) return;  // N62: the dust pass has not run yet, so there are no constants to draw with
     const float strength = g_glass_strength.load(std::memory_order_relaxed);
     const float amount = GlassAmount();
@@ -1989,20 +2458,56 @@ void GlassDirtBody(ID3D11DeviceContext* c, UINT count, UINT inst, UINT start, IN
     }
     const float day = g_daylight.load(std::memory_order_relaxed);
     const int debug = g_glass_debug.load(std::memory_order_relaxed);
+    // N64: in the arc's test mode the arc is painted whatever the dirt and the wipers are doing -- the point of the
+    // shot is where it sits, not how much it took.
+    const float wipe = debug == 4 ? 1.f : g_wipe.load(std::memory_order_relaxed);
+    const float jet = debug == 4 ? 0.f : g_jet.load(std::memory_order_relaxed);
+    const float bright = g_glass_bright.load(std::memory_order_relaxed);
+    const Arc arc = CurrentArc(g_wipe_phase.load(std::memory_order_relaxed),
+                               g_wipe_dir.load(std::memory_order_relaxed));
+    const float phase = arc.phase;
     // N62: the dust pass's own constants for this frame, plus what only the glass needs. Uploaded once a frame
     // (every glass draw of the frame shares them), with UpdateSubresource as the pass does.
     if (g_glass_consts_new || strength != g_glass_strength_sent || std::fabs(day - g_glass_day_sent) > 0.01f ||
-        debug != g_glass_debug_sent) {
+        debug != g_glass_debug_sent || std::fabs(wipe - g_wipe_sent) > 0.004f ||
+        std::fabs(jet - g_jet_sent) > 0.004f || phase != g_phase_sent ||
+        std::fabs(bright - g_bright_sent) > 0.05f) {
         g_glass_consts.glass[0] = strength;
         g_glass_consts.glass[1] = day;
         g_glass_consts.glass[2] = float(debug);
         // N62b ([glass] on = 3): the position test of the shader itself (params.y = 2), in our own copy of the
         // pass's constants, so the glass paints where it thinks each pixel is. tools/probetest checks it.
         g_glass_consts.params[1] = debug == 3 ? 2.f : 0.f;
-        g_glass_consts.glass[3] = 0.f;
+        g_glass_consts.glass[3] = wipe;
+        g_glass_consts.wiper[0] = arc.px;  // N67d
+        g_glass_consts.wiper[1] = arc.py;
+        g_glass_consts.wiper[2] = arc.len;
+        g_glass_consts.wiper[3] = arc.half;
+        {  // N68: the blades the game itself describes, when the pre-map has them
+            std::lock_guard<std::mutex> lock(g_blade_mutex);
+            memcpy(g_glass_consts.wblade, g_blade_rows, sizeof(g_blade_rows));
+            // Where each blade is across its own stroke, 0 parked .. 1 at the far end. The stroke is still the
+            // plugin's own (the SDK says only on/off, never which of the three speeds is running), so this is
+            // the one part of the arc that is not the game's own number yet.
+            // N70: where the game's own `.wipe` constants put each blade this frame, and nothing at all
+            // where they have not said lately. A stroke drawn from truck.wipers alone cannot know which of the
+            // three speeds is running, nor that the truck's electrics are off, so it would be moving on its own
+            // (N69d, the user with the power off). The ring still shows what the blades have taken.
+            g_glass_consts.wnow[0] = WipePhase(0);
+            g_glass_consts.wnow[1] = WipePhase(1);
+            g_glass_consts.wnow[2] = float(g_blade_n);
+            g_glass_consts.wnow[3] = 0.f;
+        }
+        g_glass_consts.pane[2] = jet;  // N65: the jet, in our own copy (the pass's own constants keep pane[0..1])
+        g_glass_consts.pane[3] = bright;  // N64k
+        g_glass_consts.blade[0] = debug == 4 ? 1.f : g_wipe_before.load(std::memory_order_relaxed);
+        g_glass_consts.blade[1] = debug == 4 ? 9.f : phase;  // 9 = no stroke: the whole arc at once
+        g_glass_consts.blade[2] = arc.dir;
+        g_glass_consts.blade[3] = arc.learned && debug != 4 ? 1.f : 0.f;  // N67e: the ridge, only on a real arm
         c->UpdateSubresource(g_glass_cb, 0, nullptr, &g_glass_consts, 0, 0);
         g_glass_consts_new = false;
         g_glass_strength_sent = strength, g_glass_day_sent = day, g_glass_debug_sent = debug;
+        g_wipe_sent = wipe, g_jet_sent = jet, g_phase_sent = phase, g_bright_sent = bright;
     }
     // Only the pixel shader and slot b13, both put back at once. Nothing else is read or set: the targets, the
     // depth-stencil state, the blend, the viewport, the buffers and every other slot stay the game's.
@@ -2119,6 +2624,12 @@ void WindshieldStep(ID3D11DeviceContext* c) {
     float front = 1e9f, front_y = 0.f, top = -1e9f;
     double sy = 0, sz = 0, syy = 0, syz = 0;  // D11j: z on y, least squares (the glass's slant)
     int fit = 0;
+    // N64b: the band's vertices (x, y, z), kept until the plane is known: the buffer is unmapped right after this
+    // loop, and the width can only be taken once the plane is fitted. This runs on the drawing thread, one mesh at
+    // a time, so one static buffer is enough and costs nothing per frame.
+    constexpr int kWsPoints = 8192;
+    static float pts[kWsPoints][3];
+    int pn = 0;
     for (UINT i = 0; i < g_ws.vertices && sane; ++i) {
         float p[3];
         memcpy(p, static_cast<const uint8_t*>(m.pData) + size_t(i) * g_ws.stride, sizeof(p));
@@ -2132,6 +2643,8 @@ void WindshieldStep(ID3D11DeviceContext* c) {
             top = std::max(top, y);
             sy += y, sz += z, syy += double(y) * y, syz += double(y) * z, ++fit;
         }
+        if (known && y > eye[1] - 0.9f && y < eye[1] + 1.2f && z < eye[2] - 0.3f && pn < kWsPoints)
+            pts[pn][0] = x, pts[pn][1] = y, pts[pn][2] = z, ++pn;
     }
     c->Unmap(g_ws.staging, 0);
     WsRelease();
@@ -2139,9 +2652,21 @@ void WindshieldStep(ID3D11DeviceContext* c) {
     ++g_ws.measured;
     const double den = fit * syy - sy * sy;
     const float slope = fit >= 3 && den > 1e-6 ? std::min(std::max(float((fit * syz - sy * sz) / den), 0.f), 2.f) : 0.f;
+    // N64b: a side window stands in a plane of its own (nearly constant x), so of it only the edge where it meets
+    // the windshield comes near this plane -- and that edge is the windshield's own, which is the number wanted.
+    float half = 0.f;
+    for (int i = 0; i < pn; ++i)
+        if (std::fabs(pts[i][2] - (front + (pts[i][1] - front_y) * slope)) < 0.12f)
+            half = std::max(half, std::fabs(pts[i][0]));
     if (front < eye[2] - 0.6f && front > eye[2] - 2.0f) {
         std::lock_guard<std::mutex> lock(g_inside_mutex);
-        if (front < g_ws_front) g_ws_front = front, g_ws_base_y = front_y, g_ws_slope = slope, g_ws_top = top;
+        if (front < g_ws_front) {
+            g_ws_front = front, g_ws_base_y = front_y, g_ws_slope = slope, g_ws_top = top;
+            g_ws_half = half > 0.4f && half < 2.f ? half : 0.f;  // out of that range: not believed, no arc at all
+            // N67: the learner tests a pivot against this pane, so it cannot start before the pane is known.
+            wiper::SetPane(g_ws_front, g_ws_base_y, g_ws_slope, g_ws_top, g_ws_half);
+            TakeBlades();  // N68: and the blades the game's own files describe, now that the pane is known
+        }
     }
 }
 
@@ -2360,6 +2885,18 @@ void MeshPrintStep(ID3D11DeviceContext* c) {
     MrRelease();
 }
 
+void WiperWatch(const float m[12], uint64_t mesh);
+// N67c: a stable id for the mesh of a draw, when the pre-map has no part for it. The same mesh drawn again next
+// frame has the same index buffer and the same range, so this is the same number again.
+inline uint64_t DrawId(const rig::DrawKey& k) {
+    uint64_t h = 1469598103934665603ull;
+    auto mix = [&h](uint64_t v) { h ^= v, h *= 1099511628211ull; };
+    mix(uint64_t(reinterpret_cast<uintptr_t>(k.ib)));
+    mix(uint64_t(uint32_t(k.start)) | (uint64_t(uint32_t(k.count)) << 32));
+    mix(uint64_t(uint32_t(k.base)));
+    return h ? h : 1;
+}  // N67: defined with the rest of the learner's wiring
+
 bool BeforeDrawBody(ID3D11DeviceContext* c, UINT count, UINT start, INT base) {
     if (g_pass.view < 0) {
         g_pass.view = ViewId(g_vp);
@@ -2428,6 +2965,16 @@ bool BeforeDrawBody(ID3D11DeviceContext* c, UINT count, UINT start, INT base) {
     uint64_t part = 0;  // N57b
     const int unit = rig::Classify(g_pass.view, g_pass.group, key, m, interior, &cab, g_pass.vp.Width >= 1200.f, &part);
     if (unit < 0 || unit >= rig::kUnits) return g_verdict = -6, false;
+    // N69: is this the wiper model's draw? Its bone palette says where each arm is right now.
+    // N69 retired (the development notes on the engine's glass, 6.8): the bone palette is a measured dead end -- the nearest bone
+    // to a pivot is 0.93 m away in both conventions -- and the game's own `.wipe` constants answer it (N70).
+    (void)ptr, (void)width;
+    // N67: the truck's own draws, in the truck's frame, so the learner can find the arms that turn among them.
+    // Only in the camera's own view (a mirror's frame is the same truck seen twice, and once is enough), and only
+    // when the pane is known, which is what WiperWatch checks first.
+    // N67c: every draw of the truck, not only the pre-mapped ones -- `part` is 0 for a mesh the tables do not
+    // know, and a wiper arm is exactly that, so with `part` required not one arm was ever offered.
+    if (unit == 0 && g_pass.view == g_ws.main_view) WiperWatch(m, DrawId(key));
     // P1: the interior seen from outside (the pre-map's ext_model pieces): no dust. N57: a trailer's load: its own.
     const int kind = MeshPrint(c, unit, count, start, base, part);
     if (unit == 0 && kind == premap::kIntExt) return g_verdict = -10, false;
@@ -2443,6 +2990,31 @@ bool BeforeDrawBody(ID3D11DeviceContext* c, UINT count, UINT start, INT base) {
     g_marked.fetch_add(1, std::memory_order_relaxed);
     g_verdict = unit;
     return true;
+}
+
+// N67: a draw of the truck into the learner, in the truck's frame. The inverse of the truck -> camera frame is
+// the same for every draw of the view, so it is worked out once and kept until the frame or the view changes.
+uint64_t g_wiper_stamp = 0;
+int g_wiper_view = -1;
+bool g_wiper_inv_ok = false;
+float g_wiper_inv[12] = {};
+long long g_wiper_calls = 0, g_wiper_noframe = 0;  // N67b
+
+void WiperWatch(const float m[12], uint64_t mesh) {
+    ++g_wiper_calls;  // N67b
+    const uint64_t stamp = uint64_t(g_cost_frames);
+    if (stamp != g_wiper_stamp || g_pass.view != g_wiper_view) {
+        g_wiper_stamp = stamp, g_wiper_view = g_pass.view;
+        float f[12];
+        g_wiper_inv_ok = rig::GetFrame(g_pass.view, 0, f, false) && Invert(f, g_wiper_inv);
+    }
+    if (!g_wiper_inv_ok) return (void)++g_wiper_noframe;
+    float t[12];  // the mesh -> the truck
+    for (int r = 0; r < 3; ++r)
+        for (int col = 0; col < 4; ++col)
+            t[r * 4 + col] = g_wiper_inv[r * 4] * m[col] + g_wiper_inv[r * 4 + 1] * m[4 + col] +
+                             g_wiper_inv[r * 4 + 2] * m[8 + col] + (col == 3 ? g_wiper_inv[r * 4 + 3] : 0.f);
+    wiper::OnDraw(mesh, t);
 }
 
 // N11 at Present: the frame's counts and the game state go to the checker, its decisions come back.
@@ -2469,6 +3041,11 @@ void CompatFrame(const GameState& game) {
 }
 
 }  // namespace
+
+// N70: any thread (gpu_probe reads the pass's constants on the render thread). See TakeWipeLines.
+void SetWipeLines(const WipeLines& w) {
+    TakeWipeLines(w);
+}
 
 void OnDeferredDraw(ID3D11DeviceContext* c) {
     g_deferred_draws.fetch_add(1, std::memory_order_relaxed);
@@ -2559,12 +3136,12 @@ std::string StatsLine() {
     snprintf(b, sizeof(b),
              "%s: frames %lld, g-buffer draws %lld (no pointer %lld, not a matrix %lld, faults %lld), marked %lld, "
              "passes %lld, unit draws %lld (no projection %lld, no frame %lld), dust truck %.3f trailer %.3f | rig: "
-             "claimed %lld (cab %lld), missed %lld, searches %lld, found %lld (rejected %lld), predicted %lld, held %lld, lost %lld, interior %lld, "
+             "claimed %lld (cab %lld; rescued %lld, N76), missed %lld, searches %lld, found %lld (rejected %lld), predicted %lld, held %lld, lost %lld, interior %lld, "
              "promoted %lld, inherited %lld (unclassed %lld), reloaded %lld, restored %lld (map N47: truck %d/%d, trailer %d/%d); now truck in %d view(s) (%d draws; known %d: cab %d, chassis %d; pending %d), trailer in %d "
              "(%d; known %d, pending %d)",
              g_mode == 1 ? "tint" : g_mode == 3 ? "position test" : "dust", s.frames, g_gbuffer_draws.load(), g_no_pointer.load(), g_not_matrix.load(),
              g_faults.load(), g_marked.load(), g_passes.load(), g_unit_draws.load(), g_no_proj.load(), g_no_frame.load(),
-             g_dust[0].load(), g_dust[1].load(), s.claimed, s.cab_claims, s.missed, s.searches, s.found, s.rejected, s.predicted, s.held, s.lost,
+             g_dust[0].load(), g_dust[1].load(), s.claimed, s.cab_claims, s.rescued, s.missed, s.searches, s.found, s.rejected, s.predicted, s.held, s.lost,
              s.interior, s.promoted, s.inherited, s.unclassed, s.reloaded, s.restored, s.map_used[0], s.map[0], s.map_used[1], s.map[1], s.tracked_views[0], s.members[0], s.known[0], s.cab_members, s.chassis_members, s.pending[0], s.tracked_views[1],
              s.members[1], s.known[1], s.pending[1]);
     std::string line = b;
@@ -2597,19 +3174,50 @@ std::string StatsLine() {
         line += b;
     }
     {  // D11i
-        float front, eye_z, base_y, slope, top;
+        float front, eye_z, base_y, slope, top, half;
         {
             std::lock_guard<std::mutex> lock(g_inside_mutex);
             front = g_ws_front, eye_z = g_eye[2], base_y = g_ws_base_y, slope = g_ws_slope, top = g_ws_top;
+            half = g_ws_half;
         }
         if (front < 1e8f)
             snprintf(b, sizeof(b),
                      " | windshield (D11i): front z %.2f (%.2f m ahead of the eye), %d glass mesh(es) read; base y %.2f, "
-                     "slant dz/dy %.2f, top y %.2f (D11j)",
-                     front, eye_z - front, g_ws.measured, base_y, slope, top);
+                     "slant dz/dy %.2f, top y %.2f (D11j), half width %.2f (N64b: 0.00 = not measured, no wiping)",
+                     front, eye_z - front, g_ws.measured, base_y, slope, top, half);
         else
             snprintf(b, sizeof(b), " | windshield (D11i): not measured (%d glass mesh(es) read)", g_ws.measured);
         line += b;
+    }
+    {  // N67
+        int watched = 0, turning = 0, blades = 0;
+        wiper::Stats(&watched, &turning, &blades);
+        wiper::Blade wb[wiper::kBlades];
+        const int n = wiper::Get(wb);
+        snprintf(b, sizeof(b), " | wipers learned (N67): %d arm(s) of %d watched, %d turning", blades, watched,
+                 turning);
+        line += b;
+        {  // N67b: and why, when it is none of them
+            long long offered = 0, at_pane = 0;
+            bool pane_known = false;
+            float near_p[3] = {};
+            float near_off = -1.f;
+            wiper::Why(&offered, &at_pane, &pane_known, near_p, &near_off);
+            snprintf(b, sizeof(b), " (%lld draw(s) offered, %lld at the pane, the pane %s; nearest at %.2f %.2f "
+                                   "%.2f, %.2f m outside; %lld reached the watch, %lld with no frame)",
+                     offered, at_pane, pane_known ? "measured" : "NOT measured", near_p[0], near_p[1], near_p[2],
+                     near_off, g_wiper_calls, g_wiper_noframe);
+            line += b;
+        }
+        for (int i = 0; i < n; ++i) {
+            snprintf(b, sizeof(b), "; arm %d at %.2f %.2f %.2f, axis %.2f %.2f %.2f, sweep %.0f deg, now %+.0f, "
+                                   "blade %.2f m%s",
+                     i, wb[i].pivot[0], wb[i].pivot[1], wb[i].pivot[2], wb[i].axis[0], wb[i].axis[1], wb[i].axis[2],
+                     wb[i].half * 2.f * 57.2957795f, wb[i].angle * 57.2957795f, wb[i].length,
+                     wb[i].turning ? "" : " (parked)");
+            line += b;
+        }
+        line += "";
     }
     {  // N40 step 1
         if (!g_glass_on.load())
@@ -2631,10 +3239,37 @@ std::string StatsLine() {
             snprintf(b, sizeof(b),
                      " | glass dirt (N40): %lld draw(s) (dirt %.2f); forward draws at the truck %lld (%lld "
                      "instanced), elsewhere %lld, no frame %lld; glass depth %lld, multiply %lld (no resources %lld, "
-                     "no map %lld, dual-source %lld, veils over the reflection %lld, daylight %.2f)",
+                     "no map %lld, dual-source %lld, veils over the reflection %lld, daylight %.2f, brightness "
+                     "%.1f)"
+                     " | wipers (N64): the blades have taken %.2f of the dust in their arc (%.2f before the stroke "
+                     "running, blade at %.2f going %+.0f), the jet %.2f of the rest; arc %.2f %.2f %.2f %.1f deg",
                      g_glass_draws, GlassAmount(), g_glass_at_truck, g_glass_instanced, g_glass_far, g_glass_missed,
                      g_glass_depth_n, g_glass_blend_n, g_glass_res, g_glass_map, g_glass_dual, g_glass_veils,
-                     g_daylight.load());
+                     g_daylight.load(), g_glass_bright.load(), g_wipe.load(), g_wipe_before.load(),
+                     g_wipe_phase.load(), g_wipe_dir.load(),
+                     g_jet.load(), g_wiper_px.load(), g_wiper_py.load(), g_wiper_len.load(),
+                     g_wiper_sweep.load() * 57.2957795f);
+        {  // N70: where the game's own glass-drop constants put the blades
+            std::lock_guard<std::mutex> lock(g_wline_mutex);
+            char bb[400];
+            snprintf(bb, sizeof(bb), " | wipe lines (N70): %s", g_wline_note);
+            line += bb;
+        }
+        {  // N68: the blades from the game's own files
+            std::lock_guard<std::mutex> lock(g_blade_mutex);
+            char bb[200];
+            snprintf(bb, sizeof(bb), " | blades (N68): %s", g_blade_note);
+            line += bb;
+        }
+        {  // N67d: and the arc actually drawn, which is the learner's once it has the arms
+            const Arc a = CurrentArc(g_wipe_phase.load(), g_wipe_dir.load());
+            char ab[192];
+            snprintf(ab, sizeof(ab), " | arc drawn (N67d): %s, pivots %.2f %.2f, blade %.2f, half sweep %.1f deg, "
+                                     "blade at %.2f",
+                     a.learned ? "LEARNED from the arms" : "the INI's fan", a.px, a.py, a.len,
+                     a.half * 57.2957795f, a.phase);
+            line += ab;
+        }
         g_glass_draws = g_glass_missed = g_glass_depth_n = g_glass_blend_n = g_glass_far = 0;
         g_glass_pass = g_glass_res = g_glass_map = g_glass_at_truck = g_glass_instanced = g_glass_dual = 0;
         g_glass_veils = 0;

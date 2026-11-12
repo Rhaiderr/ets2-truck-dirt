@@ -54,7 +54,7 @@ if(DIRT_FULL_BUILD)
     # src/generated/shader_catalog.inc comes from tools/shader_catalog/build_catalog.py.
     add_library(ets2_truck_dirt SHARED src/plugin.cpp src/gpu_probe.cpp src/tint.cpp src/rig_tracker.cpp src/dirt_model.cpp
         src/dirt_state.cpp src/test_panel.cpp src/panel_draw.cpp src/compat.cpp src/pattern.cpp src/trigger_probe.cpp
-        src/wash.cpp src/overlay.cpp src/lang.cpp src/lang_embed.cpp src/payment.cpp src/station.cpp src/input_hook.cpp src/menu.cpp src/premap.cpp src/cargo_dirt.cpp "${DIRT_LANG_INC}"
+        src/wiper.cpp src/wash.cpp src/overlay.cpp src/lang.cpp src/lang_embed.cpp src/payment.cpp src/station.cpp src/input_hook.cpp src/menu.cpp src/premap.cpp src/cargo_dirt.cpp "${DIRT_LANG_INC}"
         src/exports.def)
     target_include_directories(ets2_truck_dirt PRIVATE third_party/scs_sdk/include src "${DIRT_VERSION_DIR}"
         "${CMAKE_BINARY_DIR}/generated")
@@ -122,6 +122,13 @@ target_compile_definitions(washtest PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS)
 target_compile_options(washtest PRIVATE ${DIRT_WARNINGS})
 set_target_properties(washtest PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/out")
 
+# N67: offline test of the wiper learner (tools/wipertest).
+add_executable(wipertest tools/wipertest/wipertest.cpp src/wiper.cpp)
+target_include_directories(wipertest PRIVATE src)
+target_compile_definitions(wipertest PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_options(wipertest PRIVATE ${DIRT_WARNINGS})
+set_target_properties(wipertest PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/out")
+
 # Offline test of the N10 test panel and the forced levels (tools/paneltest).
 add_executable(paneltest tools/paneltest/paneltest.cpp src/test_panel.cpp src/dirt_model.cpp src/menu.cpp
     src/overlay.cpp src/lang.cpp)
@@ -166,6 +173,13 @@ if(MSVC)
     target_compile_definitions(dustpreview PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX _CRT_SECURE_NO_WARNINGS)
     target_link_libraries(dustpreview PRIVATE d3d11 d3dcompiler windowscodecs ole32)
     set_target_properties(dustpreview PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/out")
+
+    # N64j: the windscreen's dirt rendered offline, the GLASS variant over the measured pane (tools/glasspreview).
+    add_executable(glasspreview tools/glasspreview/glasspreview.cpp)
+    target_include_directories(glasspreview PRIVATE src)
+    target_compile_definitions(glasspreview PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX _CRT_SECURE_NO_WARNINGS)
+    target_link_libraries(glasspreview PRIVATE d3d11 d3dcompiler windowscodecs ole32)
+    set_target_properties(glasspreview PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/out")
 
     # D5: the player's overlay (wash at the station, keys menu) drawn into PNGs with the real font (tools/overlaypreview).
     add_executable(overlaypreview tools/overlaypreview/overlaypreview.cpp src/panel_draw.cpp src/test_panel.cpp src/menu.cpp

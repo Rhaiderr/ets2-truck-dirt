@@ -9,7 +9,8 @@
 // - Only with [test] panel = 1 in the INI; panel_key (default ctrl+f5: the
 //   game has its own teleport on ctrl+f9) opens and closes it.
 // - Rows: the unit (truck, trailer, both), one per layer (dirt::Layer), the
-//   reach of the forced layers, "all real" and "clean all".
+//   reach of the forced layers, N64h the four numbers of the wipers' arc, then
+//   "all real" and "clean all".
 // - A layer starts from the level it shows and moves on a grid of 0.1 (0.01
 //   fine), clamped to 0..1; 0 and 1 directly; "real" gives the row back to the
 //   simulation. With both units the two get the same value (the truck's).
@@ -39,7 +40,24 @@ enum Key { kNone, kToggle, kUp, kDown, kLeft, kRight, kFineLeft, kFineRight, kZe
 enum Target { kTruck, kTrailer, kBoth, kTargets };
 
 // Rows, top to bottom.
-enum Row { kRowTarget, kRowLayer, kRowReach = kRowLayer + dirt::kLayers, kRowAllReal, kRowCleanAll, kRows };
+// N64h: the wipers' arc, after the reach: where the two pivots sit across the pane and how high (shares of the
+// windshield the plugin measures), how long the blade is (a share of the pane's height) and how wide the sweep
+// is (a share of 90 degrees). All four are 0..1, so they move on the same grid as the levels.
+enum Row {
+    kRowTarget,
+    kRowLayer,
+    kRowReach = kRowLayer + dirt::kLayers,
+    kRowArc,
+    kRowArcLast = kRowArc + 4,
+    kRowAllReal,
+    kRowCleanAll,
+    kRows
+};
+// N64k: the fifth is not the arc's -- it is how bright the dirt on the glass is in the scene's own units
+// ([glass] brightness), 0..1 here and x kGlassBrightMax there. It rides with these because it is tuned the same
+// way: looking at the windscreen and moving a row.
+constexpr int kArcValues = 5;
+constexpr float kGlassBrightMax = 50.f;
 
 constexpr float kStep = 0.1f, kFineStep = 0.01f;
 
@@ -69,6 +87,11 @@ public:
     // forced value). True when the forced levels changed.
     bool Press(Key k, const dirt::Coat shown[dirt::kUnits]);
     const dirt::Forced& Forced() const { return forced_; }
+    // N64h: the wipers' arc as the panel has it, 0..1 each (see Row). The INI's values go in at startup.
+    const float* Arc() const { return arc_; }
+    void SetArc(const float a[kArcValues]) {
+        for (int i = 0; i < kArcValues; ++i) arc_[i] = a[i] < 0.f ? 0.f : a[i] > 1.f ? 1.f : a[i];
+    }
     // D5: every level real again (the wash at the station cleaned the rig).
     void ClearForced() { forced_ = dirt::Forced(); }
     int Selected() const { return row_; }
@@ -87,6 +110,8 @@ private:
     int row_ = kRowLayer;
     Target target_ = kBoth;
     dirt::Forced forced_;
+    float arc_[kArcValues] = {0.45f, 0.02f, 0.48f, 0.47f, 0.20f};  // the INI's defaults (0.47 x 90 = 42 deg,
+                                                                   // 0.20 x 50 = brightness 10)
 };
 
 // N12: the warning while the truck and/or the trailer are known by their wheels

@@ -193,14 +193,52 @@ cbuffer C : register(b0) {
     float4 cavity_hi;       //   turn towards its middle
     float4 dash0;           // D11j: the windshield measured (D11i): its front z + 3 cm, the base's height, dz/dy, its top
     float4 dash1;           //   the front zone's half width, its floor, its back (the eye's z), w 1 = on
-    float4 glass;           // N62 (GLASS): x how strong the dirt is on the glass, y the daylight, z 1 = paint it
-                            //   magenta ([glass] on = 2), w -
+    float4 glass;           // N62 (GLASS): x how strong the dirt is on the glass, y the daylight, z the test mode
+                            //   ([glass] on: 2 magenta, 3 the place, 4 the wiper's arc), w N64: how much the blade
+                            //   has taken inside its arc, 0..1
+    float4 pane;            // N64b: the windshield measured: x half its width (m), y 1 = measured; N65: z how
+                            //   much of the layers a blade cannot touch the jet took inside the arc, 0..1; N64k: w
+                            //   how bright the dirt on the glass is in the scene's own units ([glass] brightness)
+    float4 blade;           // N64c: the stroke running now: x how much of the dust the blades had taken when it
+                            //   started (glass.w is after it), y where the blade is across the sweep, -1..1
+                            //   (9 = no stroke: the whole arc shows glass.w), z which way it goes (+1/-1); N67e:
+                            //   w 1 = the arm is the one the learner measured, so the rubber's ridge is drawn
+    float4 wiper;           // N64 (GLASS): the old guessed fan, kept for the arc's test mode: x the pivots'
+                            //   distance from the middle and y their height, both shares of the pane; z the blade's
+                            //   length as a share of the pane's height; w half the sweep (radians). x 0 = off
+    float4 wblade[6];       // N68 (GLASS): the two blades the game itself describes, three rows each, all in the
+                            //   TRUCK's frame: (pivot xyz, where the rubber starts, m from the pivot),
+                            //   (the axis it turns about xyz, where the rubber ends), (the arm at rest xyz, unit
+                            //   and already in the plane it turns in, how far it swings in radians, signed)
+    float4 wnow;            // N68: x, y where each blade is across its own stroke, 0 parked .. 1 far end
+                            //   (9 = no stroke running); z how many blades there are (0 = none, use nothing); w -
 };
+// N64 (the user, 06/11: with the wipers on "deveria dar uma limpada na poeira mas nao tirar o filme nem a
+// fuligem"): inside the arc the blades sweep, a DRY blade takes the loose dust and little else. The film and the
+// soot are not touched at all (they are greasy: a dry blade smears them), and the washer jet of the next step is
+// what takes everything. [estimativa: falta o teste no jogo]
+// How much of what the blade took (glass.w, from the model, which already knows a dry blade leaves a haze behind)
+// reaches each layer: all of it for the dust and the grit -- the "poeira" of the user's words -- and a fraction of
+// it for the two the rubber smears rather than removes.
+static const float kWipeDust = 1.00;  // the dust level and the grit
+static const float kWipeSalt = 0.35;  // dried salt: a crust the rubber smears more than it removes
+static const float kWipeMud = 0.25;   // mud: the blade pushes it aside, it does not wash it
+
 // Lattice hash (D. Hoskins' hash13): no visible grid even far from the origin.
 float hash(float3 p) {
     p = frac(p * 0.1031);
     p += dot(p, p.zyx + 31.32);
     return frac((p.x + p.y) * p.z);
+}
+// N64d: bands along the way a blade travels, for the mud it smears. One value per band, smoothly joined, taken on
+// the distance from the pivot: bands of a constant radius are arcs that follow the sweep, which is the way a blade
+// drags mud. The pattern does not move -- nothing here remembers where the mud went from one frame to the next --
+// so it reads as mud already smeared, not as mud being smeared this instant.
+float smear_bands(float r, float seed) {
+    const float t = r * 7.0;
+    const float i = floor(t), f = frac(t);
+    const float s = f * f * (3.0 - 2.0 * f);
+    return lerp(hash(float3(i, seed, 3.0)), hash(float3(i + 1.0, seed, 3.0)), s);
 }
 float vnoise(float3 x) {
     float3 i = floor(x), f = frac(x);
@@ -291,9 +329,12 @@ void over(inout float4 acc, inout float2 sacc, float3 c, float a, float s, float
     sacc = float2(s * sa + sacc.x * (1.0 - sa), sa + sacc.y * (1.0 - sa));
 }
 // N31: one layer over the stack where the road wore the tread: `keep` of its coverage, its colour and
-// specular `grey` of the way to a matte light grey film.
+// specular `grey` of the way to a matte film the colour of the road.
+// N71 (the user, ATS 07/11): that film was a *light* grey (0.36), so a worn tread came out lighter than the
+// dusty side walls -- the other way round from a real tyre, whose contact patch is the darkest part of it.
+// Asphalt leaves a dark grey.
 void over_worn(inout float4 acc, inout float2 sacc, float3 c, float a, float s, float sa, float keep, float grey) {
-    over(acc, sacc, lerp(c, float3(0.36, 0.34, 0.31), grey), a * keep, lerp(s, 0.01, grey), sa * keep);
+    over(acc, sacc, lerp(c, float3(0.055, 0.052, 0.048), grey), a * keep, lerp(s, 0.01, grey), sa * keep);
 }
 )"  // four literals: MSVC 2022 caps one at 16380 characters (C2026)
 R"(
@@ -420,7 +461,90 @@ float4 shade(float4 pos) {
     const float3 ns = n;
     s_p = p, s_n = n, s_fp = fp, s_g = g;  // D11k
 
-    const float dust = params.x;
+)"  // eight literals: MSVC 2022 caps one at 16380 characters (C2026)
+R"(
+    // N64: how much the blades have taken at this pixel. The pane comes from the windshield the plugin measures in
+    // the game (D11i/D11j: dash0 = its front z, the base's height, dz/dy, the top; dash1.x = its half width), so no
+    // per-truck data is needed yet. Only the windshield is wiped: a pixel has to sit on its slanted plane, which
+    // leaves the side and rear windows out. Inside the pane each blade sweeps a sector of a disc around its pivot.
+    float wiped = 0.0;   // N64: of the dust, here
+    float jetted = 0.0;  // N65: of everything else, here
+    float smear = 1.0;   // N64d: what the blade did to the mud it could not take
+    float ridge = 0.0;   // N67e: the dirt the rubber is pushing along in front of itself, right now
+    float3 ring_dbg = 0.0;  // N69e ([glass] on = 6): the first blade's radius, place across the stroke, coverage
+    float2 pane_q = 0.0;      // N64i: where this pixel is on the pane: across (m), above its base (m)
+    float pane_h = 1.0;       // its height (m)
+    bool on_pane = false;     // and whether this pixel is on the windshield at all
+#ifdef GLASS
+    [branch] if (pane.y > 0.5 && abs(p.x) < pane.x) {
+        const float H = max(dash0.w - dash0.y, 0.1);              // the pane's height (m)
+        const float plane = dash0.x + max(p.y - dash0.y, 0.0) * dash0.z;  // the windshield's own plane at this height
+        const float2 q = float2(p.x, p.y - dash0.y);              // on the pane: across, above its base
+        // N69c: and it has to FACE the way the truck is going. A door window is tall and sits at nearly the
+        // windscreen's own half width, so a slab of it near the A-pillar falls inside any box drawn around the
+        // windscreen's plane -- which is the square the user saw. What a pane faces cannot be confused.
+        pane_q = q, pane_h = H;
+        on_pane = abs(p.z - plane) < 0.18 && q.y > -0.15 && q.y < H + 0.15 && abs(ns.z) > 0.55;
+        [branch] if (on_pane) {
+            float bands = 0.0;
+            // N68e: one pass per blade, each solved in the TRUCK's frame around its own axis -- the game's own
+            // pivot, arm and sweep (tools/premap reads them from the cabin's wiper model and animation).
+            [loop] for (int bi = 0; bi < 2; ++bi) {
+                [branch] if (float(bi) >= wnow.z) break;
+                const float4 g0 = wblade[bi * 3 + 0];   // the pivot, and where the rubber starts
+                const float4 g1 = wblade[bi * 3 + 1];   // the axis it turns about, and where the rubber ends
+                const float4 g2 = wblade[bi * 3 + 2];   // the arm at rest, and how far it swings (signed)
+                float3 d = p - g0.xyz;
+                d -= g1.xyz * dot(d, g1.xyz);           // onto the plane the arm turns in
+                const float r = length(d);
+                [branch] if (r < 1e-3 || g2.w == 0.0) continue;
+                const float3 u = d / r;
+                // Where this pixel sits across the stroke: 0 parked, 1 at the far end.
+                const float ang = atan2(dot(g1.xyz, cross(g2.xyz, u)), dot(g2.xyz, u));
+                const float t = ang / g2.w;
+                // The rubber is a segment of the arm, so what it sweeps is a RING, not a disc.
+                const float soft = 0.05;                 // m, the soft edge of the rubber's ends
+                const float across = 0.04;               // of the stroke, the soft edge at each end
+                const float cov = smoothstep(g0.w - soft, g0.w + soft, r) * smoothstep(g1.w + soft, g1.w - soft, r) *
+                                  smoothstep(-across, across, t) * smoothstep(1.0 + across, 1.0 - across, t);
+                if (bi == 0) ring_dbg = float3(r * 0.5, t, cov);  // N69e
+                [branch] if (cov <= 0.0) continue;
+                // N64c: while a stroke is running, a pixel the blade has already crossed shows what the blades
+                // have taken and one it has not yet shows what they had taken before this stroke, so the clearing
+                // travels across the pane with the blade instead of appearing all at once.
+                float took = glass.w;
+                const float at = bi > 0 ? wnow.y : wnow.x;   // where this blade is now, across its own stroke
+                [branch] if (at < 8.0) {
+                    const float edge = 0.05;
+                    const float behind = blade.z > 0.0 ? smoothstep(at + edge, at - edge, t)
+                                                       : smoothstep(at - edge, at + edge, t);
+                    took = lerp(blade.x, glass.w, behind);
+                    // N67e: the rubber does not make dirt vanish, it pushes it along; the ridge it carries is
+                    // what the eye actually follows across the glass.
+                    const float ahead = (t - at) * blade.z;   // > 0: the blade has not come this far yet
+                    const float wide = 0.05;
+                    ridge = max(ridge, cov * exp(-ahead * ahead / (wide * wide)) * saturate(glass.w) *
+                                       step(-0.25 * wide, ahead));
+                }
+                wiped = max(wiped, cov * took);
+                jetted = max(jetted, cov * saturate(pane.z));
+                bands = max(bands, cov * smear_bands(r, bi > 0 ? 11.0 : 5.0));
+            }
+            // N64d: the mud the blade could not lift is pushed into bands along its way: less of it where the
+            // rubber scraped, more where it piled up. The blade's reach is what decides how marked this is.
+            smear = 1.0 + (bands * 2.0 - 1.0) * 0.55 * saturate(max(wiped, jetted) * 1.5);
+        }
+    }
+    if (glass.z > 3.5 && glass.z < 4.5)  // [glass] on = 4: the arc, red for the blades and blue for the jet
+        return float4(1.0 - jetted, 0.1, jetted, max(wiped, jetted));
+    // N69f ([glass] on = 6): what the shader RECEIVED for the first blade, flat over the whole pane -- red
+    // where the rubber starts (m), green where it ends (halved), blue how far the arm swings (rad, halved).
+    // One pixel gives three numbers, and against the ones the log prints they either match or they do not.
+    if (glass.z > 5.5)
+        return float4(saturate(wblade[0].w), saturate(wblade[1].w * 0.5), saturate(wblade[2].w * 0.5), 1.0);
+#endif
+
+    const float dust = params.x * (1.0 - saturate(kWipeDust * wiped + jetted));
 #ifdef GLASS
     if (params.w < 0.5 || !solvable) return none;  // N62: no normal or depth of the game's to check
 #else
@@ -444,7 +568,7 @@ float4 shade(float4 pos) {
     if (cavity_lo.w > 0.5 && all(p > cavity_lo.xyz) && all(p < cavity_hi.xyz) &&
         dot(n, normalize(0.5 * (cavity_lo.xyz + cavity_hi.xyz) - p)) > 0.15)
         return diag ? float4(0, 0.6, 1, 1) : none;
-)"  // seven literals: MSVC 2022 caps one at 16380 characters (C2026)
+)"  // eight literals: MSVC 2022 caps one at 16380 characters (C2026)
 R"(
     // D11j (the user, 30/10: the dashboard's top still dusty): it slopes down to the glass, facing up and ahead, away
     // from the cavity's middle. Behind the windshield's slanted plane (vertical below its base), ahead of the eye: the
@@ -463,15 +587,18 @@ R"(
     float3 wm = 0;     // on a wheel: the pixel in the tyre's own frame (turns with it), in radii
     float wr = 1.0;    // on a wheel: its radius
     float wid = 0.0;   // on a wheel: its index (each wheel its own pattern)
+    float2 wst = float2(1, 0), wrt = float2(1, 0);  // N72: its steering and its rolling turn, to undo them
     float tread = 0.0; // on a wheel: on the tread (facing out), not on a side wall
     const int wheels = (int)params.z;
     // N58: the mud's rays off the wheel that throws the most here (its centre at rest, this pixel from it).
     float ray_w = 0.0, ray_z = 0.0, ray_y = -1.0, ray_d = 1.0, ray_id = 0.0;
     const float mud_reach = (body0.x * reach0.x + body0.y * reach0.y) / max(body0.x + body0.y, 1e-4);
+    float wz0 = 1e9, wz1 = -1e9;  // N74: the first and the last axle along the unit
     [unroll] for (int i = 0; i < 14; ++i) {
         if (i >= wheels) continue;
         const float4 w = wheel[i];
         const float r = max(w.w, 0.3);
+        wz0 = min(wz0, w.z), wz1 = max(wz1, w.z);
         // The arches and the fan are the body's: around the wheel at rest (its centre at height w.w).
         const float d = length(float2(p.y - w.w, p.z - w.z));
         const float lateral = abs(abs(p.x) - abs(w.x));
@@ -493,11 +620,24 @@ R"(
         // its bottom reached past the edge and took the body's lowest dirt (the near black oily soot); straight down
         // from the axle the edge goes up to 12% further (below it there is only the road, never one of our pixels).
         const float down = smoothstep(0.3, 0.8, -rw.y / max(dw, 1e-3));
-        if (spin.y < 0.5 && dw < edge * (1.0 + 0.12 * down) && across > -0.35 && across < outer) {  // N16: no cab pixel
+        // N73 (the user, ATS 07/11, with a print: "there is a black stain at the bottom of the tyre... it looks
+        // like a shadow in the wrong place"). The same stain the N58 met on 04/11, and widening the edge by 12%
+        // straight down was not enough. What it is: a pixel this test loses is the *body's*, and the body's dirt
+        // is laid by height (`low`, near black at the ground, over a dithered threshold), so what shows is a flat
+        // line across the tyre with a speckled edge -- measured on the print at ~10 cm over the road, flat across
+        // 65 cm of tyre, which no circle about an axle can draw. Under the axle, inside the wheel's own window
+        // across and within a tyre's radius along the unit, there is nothing of ours but the tyre: the mudguard
+        // is above the axle (and its trailing edge well over this height), the tanks and the steps are further
+        // back than a radius. So the lowest 0.45 r is the tyre's whatever the radius we were given says, and the
+        // bottom of a tyre can no longer fall to the body. The cap keeps the mudguard out of it.
+        const bool bottom = rw.y < 0.0 && abs(rw.z) < edge && p.y < 0.45 * r;
+        if (spin.y < 0.5 && (dw < edge * (1.0 + 0.12 * down) || bottom) && across > -0.35 &&
+            across < outer) {  // N16: no cab pixel
             ring = dw / r;
             wr = r;
             wid = i;
             wm = float3(rw.x, rw.y * rt.x - rw.z * rt.y, rw.y * rt.y + rw.z * rt.x) / r;
+            wst = st, wrt = rt;  // N72
             tread = 1.0 - smoothstep(0.3, 0.7, abs(ns.x * st.x - ns.z * st.y));
         }
         zone = max(zone, smoothstep(1.75, 1.0, d / r) * smoothstep(0.9, 0.3, lateral));
@@ -546,6 +686,21 @@ R"(
 )"  // two literals: MSVC 2022 caps one at 16380 characters (C2026)
 R"(
     const float side_film = on_wheel ? 0.0 : saturate(spin.z);  // N31: a trailer's body
+    // N74 (the user, 12/11: "as realistic as possible... take the physics of the movement into account for where
+    // the dirt goes"). What a moving rig's own wheels raise only ever travels BACK: the air carries it rearwards and
+    // the layer of slow, dirty air along the sides thickens from the nose to the tail, where the wake behind the
+    // unit holds it against the last metres. So (a) every layer the wheels raise grows along the unit (`aft`, 0 at
+    // the nose, 1 at the tail; a trailer's nose is ~1 m ahead of its kingpin, a truck's 1.4 m ahead of its first
+    // axle), and (b) ahead of the truck's first axle nothing of its own arrives (`ahead`): the bumper and the grille
+    // keep only what the traffic in front and the still air leave -- the arch itself is the wheel's (zone).
+    float aft = 0.5, ahead = 0.0;
+    [branch] if (wheels > 0) {
+        const float zf = spin.z > 0.5 ? min(wz0 - 1.4, -1.0) : wz0 - 1.4;
+        aft = saturate((p.z - zf) / max(wz1 + 1.2 - zf, 1.0));
+        ahead = spin.z > 0.5 ? 0.0 : smoothstep(wz0 - 0.35, wz0 - 1.1, p.z) * (1.0 - zone);
+    }
+    const float along = spin.z > 0.5 ? lerp(0.62, 1.22, aft) : lerp(0.86, 1.10, aft);
+    float sweep = 0.5, swept = 0.0;  // N74: the streaks the airflow draws along the sides (below)
     float weight, shape, detail;
     if (on_wheel) {
         // The wheel: in the tyre's frame, the tread taking the most. N58b: half of it in radial streaks.
@@ -556,8 +711,18 @@ R"(
         // Body: large patches fixed to the unit, slightly stretched downwards.
         shape = fbm(p * float3(1.0, 0.65, 1.0), 1.4, fp);
         detail = grain(p, fp);
-        const float low = pow(smoothstep(2.3, 0.15, p.y), 1.3);
         const float vertical = 1.0 - smoothstep(0.35, 0.6, abs(ns.y));
+        // N74: low on the sides nothing settles in round patches at speed: what the wheels throw is drawn out
+        // along the way the air runs, in long streaks that climb a little towards the tail (the plume off a wheel
+        // rises as it is carried back). A noise ~2 m long and ~25 cm tall, sheared so its lines rise rearwards;
+        // the dust's patches, the soot's coat and the mud's clumps all take it (the same air carries them).
+        swept = vertical * smoothstep(2.4, 0.7, p.y) * 0.6;
+        [branch] if (swept > 0.0) {
+            const float3 sw = float3(p.x * 0.7, p.y * 2.4 - p.z * 0.3, p.z * 0.36) + 57.3;  // two octaves: half fbm's cost
+            sweep = 0.62 * fnoise(sw, 1.4, fp * 2.4) + 0.38 * fnoise(sw.zxy * float3(0.4, 1.0, 2.5) + 23.9, 3.1, fp * 2.4);
+            shape = lerp(shape, sweep, swept);
+        }
+        const float low = pow(smoothstep(2.3, 0.15, p.y), 1.3) * along * (1.0 - 0.55 * ahead);
         // N23: a film of dust over the whole body, thinner high up: only the high levels reach it. N31: not on a
         // trailer's sides, which take the side film below instead.
         const float film = (0.18 + 0.14 * smoothstep(4.0, 1.0, p.y)) * (1.0 - side_film * vertical);
@@ -565,7 +730,7 @@ R"(
         // N33 (the user, 29/10: the trailer's side must follow the rest of the rig's dirt, not only near the top
         // level): a trailer's side weighs like the truck's body at that height, heavier low down, so its patches
         // come at the same levels as the truck's skirts and cab.
-        weight = max(weight, side_film * vertical * (0.30 + 0.48 * smoothstep(3.8, 1.0, p.y)));
+        weight = max(weight, side_film * vertical * (0.30 + 0.48 * smoothstep(3.8, 1.0, p.y)) * along);  // N74
         // Faces: dust settles on top faces and in the wake (rear faces).
         weight += smoothstep(0.35, 0.97, ns.y) * (0.30 + 0.25 * shape);
         weight += smoothstep(0.2, 0.9, ns.z) * 0.30;
@@ -573,6 +738,18 @@ R"(
         float streak = 0.0;  // D13f: only where it adds (upright faces below 3.2 m)
         [branch] if (vertical > 0.0 && p.y < 3.2) streak = fbm(float3(p.x, p.y * 0.08, p.z) + 3.3, 6.0, fp);
         weight += vertical * smoothstep(0.55, 0.75, streak) * 0.18 * smoothstep(3.2, 0.8, p.y);
+#ifdef GLASS
+        // N64f (the game, 06/11: the windscreen stayed clean with the body at full dust). Every weight above is
+        // the body's: `low`, which carries most of it, dies above 2.3 m, because the dust the wheels lift settles
+        // low down. A windscreen sits at 2.2 to 3.6 m [measured here: D11i on this truck], so all of it falls in
+        // the part of the model that is meant to stay nearly clean -- and it was getting the thin film alone.
+        // A pane does not get dirty that way: it faces the way the truck is going and the airflow drives into it
+        // everything the road lifts, which is why a windscreen is filthy while the roof above it is not. So on the
+        // glass the weight does not fall off with height at all; it follows how squarely the pane meets the wind.
+        // |ns.z| and not -ns.z: the pane's normal is turned towards the camera, so its sign changes with where the
+        // camera is, and the dirt must not.
+        weight = max(weight, 0.45 + 0.40 * saturate(abs(ns.z)));
+#endif
         weight = saturate(weight);
     }
     const float vertical = on_wheel ? 0.0 : 1.0 - smoothstep(0.35, 0.6, abs(ns.y));
@@ -594,6 +771,8 @@ R"(
             heavy = saturate(heavy + 0.2);
         }
     }
+)"  // N74: one more literal here: MSVC 2022 caps one at 16380 characters (C2026)
+R"(
     // Coverage: patches grow from the dirtiest spots as the level rises, with a
     // soft edge (two scales), over a thin film everywhere; past 0.9 the heavy coat.
     const float hd = high(dust);
@@ -611,7 +790,7 @@ R"(
         const float cloud = fbm(p * float3(0.7, 0.5, 0.7) + 41.3, 0.8, fp);
         const float hang = fbm(float3(p.x, p.y * 0.1, p.z) + 7.7, 4.0, fp);
         const float lowness = smoothstep(3.8, 1.0, p.y);
-        side_cloud = side_film * vertical * (0.7 + 1.0 * lowness) *
+        side_cloud = side_film * vertical * (0.7 + 1.0 * lowness) * along *  // N74: thicker towards the tail
                      saturate(0.2 + 1.6 * cloud + 0.8 * (hang - 0.5) + 0.3 * (shape - 0.5));
         a = max(a, dust * side_cloud);
     }
@@ -636,7 +815,9 @@ R"(
     // varied by a mid-size pattern so a fully covered area is not flat; the
     // heavy coat darker and browner where it is thick.
     const float tone = fbm(sq * float3(1.0, 1.6, 1.0) + 9.7, 3.2, fq);
-    const float3 light_dust = float3(0.50, 0.45, 0.37);
+    // N75 (the user, 12/11: "review the colour, the gloss and the light of every dirt texture"): dry road dust
+    // reflects 0.35-0.45 of the light; at 0.50 with a +-25% pattern its bright spots reached 0.62, which is chalk.
+    const float3 light_dust = float3(0.47, 0.42, 0.34);
     const float3 grime = float3(0.25, 0.23, 0.20);
     const float low = smoothstep(1.2, 0.2, p.y);
     float blotch = 0.0;  // D13f: only where it tints (the wheels, the body below 1.2 m)
@@ -645,7 +826,7 @@ R"(
     const float grime_mix = on_wheel ? 0.3 * blotch + 0.15
                                      : low * (0.25 + 0.6 * blotch) + fan * 0.2 + side_film * vertical * 0.5 * smoothstep(3.2, 1.0, p.y);
     float3 col = lerp(light_dust, grime, saturate(grime_mix));
-    col *= 0.74 + 0.5 * tone + 0.08 * (detail - 0.5);
+    col *= 0.80 + 0.38 * tone + 0.08 * (detail - 0.5);  // N75: 0.80-1.18 (was 0.74-1.24)
     col = lerp(col, col * float3(0.55, 0.47, 0.38), hd * smoothstep(0.15, 0.65, heavy));
     a *= 0.82 + 0.2 * tone;
     a = dust > 0.0 ? a : 0.0;
@@ -656,19 +837,51 @@ R"(
     // rest, but rolling all the time it should not get as dirty at the limit as the other dirt, except the mud"): on the
     // tread the dust comes fast (full by level ~0.15, ~1 real minute of dirt road) and stops at ~45%; the side walls as
     // the rest. (The mud, a layer of its own, cakes on the tread as before.)
-    if (on_wheel) a = lerp(a, 0.45 * saturate(dust * 7.0) * (0.92 + 0.16 * detail), tread);
+    // N71 (the user, ATS 07/11, a print of the drive wheels with a little soot: the tread "needs a bigger
+    // difference in tone, a little darker"): the road's tone is the asphalt's dark grey, not the beige the body
+    // takes -- and a rolling contact patch holds far less loose dust than D14c gave it. On the tread the film is
+    // thinner (0.45 -> 0.12) and goes to that tone; the side walls and the rims keep the beige. The salt stays
+    // as it was: in winter it really does cake on a tread.
+    // N75 (the user, 12/11: the tread "still not very realistic when it is dirty"). N71 gave the tread the
+    // asphalt's dark tone whatever the road, so a tyre coming off a dirt road had beige side walls around a clean
+    // black band -- and a tyre rolling on dirt is dusted over its whole face at every turn, crowns included. The
+    // road's tone is the road's: while nothing paved has scrubbed it (body1.w, 0 on dirt) the band carries the
+    // dust, a little darker where it is pressed; the first few hundred metres of asphalt take it to N71's thin
+    // dark film.
+    if (on_wheel) {
+        const float scrub = smoothstep(0.0, 0.6, saturate(body1.w));
+        a = lerp(a, lerp(0.55, 0.12, scrub) * saturate(dust * 7.0) * (0.92 + 0.16 * detail), tread);
+        col = lerp(col, lerp(col * 0.9, float3(0.07, 0.065, 0.058) * (0.7 + 0.6 * tone), scrub), tread);
+    }
     // D11k (N44): up close (a pixel under ~1 mm) the film breaks into grains of ~1-2 mm, lighter and darker than it,
     // with a few bits of grit of ~2-6 mm; both stand out a little (the NORM variant's relief).
-    [branch] if (a > 0.0 && !on_wheel && fp < 0.004) {
+    // N72 (the user, 07/11, on the tyre of the N71 print: "the colours look right, but I think it is still short
+    // of realism -- I do not know if it is the play of light or the want of texture"): the wheel was left out of
+    // this from the start, and that is why its dirt was perfectly smooth up close while the cab's had grain. The
+    // reason was real -- these grains are laid in the unit's frame and would slide over a turning tyre -- so on a
+    // wheel they are laid in the tyre's own frame (wm, in radii, back to metres, one offset per wheel) and the
+    // slope they leave is turned back into the unit's frame for the relief pass. At speed they fade out: the
+    // tyre's pattern blurs into rings there, and 5 mm grains turning would only strobe.
+    const float grain_w = on_wheel ? 1.0 - smoothstep(0.15, 0.5, blur) : 1.0;
+    [branch] if (a > 0.0 && grain_w > 0.0 && fp < 0.004) {
+        const float3 gp = on_wheel ? wm * wr + wid * 2.37 : p;
         float3 d1, d2;
-        const float2 g1 = specks(p, 0.005, 0.75, fp, d1);
-        const float2 g2 = specks(p + 7.7, 0.014, 0.22, fp, d2);
-        const float ga = saturate(g1.x * smoothstep(0.05, 0.4, a));
+        // N72: on a tyre the grains are coarser and show through a thinner film than on paint -- what the wheels
+        // throw up is grit, not the fine dust that settles on a cab, and a pale grain on black rubber reads at a
+        // tenth of the coverage it needs on a painted panel.
+        const float2 g1 = specks(gp, on_wheel ? 0.008 : 0.005, 0.75, fp, d1);
+        const float2 g2 = specks(gp + 7.7, on_wheel ? 0.020 : 0.014, 0.22, fp, d2);
+        const float ga = saturate(g1.x * (on_wheel ? smoothstep(0.02, 0.22, a) : smoothstep(0.05, 0.4, a))) * grain_w;
         col = lerp(col, col * (0.45 + 1.1 * g1.y), ga * 0.9);
-        const float gb = g2.x * smoothstep(0.1, 0.5, a);
+        const float gb = g2.x * (on_wheel ? smoothstep(0.04, 0.30, a) : smoothstep(0.1, 0.5, a)) * grain_w;
         col = lerp(col, lerp(float3(0.14, 0.13, 0.11), float3(0.58, 0.54, 0.47), g2.y), gb);
         a = max(a, max(ga * a * 1.2, gb));
-        s_bump += d1 * ga * 0.4 + d2 * gb * 0.5;
+        float3 bump = d1 * ga * 0.4 + d2 * gb * 0.5;
+        [branch] if (on_wheel) {  // out of the tyre's frame: its rolling turn (about x), then its steering (about y)
+            const float3 b = float3(bump.x, bump.y * wrt.x + bump.z * wrt.y, -bump.y * wrt.y + bump.z * wrt.x);
+            bump = float3(b.x * wst.x + b.z * wst.y, b.y, -b.x * wst.y + b.z * wst.x);
+        }
+        s_bump += bump;
         s_amp = max(s_amp, a * hd * heavy * 0.0015);
     }
 
@@ -703,7 +916,9 @@ R"(
 )"  // three literals: MSVC 2022 caps one at 16380 characters (C2026)
 R"(
     // Road spray (wet, glossy) and the film it dries into (matte).
-    const float spray_b = body0.z + body0.w, spray_f = front0.z + front0.w;
+    // N65: the film is in here with the spray. A dry blade leaves it alone (it smears, which is why the user
+    // asked for it to stay); the jet is what takes it.
+    const float spray_b = (body0.z + body0.w) * (1.0 - jetted), spray_f = (front0.z + front0.w) * (1.0 - jetted);
     [branch] if (max(spray_b, spray_f) > kSeen) {
         const float reach = (body0.z * reach0.z + body0.w * reach0.w) / max(spray_b, 1e-4);
         const float hs = high(max(max(body0.z, body0.w), max(front0.z, front0.w)));
@@ -730,7 +945,8 @@ R"(
     }
     // Salt crust, whiter at the rims and along tide lines; darker and thinner
     // while wet. On a wheel a grey, matte powder: no tide lines, less on the tread.
-    const float salt_b = body1.y, salt_f = front1.y;
+    const float salt_keep = 1.0 - saturate(max(kWipeSalt * wiped, jetted));
+    const float salt_b = body1.y * salt_keep, salt_f = front1.y * salt_keep;
     [branch] if (max(salt_b, salt_f) > kSeen) {
         const float hs = high(max(salt_b, salt_f));
         const float top = lerp(0.8, 2.0, reach1.y) + 0.3 * hs;
@@ -755,31 +971,44 @@ R"(
         over_worn(acc, sacc, c, asl, on_wheel ? 0.008 : 0.03, asl, tk, tg);
     }
     // Gravel grit: fine specks, a mean tone where a speck is under a pixel.
-    const float grit_b = body1.x, grit_f = front1.x;
+    // N64: the grit is the "poeira" of the user's words: inside the arc the blade takes almost all of it.
+    const float grit_keep = 1.0 - saturate(kWipeDust * wiped + jetted);
+    const float grit_b = body1.x * grit_keep, grit_f = front1.x * grit_keep;
     [branch] if (grit_b + grit_f > 0.0) {
         const float hs = high(max(grit_b, grit_f));
         const float top = lerp(0.7, 2.0, reach1.x) + 0.3 * hs;
         float edge = 0.5;  // D13f (as the spray's; the grit's specks show at any level: no kSeen)
         [branch] if (!on_wheel && p.y < 1.25 * top) edge = fbm(sq + 71.9, 2.0, fq);
-        const float wb = on_wheel ? tyre : saturate(splash(p.y, top, edge, zone, fan, under, 0.0) + up * zone * 0.4);
+        // N71: the grit is a light grey; on the tread, scrubbed by the road, little of it stays.
+        const float wb = on_wheel ? tyre * (1.0 - 0.7 * tread)
+                                  : saturate(splash(p.y, top, edge, zone, fan, under, 0.0) + up * zone * 0.4);
         const float3 wl = pick(wb, grit_b, front_face, grit_f);
         const float c = saturate(wl.x * min(wl.y, 0.9) * (0.5 + 1.0 * fbm(sq + 77.7, 2.0, fq)) +
                                  high(wl.y) * 0.4 * heavy * saturate(wl.x * 2.5));
         // Turned lattices: on faces lined up with the unit's axes a plain one shows square specks.
         const float3x3 r = float3x3(0.00, 0.80, 0.60, -0.80, 0.36, -0.48, -0.60, -0.48, 0.64);
         const float fine = 0.6 * fnoise(mul(r, sq) + 81.1, 70.0, fq) + 0.4 * fnoise(mul(r, mul(r, sq)) + 3.7, 150.0, fq);
-        const float speck = smoothstep(0.70 - 0.42 * c, 0.78 - 0.42 * c, fine);
-        const float ag = max(lerp(c * 0.75, speck * 0.9, saturate(1.5 - fq * 210.0)), c * 0.3);
-        over_worn(acc, sacc, float3(0.50, 0.49, 0.46) * (0.75 + 0.5 * fine), ag, 0.02, ag, tk, tg);
+        // N76 (the user, 12/11: white spots on the truck up close that "do not look real" and vanish as the camera
+        // backs off; the truck carried a trace of grit, 0.0105). The specks covered ~5% of the face at any level, at
+        // 0.9 alpha, while the far view showed the level's mean (~0.75%): a trace of grit was a field of white dots
+        // up close and nothing from 10 m. Now the specks' area follows the coverage (`fine`'s spread, measured:
+        // above 0.80 1.6%, 0.70 8.7%, 0.60 25%) and a speck's alpha the level, so near and far carry the same amount;
+        // and the grit is the road's grey, not a near-white.
+        const float t_s = 0.80 - 0.35 * sqrt(c);
+        const float speck = smoothstep(t_s, t_s + 0.06, fine) * 0.8 * smoothstep(0.0, 0.05, c);
+        const float ag = max(lerp(c * 0.75, speck, saturate(1.5 - fq * 210.0)), c * 0.3);
+        over_worn(acc, sacc, float3(0.43, 0.415, 0.38) * (0.8 + 0.35 * fine), ag, 0.02, ag, tk, tg);
     }
     // The dust (D3, as before).
-    over_worn(acc, sacc, col, a, 0.012, saturate(a * 1.05), tk, tg);  // dust is matte
+    // dust is matte; N75: damp (a wet road), it is a third darker and takes a faint sheen, as wet soil does
+    over_worn(acc, sacc, col * (1.0 - 0.35 * wet_road), a, lerp(0.012, 0.07, wet_road), saturate(a * 1.05), tk, tg);
 )"  // six literals: MSVC 2022 caps one at 16380 characters (C2026)
 R"(
     // N39: road soot (oil, grease, rubber, the street's grime): dark brown-black, a faint oily sheen. Over the dust
     // (the low parts stay dark under a dusty cab, as in the user's photo, 29/10), under the mud. Not worn off the
     // tread as the rest (it is the road's own grime): the tread just takes less of it than the rims and side walls.
-    const float soot_b = body2.x, soot_f = front2.x;
+    // N65: the soot is greasy, so a dry blade only moves it about; the jet takes it.
+    const float soot_b = body2.x * (1.0 - jetted), soot_f = front2.x * (1.0 - jetted);
     [branch] if (max(soot_b, soot_f) > kSeen) {
         // D11f: first the coat where the dust would lie (soot_a, above: the trailer's sides too), dark grey-brown,
         // darker low down; then (D11d) the darkest grime low down and on the wheels over it. D11g (the user, 30/10:
@@ -801,7 +1030,7 @@ R"(
         const float tread_keep = 1.0 - 0.55 * on_tread * (0.3 + 0.7 * saturate(body1.w));
         const float lowdown = smoothstep(3.0, 0.8, p.y);
         // D14: a grey-brown haze at first, low down too; darker as the level rises (near black low down from ~0.6).
-        const float3 coat = lerp(float3(0.27, 0.22, 0.16), float3(0.06, 0.05, 0.04), lowdown * smoothstep(0.1, 0.6, sl));
+        const float3 coat = lerp(float3(0.225, 0.195, 0.158), float3(0.06, 0.05, 0.04), lowdown * smoothstep(0.1, 0.6, sl));  // N75: greyer
         const float coat_a = soot_a * lerp(0.45, 0.8, lowdown) * tread_keep;  // D14: up high a haze up to ~40%
         over(acc, sacc, coat * (0.85 + 0.3 * tone), coat_a, 0.05, coat_a);
         const float hs = high(sl);
@@ -810,7 +1039,7 @@ R"(
         [branch] if (!on_wheel && p.y < 1.25 * top) edge = fbm(sq + 105.3, 1.4, fq);
         const float wb = on_wheel ? 0.95 - 0.6 * tread  // N60/N60b: the tread takes a third of the side walls
                                   : max(splash(p.y, top, edge, zone, fan, under, up),
-                                        rear * 0.6 * (1.0 - up) * smoothstep(top + 0.8, top * 0.4, p.y));
+                                        rear * 0.6 * (1.0 - up) * smoothstep(top + 0.8, top * 0.4, p.y)) * (1.0 - 0.5 * ahead);  // N74
         const float3 wl = pick(wb, soot_b, front_face, soot_f);
         const float smear = fbm(sq * float3(1.0, 1.8, 0.5) + 111.7, 1.3, fq);  // smeared along the body
         const float t = thr(wl.y);
@@ -840,7 +1069,9 @@ R"(
         }
     }
     // Mud: one pattern for wet and dry (dry mud is wet mud that dried).
-    const float mud_b = body0.x + body0.y, mud_f = front0.x + front0.y;
+    // N64d: of the mud the blade takes little and smears the rest into bands; the jet takes all of it.
+    const float mud_keep = (1.0 - saturate(max(kWipeMud * wiped, jetted))) * smear;
+    const float mud_b = (body0.x + body0.y) * mud_keep, mud_f = (front0.x + front0.y) * mud_keep;
     [branch] if (max(mud_b, mud_f) > kSeen) {
         const float reach = (body0.x * reach0.x + body0.y * reach0.y) / max(mud_b, 1e-4);
         const float hs = high(max(max(body0.x, body0.y), max(front0.x, front0.y)));
@@ -853,10 +1084,12 @@ R"(
         // fingers only where it thins out (~0.6-0.9 of the radius), little further in.
         const float lip = 1.0 - smoothstep(0.0, 0.05, abs(ring - 0.56));
         const float tyre_mud = saturate(lerp(0.04 + 1.15 * smoothstep(0.6, 0.93, ring), 1.0, tread) + 0.2 * lip);
-        const float wb = on_wheel ? tyre_mud : mud_splash(p.y, top, edge, zone, fan, rays, under, up);  // N58
+        const float wb = on_wheel ? tyre_mud  // N58; N74: a tyre throws its mud back, never ahead of the first axle
+                                  : mud_splash(p.y, top, edge, zone, fan, rays, under, up) * (1.0 - 0.65 * ahead);
         const float3 wl = pick(wb, mud_b, front_face, mud_f);
         const float wet_share = lerp(body0.x / max(mud_b, 1e-4), front0.x / max(mud_f, 1e-4), wl.z);
         float shape = fbm(sq * float3(1.0, 0.8, 1.0) + 4.4, 2.6, fq);  // clumps
+        shape = lerp(shape, sweep, swept * 0.75);  // N74: on the sides, dashes drawn back by the air (0 on a wheel)
         // N58b: radial fingers, a few clumps in them; N58c: the fingers at the coat's thinning edge only.
         if (on_wheel) shape = lerp(shape, tyre_streak, 0.6 * (1.0 - abs(smoothstep(0.6, 0.93, ring) * 2.0 - 1.0)));
         const float thick = fbm(sq + 12.9, 6.0, fq);
@@ -872,7 +1105,7 @@ R"(
         // Wet or dry here: the thick parts stay wet the longest.
         const float lw = smoothstep(-0.12, 0.12, thick - (1.0 - wet_share) + (wet_share - 0.5) * 0.3);
         const float3 wet_col = float3(0.12, 0.085, 0.055) * (0.75 + 0.5 * thick);
-        float3 dry_col = lerp(float3(0.47, 0.39, 0.29), float3(0.36, 0.28, 0.19), saturate(smoothstep(0.3, 0.7, thick) + hm * 0.6 * heavy));
+        float3 dry_col = lerp(float3(0.41, 0.335, 0.245), float3(0.31, 0.24, 0.165), saturate(smoothstep(0.3, 0.7, thick) + hm * 0.6 * heavy));  // N75
         float crack = 0.0;
         [branch] if (wet_share < 0.999) crack = cracks(sq, fq) * smoothstep(0.45, 0.65, thick);
         dry_col *= (1.0 - 0.4 * crack) * (0.9 + 0.2 * detail);
@@ -914,9 +1147,36 @@ R"(
         }
         over_worn(acc, sacc, mud_col, am, lerp(0.015, 0.28 * (0.7 + 0.6 * detail), lw), am, tk, tg);
     }
+    // N67e: the dirt the rubber is carrying along, laid over whatever the pane still has. It is the same
+    // stuff that is on the glass, so it takes the glass's own colour where there is one.
+    [branch] if (ridge > 0.0) {
+        const float3 rc = acc.a > 0.01 ? acc.rgb / acc.a : float3(0.42, 0.38, 0.32);
+        const float ra = saturate(0.85 * ridge);
+        over(acc, sacc, rc, ra, 0.05, ra);
+    }
     if (diag) return float4(0.04, 0.04 + 0.96 * saturate(acc.a), 0.04, 1);
     if (acc.a <= 0.0) return none;
     s_end = true, s_spec = float2(sacc.x / max(sacc.y, 1e-5), saturate(sacc.y));
+#ifdef GLASS
+    // N64i: break the coverage up so the pane reads as dirty glass and not as tinted glass. The film's own even
+    // haze is left alone -- that part IS flat on a real windscreen -- and what varies is the dust over it: broad
+    // patches, the same fine grain the body gets, and more of it towards the border, where the airflow is slow.
+    [branch] if (on_pane) {
+        const float patches = fbm(p * 2.6 + 11.3, 1.1, fp);
+        const float fine = grain(p * 1.6, fp);
+        const float ex = saturate(abs(pane_q.x) / max(pane.x, 0.1));            // 0 middle .. 1 the side edges
+        const float ey = saturate(abs(pane_q.y - 0.5 * pane_h) / (0.5 * pane_h));  // 0 middle .. 1 top and bottom
+        const float border = 0.30 * smoothstep(0.45, 1.0, max(ex, ey));
+        const float even = 0.34;  // the film's share, which stays even however the dust falls
+        const float uneven = saturate(0.30 + 1.15 * patches + 0.30 * (fine - 0.5) + border);
+        acc.a *= saturate(even + (1.0 - even) * uneven);
+    }
+    // N64g ([glass] on = 5): paint what the shader worked out, instead of blending it -- red is how much dirt it
+    // puts on this pixel and green is how much the blades took there. One screenshot then says whether the dirt
+    // is reaching the pane at all, how strong it is where it reaches, and where the arc really sits, which no
+    // amount of looking at a blended windscreen can settle.
+    if (glass.z > 4.5 && glass.z < 5.5) return float4(saturate(acc.a), wiped, 0, 1);  // [glass] on = 5
+#endif
     return float4(acc.rgb / acc.a, saturate(acc.a));
 }
 )"  // five literals: MSVC 2022 caps one at 16380 characters (C2026)
@@ -955,39 +1215,55 @@ float3 unoct(float2 e) {
 // shade() is called once and once only in each of them: it is the whole shader, and a second call doubles both
 // the code and the time it takes to compile (N62b: with two, the compile outlived a 90 s test run).
 // glass.z: 2 = paint the glass where the dirt reaches it, 3 = paint each pixel where the shader places it in the
-// truck (the plugin sets the shader's own position test for that; tools/probetest checks it).
+// truck (the plugin sets the shader's own position test for that; tools/probetest checks it), 4 = paint the arc the
+// wipers sweep (N64), to see on one screenshot whether it sits where the blades really are.
+// N64k (the user, 06/11, with a print of the rear quarter window: "esperava algo assim nos vidros da frente e
+// lateral, de fato obstruindo a visao"). The dirt on the glass was being written in ALBEDO units (0..1, a
+// reflectance) into the game's forward target, which holds the scene's RADIANCE before the tone map -- and that
+// target is exposed down by some forty times, as the glass's own coverage test showed: [glass] on = 5 painted
+// 0.72 and the screen read 52/255 once the gamma is undone. So the dirt landed at a fortieth of what a lit
+// surface there is worth: a pane that only darkened the glass a little instead of hazing it.
+// The body never had this problem: its dirt goes into the G-buffer's albedo and the game's own lighting puts it
+// in the scene's units. A forward draw has to do that itself, which is what pane.w is: how bright a surface of
+// this dirt is under the sky, in the scene's units. The daylight keeps shaping it over the day.
 float4 glass_dirt(float4 pos, out float a) {
     const float4 d = shade(pos);
-    a = min(saturate(d.a) * glass.x, 0.9);
-    const float3 lit = glass.z > 1.5 ? d.rgb : d.rgb * (0.12 + 0.88 * glass.y);
+    const bool raw = glass.z > 2.5;  // the place, the arc and the ring are numbers: no strength, no daylight
+    a = raw ? saturate(d.a) : min(saturate(d.a) * glass.x, 0.97);
+    const float3 lit = raw ? d.rgb : d.rgb * max(pane.w, 0.0) * (0.12 + 0.88 * glass.y);
     return float4(lit, a);
 }
 #if defined(GLASS_MULT)
 float4 main(float4 pos : SV_Position) : SV_Target0 {
-    if (glass.z > 0.5 && glass.z < 1.5) return float4(0, 0, 0, 1);
+    if (glass.z > 1.5 && glass.z < 2.5) return float4(0, 0, 0, 1);
     float a;
     const float4 d = glass_dirt(pos, a);
-    if (glass.z > 1.5) return float4(d.rgb, 1);  // the position test: shade() gives the place, unlit
+    if (glass.z > 2.5) return float4(d.rgb, 1);  // the position test (3) and the coverage (5), unlit
     return float4(lerp(float3(1, 1, 1), d.rgb, a), 1);
 }
 #elif defined(GLASS_OVER)
 float4 main(float4 pos : SV_Position) : SV_Target0 {
-    if (glass.z > 0.5 && glass.z < 1.5) return float4(5, 0, 2, 1);
+    if (glass.z > 1.5 && glass.z < 2.5) return float4(5, 0, 2, 1);
     float a;
     const float4 d = glass_dirt(pos, a);
-    if (glass.z > 1.5) return float4(d.rgb, 1);
+    if (glass.z > 2.5) return float4(d.rgb, 1);
     return float4(d.rgb, a);
 }
 #else
 void main(float4 pos : SV_Position, out float4 o0 : SV_Target0, out float4 o1 : SV_Target1) {
-    if (glass.z > 0.5 && glass.z < 1.5) {  // [glass] on = 2
+    if (glass.z > 1.5 && glass.z < 2.5) {  // [glass] on = 2
         o0 = float4(5, 0, 2, 0);
         o1 = float4(0, 0, 0, 1);
         return;
     }
     float a;
     const float4 d = glass_dirt(pos, a);
-    if (glass.z > 1.5) {  // [glass] on = 3: the place itself, nothing of the screen left
+    if (glass.z > 4.5) {  // [glass] on = 5 and 6: the numbers themselves, nothing of the screen left
+        o0 = float4(d.rgb, 0);
+        o1 = float4(0, 0, 0, 1);
+        return;
+    }
+    if (glass.z > 2.5 && glass.z < 3.5) {  // [glass] on = 3: the place itself, nothing of the screen left
         o0 = float4(d.rgb, 0);
         o1 = float4(0, 0, 0, 1);
         return;
@@ -1093,7 +1369,12 @@ struct Constants {
     float cavity_hi[4];        // D11f: its high corner, -
     float dash0[4];            // D11j: the windshield: front z + 3 cm, base height, dz/dy, top height
     float dash1[4];            // D11j: the front zone: half width, floor, back z (the eye), on
-    float glass[4];            // N62: on the glass: how strong, the daylight, 1 = paint it magenta, -
+    float glass[4];            // N62: on the glass: how strong, the daylight, the test mode, N64: the wipe 0..1
+    float pane[4];             // N64b: the windshield: half its width (m), 1 = measured; N65: the jet, 0..1; -
+    float blade[4];            // N64c: the stroke: the wipe before it, the blade across the sweep, its way, -
+    float wiper[4];            // N64: the arc: the pivots' x and y (shares of the pane), the blade, half the sweep
+    float wblade[6][4];        // N68: the two blades the game describes, three rows each (see the cbuffer above)
+    float wnow[4];             // N68: where each blade is across its stroke, how many blades there are
 };
 static_assert(sizeof(Constants) % 16 == 0, "constant buffer size");
 

@@ -153,6 +153,9 @@ struct State {
     std::chrono::steady_clock::time_point last_save{};
     // N10: test panel
     panel::Panel panel;
+    std::chrono::steady_clock::time_point last_wipe = std::chrono::steady_clock::now();  // N64
+    panel::Hotkey washer_key;  // N65: the washer jet ([glass] washer_key); the SDK has no washer channel
+    bool washer_key_down = false;
     panel::Hotkey panel_key;
     bool panel_key_down = false;
     // N41: [dust] cab_inside, the box with no dust around the driver's eye (tint::SetCabInside).
@@ -271,10 +274,24 @@ std::wstring IniPath() {
                   "level = -1\r\n"
                   "[glass]\r\n"
                   "; N40 (being tested): 1 = the truck's glass takes the truck's dirt, 0 = clean glass,\r\n"
-                  ";   2 = paint the glass the dirt reaches magenta (to see what it reaches)\r\n"
+                  ";   2 = paint the glass the dirt reaches magenta, 3 = paint each pixel where the shader\r\n"
+                  ";   places it, 4 = paint the arc the wipers sweep, 5 = paint the dirt it worked out\r\n"
+                  ";   (red how much, green what the blades took) (tests only)\r\n"
                   "on = 0\r\n"
                   "; how strong the dirt on the glass is (0.5 = half, 2 = twice)\r\n"
                   "strength = 1.0\r\n"
+                  "; N64k: how bright a surface of that dirt is, in the scene's own units. The game's\r\n"
+                  ";   forward target holds radiance before the tone map, where a sunlit surface is worth\r\n"
+                  ";   tens, so a reflectance of 0..1 written there comes out nearly black. Higher = the\r\n"
+                  ";   pane obstructs more; it is also the 'glass light' row of the test panel.\r\n"
+                  "brightness = 10\r\n"
+                  "; N64: the arc the wipers clear on the windshield: how far the pivots sit from its middle and\r\n"
+                  ";   how high, as shares of the pane the plugin measures; the blade's length as a share of its\r\n"
+                  ";   height; half the sweep in degrees. 0 = the wipers clear nothing.\r\n"
+                  "wiper = 0.45 0.02 0.48 42\r\n"
+                  "; N65: the key for the washer jet, which takes everything inside that arc (the film and the\r\n"
+                  ";   soot too, which the blades alone never do). Empty = off.\r\n"
+                  "washer_key = f9\r\n"
                   "[test]\r\n"
                   "; 1 = test panel: panel_key opens it; it forces any level of any dirt layer (nothing is saved\r\n"
                   "; from it: the real dirt goes on underneath)\r\n"
@@ -633,6 +650,7 @@ SCSAPI_VOID OnConfig(const scs_event_t, const void* info, const scs_context_t) {
         ConfigLog(inside_log);
         g.truck_id = str_id;
         g.truck_plate = plate;
+        tint::SetTruckId(g.truck_id.c_str());  // N68: its wiper blades come from the pre-map
         g.rig_changed = true;
     } else if (id == "trailer.0") {
         g.trailer.wheel_count = (std::min)(wheel_count, kMaxWheels);
@@ -686,6 +704,8 @@ void DustLayers(dirt_state::Layers out[dirt::kUnits]) {
             out[u][name + "_reach"] = c.reach[k];
         }
     }
+    out[0]["dust_wipe"] = g.dust.ArcWipe();  // N64: the share of the dust the blades have taken inside their arc
+    out[0]["dust_arc_other"] = g.dust.ArcOther();  // N65: the share of the other layers the jet has left there
 }
 
 // D5: a unit that came in: clean, then its saved layers (none = stays clean).
@@ -698,6 +718,12 @@ void DustRestore(int unit, const dirt_state::Layers& saved) {
         if (body != saved.end()) g.dust.SetLayer(unit, l, body->second);
         if (front != saved.end()) g.dust.SetLayer(unit, l, front->second, true);
         if (reach != saved.end()) g.dust.SetReach(unit, l, reach->second);
+    }
+    if (unit == 0) {  // N64: a save from before this has none of these, and the pane starts dirty all over
+        const auto wipe = saved.find("dust_wipe");
+        g.dust.SetArcWipe(wipe != saved.end() ? wipe->second : 0.f);
+        const auto other = saved.find("dust_arc_other");  // N65: and with all of its other layers
+        g.dust.SetArcOther(other != saved.end() ? other->second : 1.f);
     }
 }
 
@@ -947,6 +973,8 @@ dust::Layers ShownLayers(int unit) {
 }
 
 // D3: distance and game time since the last frame, the ground under the
+bool HotkeyPressed(const panel::Hotkey& h, bool* was_down);  // N65: the washer's key, defined with the others
+
 // wheels and the rain move the dust levels; D5: saved every few minutes.
 void DustStep() {
     constexpr double kSaveIntervalSec = 120.0;
@@ -962,6 +990,19 @@ void DustStep() {
         if (g.last_game_time && g.game_time > g.last_game_time)
             g.dust.Weather(double(g.game_time - g.last_game_time), gpu_probe::RainActive() || g.wipers);
         g.last_game_time = g.game_time;
+        // N64: the blades sweep in real time (a sweep is about a second), not in the game's clock, which runs many
+        // times faster -- in game minutes a wipe would always be instant.
+        const auto now = std::chrono::steady_clock::now();
+        const double wipe_dt = std::chrono::duration<double>(now - g.last_wipe).count();
+        g.last_wipe = now;
+        g.dust.Wipers(wipe_dt, g.wipers);
+        // N65: the washer jet. The SDK has no washer channel (only truck.wipers, on or off), so it is a key of
+        // ours. Inside the arc it takes everything; the rest of the pane stays dirty until the truck is washed.
+        if (g.washer_key.vk && HotkeyPressed(g.washer_key, &g.washer_key_down) && !g.menu.Open()) {
+            g.dust.Washer();
+            ConfigLog("[glass] washer: the jet cleaned the arc the wipers sweep (N65)");
+            SaveState("washer");
+        }
         if (std::chrono::duration<double>(std::chrono::steady_clock::now() - g.last_save).count() >= kSaveIntervalSec)
             SaveState("timer");
     }
@@ -978,6 +1019,13 @@ void DustStep() {
                           : h <= 17.f           ? 1.f
                                                 : 0.1f + 0.9f * (21.f - h) / 4.f;
         tint::SetDaylight(day);
+    }
+    // N64/N64c/N65: what the blades and the jet have taken inside the arc, and where the blade is right now.
+    tint::SetWipe(g.dust.Wipe(), g.dust.WipeBefore(), g.dust.Phase(), g.dust.Dir(), g.dust.Jet());
+    if (g.panel.Enabled()) {  // N64h: the arc as the panel has it, so it can be lined up without a restart
+        const float* a = g.panel.Arc();
+        tint::SetWiperArc(a[0], a[1], a[2], a[3] * 90.f * 3.14159265f / 180.f);
+        tint::SetGlassBright(a[4] * panel::kGlassBrightMax);  // N64k
     }
     gpu_probe::SetDust(g.dust.Level(0), trailer ? g.dust.Level(1) : 0.f);
     gpu_probe::SetLayers(ShownLayers(0), trailer ? ShownLayers(1) : dust::Layers{});
@@ -1667,11 +1715,68 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
         const int glass_mode = GetPrivateProfileIntW(L"glass", L"on", 0, ini.c_str());
         const float strength = float(atof(IniString(ini, L"glass", L"strength", L"1.0").c_str()));
         tint::SetGlassDirt(glass_mode != 0, strength, glass_mode >= 2 ? glass_mode : 0);
+        gpu_probe::SetWipeWanted(glass_mode != 0);  // N70: read the game's own blade lines while the glass is on
         if (glass_mode == 2)
             ConfigLog("[glass] on = 2: the glass the veil reaches is painted magenta (N40, to see what it reaches)");
+        else if (glass_mode == 3)
+            ConfigLog("[glass] on = 3: the glass paints each pixel where the shader places it (N62b)");
+        else if (glass_mode == 4)
+            ConfigLog("[glass] on = 4: the arc the wipers sweep is painted (N64, to see where it sits)");
+        else if (glass_mode == 6)
+            ConfigLog("[glass] on = 6: the glass paints the first blade's ring -- red its radius from the "
+                      "pivot (half a metre per unit), green where the pixel sits across its stroke, blue the "
+                      "coverage (N69e, to see which of the three is wrong)");
+        else if (glass_mode == 5)
+            ConfigLog("[glass] on = 5: the glass paints the dirt it worked out, red how much and green what the "
+                      "blades took there (N64g)");
         else if (glass_mode)
             ConfigLog("[glass] on = 1, strength " + std::to_string(strength) +
                       ": the truck's glass takes the truck's dirt (N40, being tested)");
+        // N64: [glass] wiper = the pivots' distance from the middle and their height (shares of the windshield the
+        // plugin measures in the game), the blade's length (a share of the pane's height) and half the sweep in
+        // degrees. In the INI because the arc has to be lined up against the blades on the screen, and a number in
+        // the INI costs one game start while a number in the code costs a build and an install.
+        float arc[4] = {0.45f, 0.02f, 0.48f, 42.f};
+        wchar_t text[96] = {};
+        GetPrivateProfileStringW(L"glass", L"wiper", L"", text, 96, ini.c_str());
+        if (text[0]) {
+            float v[4] = {};
+            const int n = swscanf(text, L"%f %f %f %f", &v[0], &v[1], &v[2], &v[3]);
+            const bool ok = (n == 1 && v[0] == 0.f) ||
+                            (n == 4 && v[0] >= 0.f && v[0] <= 1.f && v[1] >= -0.5f && v[1] <= 1.f && v[2] > 0.f &&
+                             v[2] <= 2.f && v[3] > 0.f && v[3] <= 85.f);
+            if (!ok)
+                Log(SCS_LOG_TYPE_warning, "[glass] wiper not understood (4 numbers, or 0 for no wiping): the "
+                                          "default stays");
+            else if (n == 1)
+                arc[0] = 0.f;
+            else
+                memcpy(arc, v, sizeof(v));
+        }
+        tint::SetWiperArc(arc[0], arc[1], arc[2], arc[3] * 3.14159265f / 180.f);
+        // N64k: how bright a surface of the dirt is on the glass, in the scene's own units.
+        float bright = float(atof(IniString(ini, L"glass", L"brightness", L"10").c_str()));
+        if (!(bright >= 0.f && bright <= panel::kGlassBrightMax)) bright = 10.f;
+        tint::SetGlassBright(bright);
+        // N64h: and the same numbers into the test panel, where they can be moved while looking at the glass.
+        const float arc01[panel::kArcValues] = {arc[0], arc[1], arc[2], arc[3] / 90.f,
+                                                bright / panel::kGlassBrightMax};
+        g.panel.SetArc(arc01);
+        // N65: the washer jet's key. The game has no washer of its own and the SDK has no channel for one, so the
+        // jet is this key. Empty = off.
+        const std::string washer = IniString(ini, L"glass", L"washer_key", L"f9");
+        g.washer_key = panel::Hotkey();
+        if (!washer.empty() && !panel::ParseHotkey(washer, &g.washer_key)) {
+            Log(SCS_LOG_TYPE_warning, "[glass] washer_key = " + washer + " not understood: the jet is off");
+            g.washer_key = panel::Hotkey();
+        }
+        if (glass_mode && g.washer_key.vk)
+            ConfigLog("[glass] washer_key = " + panel::HotkeyName(g.washer_key) +
+                      ": the jet cleans everything inside the wipers' arc (N65)");
+        if (glass_mode && arc[0] > 0.f)
+            ConfigLog("[glass] wiper = " + std::to_string(arc[0]) + " " + std::to_string(arc[1]) + " " +
+                      std::to_string(arc[2]) + " " + std::to_string(arc[3]) +
+                      " deg: the wipers clear the dust inside the arc they sweep (N64)");
     }
     // N41: [dust] cab_inside = half width, below, above, ahead of, behind the eye (m); 0 = off. D11f: cab_cavity, the same.
     for (const auto& [key, box] : {std::pair<const wchar_t*, float*>{L"cab_inside", g.cab_inside},

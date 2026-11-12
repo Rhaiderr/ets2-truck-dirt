@@ -2,6 +2,7 @@
 // box. The pieces are lines of the VNL 2025's table (tools/premap/premap.py on its DLC): the same count and vertex
 // count as an interior piece and an ext_model piece, told apart by the box.
 #include <cstdio>
+#include <cstring>
 
 #include "premap.h"
 
@@ -12,6 +13,13 @@ int failures = 0;
 void Expect(const char* what, int got, int want) {
     printf("%s: %s%s\n", what, premap::KindName(got), got == want ? "" : "  <- FAIL");
     if (got != want) ++failures;
+}
+
+// N68: the blade checks are numbers, not kinds.
+void ExpectN(const char* what, double got, double want, double tol = 0.0) {
+    const bool ok = got >= want - tol && got <= want + tol;
+    printf("%s: %.4g%s\n", what, got, ok ? "" : "  <- FAIL");
+    if (!ok) ++failures;
 }
 
 }  // namespace
@@ -78,6 +86,42 @@ int main() {
     Expect("600/200, a merged size also a piece's of another kind", premap::Lookup(600, 200, t_lo, t_hi), premap::kNone);
     premap::Clear();
     Expect("after Clear", premap::Lookup(144, 74, ext_lo, ext_hi), premap::kNone);
+    premap::Clear();
+    // N68: the wiper blades. The lines are the real ones tools/premap writes for the Volvo FH 2024 (ETS2 1.62),
+    // plus a second cabin's set of the same truck, to check that the measured windscreen picks the right one.
+    premap::Parse(
+        "truck dirt premap 1\n"
+        "b volvo.fh_2024 0 1 2 -0.8174 2.1189 -3.1044 0.0970 -0.1030 0.9899 0.5286 0.1755 -0.0208 0.700 1.5334 "
+        "1.90:2.00,1.90:0.00,1.00:0.00 /vehicle/truck/volvo_fh_2024/cabin/wipers.pmg\n"
+        "b volvo.fh_2024 1 3 4 0.1552 2.1189 -3.1328 -0.0264 -0.1088 0.9937 0.8657 0.1517 0.1038 0.700 1.8010 "
+        "1.90:2.00,1.90:0.00,1.00:0.00 /vehicle/truck/volvo_fh_2024/cabin/wipers.pmg\n"
+        "b volvo.fh_2024 0 1 2 -0.8000 1.5000 -2.2000 0.0000 0.0000 1.0000 0.5000 0.2000 0.0000 0.500 1.2000 "
+        "1.50:0.00 /vehicle/truck/volvo_fh16_2012/cabin/wipers.pmg\n");
+    premap::Blade bl[premap::kMaxBlades];
+    // The windscreen D11i measured on that truck: its base at y 2.20, its front at z -3.10.
+    const int nb = premap::Blades("vehicle.volvo.fh_2024", 2.20f, -3.10f, bl);
+    ExpectN("two blades for the truck", nb, 2);
+    if (nb == 2) {
+        ExpectN("the aero cabin's set, not the other one", strstr(bl[0].model, "fh_2024") ? 1 : 0, 1);
+        ExpectN("the left pivot, m across", bl[0].pivot[0], -0.8174, 0.001);
+        ExpectN("and it sits on the glass, m front", bl[0].pivot[2], -3.1044, 0.001);
+        ExpectN("just under the windscreen's base, m up", bl[0].pivot[1], 2.1189, 0.001);
+        ExpectN("the blade is 0.70 m", bl[0].length, 0.70, 0.001);
+        ExpectN("the right arm sweeps 103 deg", bl[1].sweep * 57.2957795, 103.2, 0.3);
+        ExpectN("the left one only 88", bl[0].sweep * 57.2957795, 87.9, 0.3);
+        ExpectN("the arms are no mirror pair: 0.97 m apart", bl[1].pivot[0] - bl[0].pivot[0], 0.9726, 0.001);
+        ExpectN("nor the same length", bl[1].arm[0] - bl[0].arm[0], 0.3371, 0.001);
+        ExpectN("the arm bone is known", bl[1].arm_bone, 3);
+        ExpectN("the blade bone too", bl[1].blade_bone, 4);
+        ExpectN("the intermittent speed pauses 2 s", bl[0].pause[0], 2.0, 0.001);
+        ExpectN("the fast speed strokes in 1 s", bl[0].stroke[2], 1.0, 0.001);
+        ExpectN("the slow one does not pause", bl[0].pause[1], 0.0, 0.001);
+    }
+    ExpectN("without a measured pane, the first set", premap::Blades("volvo.fh_2024", 0.f, 0.f, bl), 2);
+    ExpectN("a truck with no blades", premap::Blades("vehicle.scania.r_2016", 2.2f, -3.1f, bl), 0);
+    ExpectN("trucks with blades", premap::BladeTrucks(), 1);
+    premap::Clear();
+    ExpectN("blades after Clear", premap::Blades("vehicle.volvo.fh_2024", 2.2f, -3.1f, bl), 0);
     printf(failures ? "FAILED (%d)\n" : "ok\n", failures);
     return failures ? 1 : 0;
 }

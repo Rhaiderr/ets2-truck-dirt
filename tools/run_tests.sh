@@ -57,18 +57,19 @@ check() {
 
 # Runs every test with the binaries in $1, writing the outputs to $2.
 run_all() {
-    local bin=$1 out=$2 rigtest maptest dusttest statetest washtest paneltest langtest compattest premaptest cargotest pairs f
+    local bin=$1 out=$2 rigtest maptest dusttest statetest washtest paneltest langtest compattest premaptest cargotest wipertest pairs f
     rigtest=$(find_bin "$bin" rigtest)
     maptest=$(find_bin "$bin" maptest)
     dusttest=$(find_bin "$bin" dusttest)
     statetest=$(find_bin "$bin" statetest)
     washtest=$(find_bin "$bin" washtest)
     paneltest=$(find_bin "$bin" paneltest)
+    wipertest=$(find_bin "$bin" wipertest)
     langtest=$(find_bin "$bin" langtest)
     compattest=$(find_bin "$bin" compattest)
     premaptest=$(find_bin "$bin" premaptest)
     cargotest=$(find_bin "$bin" cargotest)
-    if [ -z "$rigtest" ] || [ -z "$maptest" ] || [ -z "$dusttest" ] || [ -z "$statetest" ] || [ -z "$washtest" ] || [ -z "$paneltest" ] ||
+    if [ -z "$rigtest" ] || [ -z "$maptest" ] || [ -z "$dusttest" ] || [ -z "$statetest" ] || [ -z "$washtest" ] || [ -z "$paneltest" ] || [ -z "$wipertest" ] ||
        [ -z "$langtest" ] || [ -z "$compattest" ] || [ -z "$premaptest" ] || [ -z "$cargotest" ]; then
         echo "FAIL: rigtest, maptest, dusttest, statetest, washtest, paneltest, langtest, compattest, premaptest or cargotest not found in $bin"
         failures=$((failures + 1))
@@ -105,6 +106,8 @@ run_all() {
     check washtest "$out/washtest.txt" $?
     "$paneltest" > "$out/paneltest.txt"
     check paneltest "$out/paneltest.txt" $?
+    "$wipertest" > "$out/wipertest.txt"
+    check wipertest "$out/wipertest.txt" $?
     "$langtest" lang > "$out/langtest.txt"
     check langtest "$out/langtest.txt" $?
     "$compattest" > "$out/compattest.txt"
@@ -151,7 +154,7 @@ else
         mkdir -p "$dir"
         if ! CXXFLAGS="${CXXFLAGS:-} -Werror" cmake -S . -B "$dir" -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_CXX_COMPILER="$cxx" > "$dir/configure.log" 2>&1 ||
-           ! cmake --build "$dir" --target rigtest maptest dusttest statetest washtest paneltest langtest compattest premaptest cargotest > "$dir/build.log" 2>&1; then
+           ! cmake --build "$dir" --target rigtest maptest dusttest statetest washtest paneltest langtest compattest premaptest cargotest wipertest > "$dir/build.log" 2>&1; then
             echo "FAIL $cxx: build failed (warnings are errors)"
             tail -n 30 "$dir/configure.log" "$dir/build.log" 2> /dev/null
             failures=$((failures + 1))

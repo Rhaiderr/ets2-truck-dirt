@@ -26,9 +26,22 @@ struct Piece {
 std::unordered_map<uint64_t, std::vector<Piece>> g_pieces;
 std::unordered_set<uint32_t> g_counts;
 int g_count = 0;
+// N68: the wiper blades, by truck id. Written at load, read on the render thread.
+std::unordered_map<std::string, std::vector<Blade>> g_blades;
 constexpr float kTol = 0.003f;  // m: the table keeps 4 decimals
 
 uint64_t Key(uint32_t count, uint32_t verts) { return (uint64_t(count) << 32) | verts; }
+
+// N68: "1.90:2.00,1.90:0.00,1.00:0.00" -> the three speeds' stroke and pause.
+void ReadRhythm(const char* s, Blade* b) {
+    for (int i = 0; i < kSpeeds && s && *s; ++i) {
+        float stroke = 0.f, pause = 0.f;
+        if (sscanf(s, "%f:%f", &stroke, &pause) != 2) return;
+        b->stroke[i] = stroke, b->pause[i] = pause;
+        const char* comma = strchr(s, ',');
+        s = comma ? comma + 1 : nullptr;
+    }
+}
 
 int KindOf(const char* s) {
     if (!strcmp(s, "int_ext")) return kIntExt;
@@ -46,6 +59,20 @@ int Parse(const std::string& text) {
     if (!std::getline(in, line) || line.rfind("truck dirt premap 1", 0) != 0) return 0;
     int taken = 0;
     while (std::getline(in, line)) {
+        if (line.size() > 2 && line[0] == 'b' && line[1] == ' ') {  // N68: a wiper blade
+            char tid[64] = {}, rhythm[48] = {}, model[96] = {};
+            int idx = 0;
+            Blade b;
+            if (sscanf(line.c_str() + 1, " %63s %d %d %d %f %f %f %f %f %f %f %f %f %f %f %47s %95s", tid, &idx,
+                       &b.arm_bone, &b.blade_bone, &b.pivot[0], &b.pivot[1], &b.pivot[2], &b.axis[0], &b.axis[1],
+                       &b.axis[2], &b.arm[0], &b.arm[1], &b.arm[2], &b.length, &b.sweep, rhythm, model) != 17)
+                continue;
+            ReadRhythm(rhythm, &b);
+            snprintf(b.model, sizeof(b.model), "%s", model);
+            auto& v = g_blades[tid];
+            if (v.size() < 32) v.push_back(b);
+            continue;
+        }
         if (line.size() < 2 || (line[0] != 'p' && line[0] != 'm') || line[1] != ' ') continue;
         unsigned count = 0, verts = 0;
         Piece p = {};
@@ -86,9 +113,41 @@ int LoadDir(const std::wstring& dir, const std::wstring& prefix) {
     return taken;
 }
 
+int Blades(const char* truck_id, float pane_y, float pane_z, Blade out[kMaxBlades]) {
+    if (!truck_id || !*truck_id) return 0;
+    std::string id = truck_id;
+    if (id.rfind("vehicle.", 0) == 0) id = id.substr(8);  // telemetry says "vehicle.volvo.fh_2024"
+    const auto it = g_blades.find(id);
+    if (it == g_blades.end() || it->second.empty()) return 0;
+    // A truck has one set of blades per wiper model (one per cabin). The windscreen the plugin measured says
+    // which cabin is on the truck: the right set has its pivots at that glass.
+    const char* best = nullptr;
+    float best_off = 1e9f;
+    for (const Blade& b : it->second) {
+        float off = 0.f;
+        int n = 0;
+        for (const Blade& c : it->second)
+            if (!strcmp(c.model, b.model)) off += std::fabs(c.pivot[1] - pane_y) + std::fabs(c.pivot[2] - pane_z), ++n;
+        off = n ? off / float(n) : 1e9f;
+        if (!(pane_y != 0.f || pane_z != 0.f)) off = 0.f;  // nothing measured: the first set will do
+        if (off < best_off) best_off = off, best = b.model;
+        if (!(pane_y != 0.f || pane_z != 0.f)) break;
+    }
+    int n = 0;
+    for (const Blade& b : it->second) {
+        if (n >= kMaxBlades) break;
+        if (best && strcmp(b.model, best)) continue;
+        out[n++] = b;
+    }
+    return n;
+}
+
+int BladeTrucks() { return int(g_blades.size()); }
+
 void Clear() {
     g_pieces.clear();
     g_counts.clear();
+    g_blades.clear();
     g_count = 0;
 }
 

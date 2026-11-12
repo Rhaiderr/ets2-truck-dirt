@@ -50,6 +50,8 @@ constexpr int kCatalogSize = static_cast<int>(sizeof(kCatalog) / sizeof(kCatalog
 
 std::unordered_map<std::string, int> g_by_checksum;  // filled before the hooks go live
 std::vector<bool> g_is_glass;                        // catalog index -> def.glassdrops.*
+std::vector<bool> g_is_wipe;                         // N70: ... and a `.wipe` variant of it (a pane with blades)
+std::atomic<bool> g_wipe_wanted{false};              // N70: [glass] on
 
 // ---- log ----
 
@@ -147,6 +149,7 @@ struct PsEntry {
     uint64_t total_draws = 0;
     bool described = false;
     uint8_t glass = 0;  // 1 = by checksum, 2 = by signature (3 targets + a 43-vec4 constant buffer)
+    uint8_t wipe = 0;   // N70: 1 = a `.wipe` variant by checksum, 2 = a glass pass of unknown variant
     uint64_t last_sample_ms = 0;
     uint64_t last_dump_ms = 0;
 };
@@ -377,6 +380,7 @@ void DescribeDraw(ID3D11DeviceContext* c, PsEntry* e, DrawKind kind, UINT count,
     // into 3 targets reading a constant buffer of glass_drops_params_cb_t size.
     if (!e->glass && targets == 3 && (kind == kDraw || kind == kDrawInstanced) && count <= 6 && params_sized) {
         e->glass = 2;
+        e->wipe = 2;  // N70: created before our hook, so the variant is unknown -- the data itself is checked
         s += " | glass-drop signature";
     }
     Emit(s);
@@ -396,14 +400,16 @@ struct Readback {
     int cb_slot = 0;
     PsEntry* entry = nullptr;
     bool dump = false;
+    bool wipe = false;   // N70: hand the blades to tint when it comes back
     bool wipers = false;
+    bool rain = false;   // N70: whether it rained when this was taken (note 6.8: does the pass run dry?)
     float speed = 0.f;
 };
 Readback g_rb[kStaging];
 int g_pending = 0;
 int g_readback_errors = 0;  // only the first few are logged
 
-void Sample(ID3D11DeviceContext* c, PsEntry* e, uint64_t now) {
+void Sample(ID3D11DeviceContext* c, PsEntry* e, uint64_t now, bool wipe = false) {
     e->last_sample_ms = now;
     const bool dump = now - e->last_dump_ms >= 10000;
     if (dump) e->last_dump_ms = now;
@@ -437,6 +443,8 @@ void Sample(ID3D11DeviceContext* c, PsEntry* e, uint64_t now) {
                     rb.cb_slot = i;
                     rb.entry = e;
                     rb.dump = dump;
+                    rb.wipe = wipe;
+                    rb.rain = RainActive();
                     rb.wipers = g_wipers.load(std::memory_order_relaxed);
                     rb.speed = g_speed_kmh.load(std::memory_order_relaxed);
                     ++g_pending;
@@ -469,6 +477,24 @@ void LogReadback(const Readback& rb, const float* v) {
     Emit(s);
 }
 
+// N70: the blades of one pane, as the `.wipe` pass is handed them -- segments in the pane's own 2D plane, in
+// metres, SoA with one component per blade [verified: the development notes on the engine's glass, 6.3]. Row 10 is 1/length, so a slot
+// with 0 there is empty; rows 14/15 are one tip and 16/17 the vector to the other, whose length is the blade.
+void TakeWipe(const float* v, bool wipers, bool rain) {
+    tint::WipeLines w;
+    w.half[0] = v[5 * 4 + 0], w.half[1] = v[5 * 4 + 1];
+    for (int i = 0; i < 4; ++i) {
+        const float rcp = v[10 * 4 + i];
+        w.len[i] = rcp > 1e-3f ? 1.f / rcp : 0.f;
+        w.dir[i][0] = v[16 * 4 + i], w.dir[i][1] = v[17 * 4 + i];
+        w.mid[i][0] = v[14 * 4 + i] + 0.5f * w.dir[i][0];
+        w.mid[i][1] = v[15 * 4 + i] + 0.5f * w.dir[i][1];
+    }
+    w.wipers = wipers;
+    w.rain = rain;
+    tint::SetWipeLines(w);
+}
+
 void PollReadbacks(ID3D11DeviceContext* c, uint64_t now) {
     for (Readback& rb : g_rb) {
         if (!rb.pending || now - rb.t_ms < 30) continue;
@@ -480,7 +506,8 @@ void PollReadbacks(ID3D11DeviceContext* c, uint64_t now) {
             float v[kStagingBytes / 4] = {};
             memcpy(v, m.pData, rb.bytes);
             c->Unmap(rb.staging, 0);
-            LogReadback(rb, v);
+            if (rb.wipe) TakeWipe(v, rb.wipers, rb.rain);  // N70
+            if (g_cfg.verbose) LogReadback(rb, v);
         } else if (g_readback_errors++ < 5) {
             Emit("staging Map failed, hr=" + Hex(static_cast<uint32_t>(hr)));
         }
@@ -1395,14 +1422,19 @@ void DrawBody(ID3D11DeviceContext* c, DrawKind kind, UINT count, UINT instances,
             if (!e->described) {
                 const int l = e->label.load(std::memory_order_acquire);
                 if (l >= 0 && g_is_glass[l]) e->glass = 1;
+                if (l >= 0 && g_is_wipe[l]) e->wipe = 1;  // N70
                 e->described = true;
                 DescribeDraw(c, e, kind, count, instances);
             }
             ++e->window_draws;
             ++e->total_draws;
             if (e->glass) ++g_sec_glass_draws;
-            if (g_cfg.verbose && e->glass && now - e->last_sample_ms >= static_cast<uint64_t>(g_cfg.sample_ms))
-                Sample(c, e, now);
+            // N70: a `.wipe` pass is read every frame it draws (the staging ring itself limits how many are
+            // in flight), the rest only for the log.
+            const bool want_wipe = e->wipe && g_wipe_wanted.load(std::memory_order_relaxed);
+            if (e->glass && (want_wipe || (g_cfg.verbose &&
+                                           now - e->last_sample_ms >= static_cast<uint64_t>(g_cfg.sample_ms))))
+                Sample(c, e, now, want_wipe);
         }
     }
     RainOnDraw(c, kind, count, instances);
@@ -2291,9 +2323,11 @@ void Start(const std::wstring& dir, const Config& c) {
     g_cfg.sample_ms = (std::max)(100, g_cfg.sample_ms);
     if (g_by_checksum.empty()) {
         g_is_glass.resize(kCatalogSize);
+        g_is_wipe.resize(kCatalogSize);
         for (int i = 0; i < kCatalogSize; ++i) {
             g_by_checksum.emplace(kCatalog[i].checksum, i);
             g_is_glass[i] = strncmp(kCatalog[i].label, "def.glassdrops", 14) == 0;
+            g_is_wipe[i] = g_is_glass[i] && strstr(kCatalog[i].label, ".wipe") != nullptr;  // N70
         }
     }
     {
@@ -2343,6 +2377,10 @@ void Stop() {
         fclose(g_file);
         g_file = nullptr;
     }
+}
+
+void SetWipeWanted(bool on) {  // N70
+    g_wipe_wanted.store(on, std::memory_order_relaxed);
 }
 
 void SetTelemetry(bool wipers, float speed_kmh, bool paused) {

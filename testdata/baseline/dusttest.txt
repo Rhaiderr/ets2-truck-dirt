@@ -59,6 +59,36 @@ ok   setting the dust leaves the mud                            0.666
 ok   INI override forces a layer (body and trailer front)       0.800
 ok   rate x10: 6 km of wet dirt as muddy as 60 km               0.776
 ok   a saved reach is restored (not for the dust)               0.700
+ok   before wiping, the arc is as dirty as the glass            0.000
+ok   the wipers off take nothing                                0.000
+ok   the first stroke clears part of it, not all                0.405
+ok   the second clears more, still not all                      0.628
+ok   by the fifth it is nearly at the limit                     0.855
+ok   a dry blade never takes more than 90%: 10% of the dust stays 0.900
+ok   with the wipers off no stroke is running                   9.000
+ok   half a stroke in, the blade is halfway across              0.000
+ok   and the front has the two sides of it apart                0.000
+ok   the next stroke goes back the other way                    -1.000
+ok   switched off, no stroke is running                         9.000
+ok   wiping the glass leaves the body alone                     0.713
+ok   driving on fills the swept arc again                       0.758
+ok   a while later the arc is still a little cleaner            0.175
+ok   once the dust saturates, the arc is as dirty as the rest   0.000
+ok   saturated truck: the blade still clears the arc            0.855
+ok   saturated truck: and the arc fills again                   0.070
+ok   dry, the blades leave the film and the soot                0.000
+ok   the jet takes everything inside the arc                    1.000
+ok   and nothing outside it: the body is untouched              0.000
+ok   a dry dirt road does not undo the jet: it builds no film or soot 1.000
+ok   asphalt builds the soot, and the arc takes it back         0.020
+ok   far enough and little of the jet's work is left            0.001
+ok   a long rain levels the pane too                            0.016
+ok   washed: nothing is cleaner than anything                   0.000
+ok   the rain takes the dust off the arc too                    0.875
+ok   what the blades took survives a save and a load            0.855
+ok   the jet's work survives it too                             1.000
+ok   an almost clean truck: nothing wiped                       0.000
+ok   and forcing the shown level changes nothing                0.000
 ok   N31: a new unit's tread starts worn (clean tyres)          0.920
 ok   40 km of wet dirt: the tread as dirty as the wheel         0.000
 ok   ... then 1 km of dry asphalt: the tread wears to the floor 0.704

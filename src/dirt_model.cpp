@@ -79,6 +79,12 @@ void Move(float* coat, float* reach, Layer from, Layer to, double share) {
 // The share of a layer left after `minutes` with this half-life (in game minutes).
 double Keep(double minutes, double half_life) { return std::exp2(-minutes / half_life); }
 
+// N65: the layers a dry blade cannot take off the glass -- what the jet is for. The dust and the grit are not
+// here: those are the blade's own (kDust lives in level_, and kGrit is swept with it).
+float OtherSum(const float* coat) {
+    return coat[kWetMud] + coat[kDryMud] + coat[kSpray] + coat[kFilm] + coat[kSalt] + coat[kSoot];
+}
+
 }  // namespace
 
 Ground GroundOf(const std::string& s) {
@@ -189,8 +195,19 @@ void Model::Drive(int unit, double km, const Ground* ground, const bool* on_grou
     const double faster = std::clamp(0.5 + v / 100.0, 0.5, 1.5);
     if (wet_minutes_ <= 0) {  // wet road: no dust
         const double rate = RatePerKm(g) * faster * settings_.rate * share;
-        level_[unit] += static_cast<float>((1.0 - std::exp(-rate * km)) * (1.0 - level_[unit]));
+        const double lands = 1.0 - std::exp(-rate * km);
+        const float before_level = level_[unit];
+        level_[unit] += static_cast<float>(lands * (1.0 - level_[unit]));
         level_[unit] = std::clamp(level_[unit], 0.f, 1.f);
+        // N64: the same dust, at the same rate, on the glass the blades have swept. The arc holds
+        // level x (1 - wipe); both it and the body take `lands` of what they are missing, and the share that is
+        // left between them is what the glass is drawn with.
+        if (unit == 0 && wipe_ > 0.f) {
+            const double arc = double(before_level) * (1.0 - wipe_);
+            const double new_arc = arc + lands * (1.0 - arc);
+            const double new_level = double(before_level) + lands * (1.0 - before_level);
+            wipe_ = std::clamp(float(1.0 - new_arc / (std::max)(new_level, 1e-6)), 0.f, 1.f);
+        }
     }
 
     // D4 splash: the ground, the wetness and the speed.
@@ -209,7 +226,16 @@ void Model::Drive(int unit, double km, const Ground* ground, const bool* on_grou
     }
     const float height = known ? static_cast<float>(std::clamp((v - 10.0) / 80.0, 0.0, 1.0)) : 0.5f;
     for (double& r : rate_km) r *= faster * settings_.rate * share;
+    // N65: what the jet took of the other layers comes back as those layers grow. They have rates of their own,
+    // so the share closes by however much they grew relative to what is there -- the same shape as the dust's law
+    // above, with the layers' own sum in place of the dust level. [estimativa]
+    const float before_other = unit == 0 ? OtherSum(coat_[0].body) : 0.f;
     Splash(coat_[unit].body, coat_[unit].reach, rate_km, km, height);
+    if (unit == 0 && arc_other_ < 1.f) {
+        const float after_other = OtherSum(coat_[0].body);
+        const float grew = after_other - before_other;
+        if (grew > 0.f && after_other > 1e-4f) arc_other_ += (1.f - arc_other_) * (grew / after_other);
+    }
     if (unit == 0) {
         for (int k = 0; k < kLayers; ++k) front_rate_[k] = rate_km[k] * kFrontShare;
         front_km_ = km;
@@ -248,6 +274,11 @@ void Model::Weather(double minutes, bool raining, float intensity) {
         wet_minutes_ = kWetAfterRainMin;
         const float keep = static_cast<float>(std::exp2(-minutes * intensity / kRainHalfLifeMin));
         for (float& l : level_) l *= keep;
+        // N64e: the rain takes the same share off the arc and off the glass around it, so what is missing
+        // between them does not change -- nothing to do here for the dust.
+        // N65: and as it takes a share (1 - keep) off the body's other layers, the arc's deficit in them closes by
+        // that same share: rain for long enough and nothing on the pane is cleaner than anything else.
+        arc_other_ += (1.f - arc_other_) * (1.f - keep);
         if (wet_ < intensity) {  // towards the intensity: w(t) = I - (I - w0) e^(-t / T)
             const double rise = 1.0 - std::exp(-minutes / kWetRiseMin);
             mean_wet = intensity - (intensity - wet_) * kWetRiseMin * rise / minutes;
@@ -313,7 +344,74 @@ Coat Model::Real(int unit) const {
 void Model::Reset(int unit) {
     Set(unit, 0.f);
     if (unit >= 0 && unit < kUnits) coat_[unit] = Coat{}, tread_wear_[unit] = kTreadWearMax;
+    if (unit == 0) {  // N64/N65: washed, so nothing on the pane is cleaner than anything else any more
+        wipe_ = 0.f;
+        arc_other_ = 1.f;
+        wiper_phase_ = -1.0;
+    }
 }
+
+// N64: the blades. kBladeTakes is the most a DRY blade ever gets off, however long the wipers run: the loose
+// dust, never all of it -- the glass stays hazy where it passed, which is what it looks like in a truck, and is
+// what the user asked for ("com poeira ainda deveria ficar uns 10% sujo se não passar água com o esguicho").
+// N64c: and it does not get there in one stroke. Each stroke takes kStrokeTakes of what is still there to take,
+// so five strokes get to 95% of that limit and the first one to 45%: the glass clears visibly but partly, and
+// then over a few more sweeps. kSweepSeconds is how long one stroke lasts [estimativa: the SDK gives only
+// truck.wipers, on or off -- no angle and no speed, so the blade's own timing cannot be read from the game].
+namespace {
+constexpr float kBladeTakes = 0.90f;
+constexpr float kStrokeTakes = 0.45f;
+constexpr double kSweepSeconds = 0.9;
+}  // namespace
+
+void Model::Wipers(double seconds, bool on) {
+    if (!on || !(seconds > 0) || seconds > 60.0) {  // off, or a long jump: sleep, ferry, load
+        wiper_phase_ = -1.0;  // no stroke running: the whole arc shows what the blades have taken
+        return;
+    }
+    if (wiper_phase_ < 0.0) wiper_phase_ = 0.0;  // the wipers have just come on: a stroke starts now
+    wiper_phase_ += seconds / kSweepSeconds;
+    // What a stroke takes is kept when it ENDS, not when it starts: while it runs, the glass behind the blade
+    // already shows it (Wipe) and the glass ahead of the blade does not (WipeBefore). Several strokes can fall
+    // inside one step (a long frame, or the wipers switched on and off), and each takes its share, so the result
+    // does not depend on how the steps happen to be cut.
+    while (wiper_phase_ >= 1.0) {
+        wiper_phase_ -= 1.0;
+        wipe_ = Swept(wipe_);
+        wiper_dir_ = -wiper_dir_;
+    }
+}
+
+// N64c: what one stroke of the blades leaves behind it -- kStrokeTakes of the way from where the share is now
+// to kBladeTakes, which is as far as a dry blade ever gets.
+float Model::Swept(float wipe) const {
+    return wipe < kBladeTakes ? wipe + (kBladeTakes - wipe) * kStrokeTakes : wipe;
+}
+
+// N65: the jet. Water inside the arc takes everything -- the dust the blade would have left, and the film, the
+// soot, the salt and the mud it cannot touch at all. Outside the arc nothing changes, so the pane is only ever
+// clean all over after a wash.
+void Model::Washer() {
+    wipe_ = 1.f;  // the water takes the dust the blade would have left behind as well
+    arc_other_ = 0.f;
+}
+
+float Model::Wipe() const {
+    // While a stroke runs this is what it will have taken: the glass behind the blade shows it already.
+    return wiper_phase_ >= 0.0 ? Swept(wipe_) : wipe_;
+}
+
+float Model::WipeBefore() const { return wipe_; }
+
+float Model::Phase() const {
+    if (wiper_phase_ < 0.0) return 9.f;  // no stroke running
+    const float t = static_cast<float>(std::clamp(wiper_phase_, 0.0, 1.0));
+    return wiper_dir_ > 0 ? -1.f + 2.f * t : 1.f - 2.f * t;
+}
+
+void Model::SetArcWipe(float share) { wipe_ = std::clamp(share, 0.f, 1.f); }
+
+void Model::SetArcOther(float share) { arc_other_ = std::clamp(share, 0.f, 1.f); }
 
 void Model::Set(int unit, float level) {
     if (unit < 0 || unit >= kUnits) return;
