@@ -2,7 +2,7 @@
 
 **English** | [Português (Brasil)](README.pt-BR.md)
 
-Take a dirt road and watch dust climb from the wheels to the cab. With **Truck Dirt**, your truck, trailer and cargo pick up dust, mud and road grime according to the road surface and weather. At the end of the trip, pull into a fuel station and wash the rig with **F8**.
+Take a dirt road and watch dust climb from the wheels to the cab. With **Truck Dirt**, your truck, trailer and cargo pick up dust, mud and road grime according to the road surface and weather. At the end of the trip, pull into a fuel station and wash the rig with **Ctrl+F7**.
 
 **Compatibility:** Tested on Euro Truck Simulator 2 **1.62** and American Truck Simulator **1.62** in single-player mode, on 64-bit Windows 10/11 with DirectX 11.
 
@@ -20,7 +20,7 @@ Take a dirt road and watch dust climb from the wheels to the cab. With **Truck D
 - **Clean new cargo.** A new load on a flatbed or a lowboy (machines, tractors, vehicles) arrives **clean**, even on a dirty trailer, and then gets dirty on its own.
 - **A clean cab inside.** The dashboard and seats seen through the windows get no dust. Every stock truck of both games, all DLCs included, comes mapped.
 - **Rain washes** the dirt off slowly, and the road stays wet for a while after it stops.
-- **Wash at the fuel station.** Stop at a pump, pull the parking brake and press **F8**: truck and trailer come out clean. The price is charged from your in-game bank (it can be made free in the settings).
+- **Wash at the fuel station.** Stop at a pump, pull the parking brake and press **Ctrl+F7**: truck and trailer come out clean. The price is charged from your in-game bank (it can be made free in the settings).
 - **Saved dirt.** Your truck and your trailer stay dirty from one session to the next, and the dirt follows the game's saves.
 - **Your rig only.** Traffic stays as it is. A company trailer and the quick job's vehicles start clean.
 - **Road trains, doubles and dollies** get dirty too.
@@ -50,7 +50,7 @@ Take a dirt road and watch dust climb from the wheels to the cab. With **Truck D
   <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="After the wash: the truck is clean" width="32%">
 </p>
 
-*From left to right, the ATS sequence shows the wash prompt, the progress bar, and the confirmation. Stop at a pump, set the parking brake and press **F8**. The cost comes out of your in-game bank balance (`charge = 0` makes the wash free).*
+*From left to right, the ATS sequence shows the wash prompt, progress bar and confirmation. These screenshots show an older version that used F8. In the current version, stop at a pump, set the parking brake and press **Ctrl+F7** by default. The cost comes out of your in-game bank balance (`charge = 0` makes the wash free).*
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="The washed Volvo VNL and its lowboy at a Green Petrol pump, seen from outside" width="66%">
