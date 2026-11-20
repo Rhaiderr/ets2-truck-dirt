@@ -2,7 +2,7 @@
 
 [English](README.md) | **Português (Brasil)**
 
-Pegue uma estrada de terra e veja a poeira subir das rodas para a cabine. No **Truck Dirt**, caminhão, carreta e carga acumulam poeira, lama e sujeira de estrada conforme o piso e o clima. No fim da viagem, pare num posto e lave o conjunto com **Ctrl+F7**.
+Pegue uma estrada de terra e veja a poeira subir das rodas para a cabine. No **Truck Dirt**, caminhão, carreta e carga acumulam poeira, lama e sujeira de estrada conforme o piso e o clima. No fim da viagem, pare num posto e lave o conjunto com **Ctrl+Shift+F9**.
 
 **Compatibilidade:** Euro Truck Simulator 2 **1.62** e American Truck Simulator **1.62** testados em modo individual, no Windows 10/11 de 64 bits com DirectX 11.
 
@@ -20,7 +20,7 @@ Pegue uma estrada de terra e veja a poeira subir das rodas para a cabine. No **T
 - **Carga limpa ao ser carregada.** Uma carga nova numa prancha ou num lowboy (máquinas, tratores, veículos) chega **limpa**, mesmo com a carreta suja, e depois suja por conta própria.
 - **O interior fica limpo.** O painel e os bancos vistos pela janela não pegam poeira. Todos os caminhões originais dos dois jogos, com todas as DLCs, já vêm mapeados.
 - **A chuva lava** devagar, e a pista continua molhada um tempo depois que ela para.
-- **Lavagem no posto.** Pare numa bomba, puxe o freio de mão e aperte **Ctrl+F7**: o caminhão e a carreta saem limpos. O preço é cobrado do seu banco no jogo (dá para deixar de graça na configuração).
+- **Lavagem no posto.** Pare numa bomba, puxe o freio de mão e aperte **Ctrl+Shift+F9**: o caminhão e a carreta saem limpos. O preço é cobrado do seu banco no jogo (dá para deixar de graça na configuração).
 - **A sujeira fica salva.** O seu caminhão e a sua carreta continuam sujos de uma sessão para outra, e a sujeira acompanha os saves do jogo.
 - **Só nos seus veículos.** O tráfego fica como está. Uma carreta de empresa e os veículos do frete rápido começam limpos.
 - **Rodotrens, bitrens e dollies** também sujam.
@@ -50,7 +50,7 @@ Pegue uma estrada de terra e veja a poeira subir das rodas para a cabine. No **T
   <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="Depois da lavagem: o caminhão está limpo" width="32%">
 </p>
 
-*Da esquerda para a direita, a sequência no ATS mostra o aviso, a barra de progresso e a confirmação da lavagem. A captura é de uma versão anterior que usava F8. Na versão atual, pare numa bomba, puxe o freio de mão e use **Ctrl+F7** por padrão. O valor sai da sua conta no jogo (`charge = 0` deixa a lavagem gratuita).*
+*Da esquerda para a direita, a sequência no ATS mostra o aviso, a barra de progresso e a confirmação da lavagem. A captura é de uma versão anterior que usava F8. Na versão atual, pare numa bomba, puxe o freio de mão e use **Ctrl+Shift+F9** por padrão. O valor sai da sua conta no jogo (`charge = 0` deixa a lavagem gratuita).*
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="O Volvo VNL lavado com a prancha numa bomba da Green Petrol, visto de fora" width="66%">
@@ -96,7 +96,7 @@ O arquivo é o `ets2_truck_dirt.ini` da pasta `plugins`; cada chave tem um comen
 |---|---|---|---|
 | `[dust]` | `rate` | `1.0` | A velocidade com que suja: `2.0` duas vezes mais rápido, `0.5` metade |
 | `[dust]` | `level` | `-1` | **Teste:** força a sujeira de `0.0` a `1.0`, para ver o efeito na hora (nada é salvo); `-1` = a sujeira real |
-| `[wash]` | `key` | `ctrl+f7` | A tecla da lavagem no posto |
+| `[wash]` | `key` | `ctrl+shift+f9` | A tecla da lavagem no posto |
 | `[wash]` | `game_minutes` | `10` | Minutos de jogo para uma lavagem completa (1–60). As versões compatíveis aceleram o relógio no modo solo. Nas demais, vale a velocidade normal do jogo. |
 | `[wash]` | `price_truck`, `price_trailer` | `120`, `180` | O preço da lavagem, em euro (ETS2) ou dólar (ATS) |
 | `[wash]` | `charge` | `1` | `1` = cobra a lavagem do seu banco no jogo; `0` = de graça |
