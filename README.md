@@ -95,6 +95,8 @@ That's it: drive and the dirt builds up. Logs and the saved dirt live in `Docume
 
 **Uninstall:** delete `ets2_truck_dirt.dll`, `ets2_truck_dirt.ini` and the `ets2_truck_dirt_premap` folder from `plugins` and, if you like, the `Documents\<game>\TruckDirt` folder. The game's files and your saves were never changed.
 
+In game, **Shift+F12** opens the plugins menu (Truck Dirt and Mod Hub tabs): wash key, the telemetry report and the dirt test levels. **Apply** saves the wash key and the report switch to the INI; the test levels last for the session.
+
 ## Settings
 
 The file is `ets2_truck_dirt.ini` in the `plugins` folder; every key has a comment. Edit it with the game closed.
@@ -104,10 +106,11 @@ The file is `ets2_truck_dirt.ini` in the `plugins` folder; every key has a comme
 | `[dust]` | `rate` | `1.0` | How fast the rig gets dirty: `2.0` twice as fast, `0.5` half |
 | `[dust]` | `level` | `-1` | **Test:** forces the dirt from `0.0` to `1.0`, to see the effect at once (nothing is saved); `-1` = the real dirt |
 | `[wash]` | `key` | `ctrl+f7` | The wash key at the fuel station |
+| `[wash]` | `game_minutes` | `10` | Simulated minutes for a full wash (1–60). Compatible single-player builds accelerate the game clock. Other builds follow its normal rate. |
 | `[wash]` | `price_truck`, `price_trailer` | `120`, `180` | The wash price, in euros (ETS2) or dollars (ATS) |
 | `[wash]` | `charge` | `1` | `1` = charge the wash from your in-game bank; `0` = free |
 | `[lang]` | `code` | `auto` | The texts' language: the game's, or a code such as `en_gb` |
-| `[menu]` | `key` | `shift+f7` | The keys menu |
+| `[probe]` | `csv` | `0` | The telemetry report (`telemetry.csv`); also the menu's switch |
 | `[probe]` | `tint` | `2` | `2` draws the dirt; `0` draws nothing (the dirt is still worked out and saved) |
 | `[compat]` | `enforce` | `1` | After a game update, safely turns off the part of the drawing that no longer fits |
 

@@ -95,6 +95,8 @@ Pronto: dirija e a sujeira vai aparecendo. Os logs e a sujeira salva ficam em `D
 
 **Desinstalar:** apague `ets2_truck_dirt.dll`, `ets2_truck_dirt.ini` e a pasta `ets2_truck_dirt_premap` da pasta `plugins` e, se quiser, a pasta `Documentos\<jogo>\TruckDirt`. Os arquivos do jogo e os seus saves nunca foram alterados.
 
+No jogo, **Shift+F12** abre o menu de plugins (abas Truck Dirt e Mod Hub): tecla da lavagem, relatório de telemetria e níveis de teste da sujeira. **Aplicar** grava a tecla e o relatório no INI; os níveis de teste valem só na sessão.
+
 ## Configuração
 
 O arquivo é o `ets2_truck_dirt.ini` da pasta `plugins`; cada chave tem um comentário. Edite com o jogo fechado.
@@ -104,10 +106,11 @@ O arquivo é o `ets2_truck_dirt.ini` da pasta `plugins`; cada chave tem um comen
 | `[dust]` | `rate` | `1.0` | A velocidade com que suja: `2.0` duas vezes mais rápido, `0.5` metade |
 | `[dust]` | `level` | `-1` | **Teste:** força a sujeira de `0.0` a `1.0`, para ver o efeito na hora (nada é salvo); `-1` = a sujeira real |
 | `[wash]` | `key` | `ctrl+f7` | A tecla da lavagem no posto |
+| `[wash]` | `game_minutes` | `10` | Minutos de jogo para uma lavagem completa (1–60). As versões compatíveis aceleram o relógio no modo solo. Nas demais, vale a velocidade normal do jogo. |
 | `[wash]` | `price_truck`, `price_trailer` | `120`, `180` | O preço da lavagem, em euro (ETS2) ou dólar (ATS) |
 | `[wash]` | `charge` | `1` | `1` = cobra a lavagem do seu banco no jogo; `0` = de graça |
 | `[lang]` | `code` | `auto` | O idioma dos textos: o do jogo, ou um código como `pt_br` |
-| `[menu]` | `key` | `shift+f7` | O menu das teclas |
+| `[probe]` | `csv` | `0` | O relatório de telemetria (`telemetry.csv`); também a chave do menu |
 | `[probe]` | `tint` | `2` | `2` desenha a sujeira; `0` não desenha (a sujeira continua sendo calculada e salva) |
 | `[compat]` | `enforce` | `1` | Depois de uma atualização do jogo, desliga com segurança a parte do desenho que deixou de servir |
 
