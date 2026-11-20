@@ -2,26 +2,15 @@
 
 **English** | [Português (Brasil)](README.pt-BR.md)
 
-[![Download ets2-truck-dirt.zip](https://img.shields.io/github/v/release/Rhaiderr/ets2-truck-dirt?label=Download%20ets2-truck-dirt.zip&style=for-the-badge&logo=github&color=2ea44f)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-yellow?style=for-the-badge&logo=buymeacoffee&logoColor=white)](https://buymeacoffee.com/leonardoarouck)
+Take a dirt road and watch dust climb from the wheels to the cab. With **Truck Dirt**, your truck, trailer and cargo pick up dust, mud and road grime according to the road surface and weather. At the end of the trip, pull into a fuel station and wash the rig with **F8**.
 
-**[⬇ Download the latest version (zip)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)** · [all versions](https://github.com/Rhaiderr/ets2-truck-dirt/releases) · [Find more mods on Mod Hub](https://rhaiderr.github.io/mod-hub/)
+**Compatibility:** Tested on Euro Truck Simulator 2 **1.62** and American Truck Simulator **1.62** in single-player mode, on 64-bit Windows 10/11 with DirectX 11.
 
-![ETS2 & ATS Truck Dirt](images/projects/ets2-truck-dirt.png)
-
-*Illustrative promotional artwork, not an in-game screenshot.*
-
-> Realism plugin (mod) for **Euro Truck Simulator 2** and **American Truck Simulator** (ETS2 / ATS): your truck, your trailers and your cargo get dirty as you drive, with dust, mud, road spray, salt and road grime, following the ground and the weather. Built on the SCS Telemetry SDK.
-
-**Install:** copy **everything** in the zip's `plugins` folder into `<game folder>\bin\win_x64\plugins\` (ETS2 or ATS) and start the game ([details](#installation)).
-
-> **Beta release.** Tested on ETS2 1.62 and ATS 1.62, single player, with and without the SnowyMoon graphics mod. Back up your profile if you want to be extra safe.
+**[Download Truck Dirt (ZIP)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)** · [All releases](https://github.com/Rhaiderr/ets2-truck-dirt/releases) · [Installation](#installation) · [Mod Hub](https://rhaiderr.github.io/mod-hub/#truck-dirt)
 
 ![A Volvo VNL with a road-grimed front pulling a lowboy with a clean JCB wheel loader](docs/img/readme/2026-10-31-ats-vnl2025-frente-suja-carga-limpa.jpg)
 
-*ATS: the Volvo VNL's front covered in road dust and grime; the wheel loader on the lowboy was just loaded and is still clean.*
-
-In the game, your truck leaves any dirt road looking showroom-new. With this plugin it **gets dirty little by little**, the way a real truck does: first the bumper, the wheels, the wheel arches and the side skirts; then the sides and the rear; at last a thin film even on top of the cab. A dry dirt road raises dust, rain throws mud, wet asphalt leaves a grey spray, and the miles build up that oily road grime. Rain washes it off slowly, and at a fuel station you can wash everything with one key.
+*In American Truck Simulator, the Volvo VNL is already dusty. The wheel loader has just been loaded and is still clean.*
 
 ## What it does
 
@@ -39,7 +28,7 @@ In the game, your truck leaves any dirt road looking showroom-new. With this plu
 - **42 languages**, following the game's.
 - **Nothing in the game is changed:** no `.scs` file, no save. The dirt is drawn on top of the game's own image, with its light, reflections and shadows.
 
-### In the game
+## In the game
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-vnl2025-lowboy-terra-frente.webp" alt="A white Volvo VNL with dust and grime on a dirt road" width="49%">
@@ -53,13 +42,15 @@ In the game, your truck leaves any dirt road looking showroom-new. With this plu
   <img src="docs/img/readme/2026-10-31-ats-vnl2025-lowboy-jcb-entardecer.webp" alt="The rig with the wheel loader at dusk" width="49%">
 </p>
 
+### Washing the Volvo at a fuel station
+
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-1-f8-no-posto.webp" alt="Stopped at an ATS fuel pump: the F8 wash prompt with its price" width="32%">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-2-lavando.png" alt="The wash screen with the truck icon, the price and the progress bar" width="32%">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="After the wash: the truck is clean" width="32%">
 </p>
 
-*Washing at the fuel station (ATS): stop at a pump, pull the parking brake and press **F8**; the wash screen runs and the truck comes out clean. The price comes out of your in-game bank (`charge = 0` makes it free).*
+*From left to right, the ATS sequence shows the wash prompt, the progress bar, and the confirmation. Stop at a pump, set the parking brake and press **F8**. The cost comes out of your in-game bank balance (`charge = 0` makes the wash free).*
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="The washed Volvo VNL and its lowboy at a Green Petrol pump, seen from outside" width="66%">
@@ -143,12 +134,18 @@ Open an [issue](https://github.com/Rhaiderr/ets2-truck-dirt/issues) with:
 
 ## Explore my other mods
 
+For brake overheating and fade on long descents, see [Brake Fade](https://github.com/Rhaiderr/ets2-ats-brake-fade).
+
 | [ETS2 & ATS Tire Wear](https://github.com/Rhaiderr/ets2-tire-wear) | [BR Brasil - Clima Real](https://github.com/Rhaiderr/ets2-brbrasil-climate) |
 | --- | --- |
 | [![ETS2 & ATS Tire Wear](images/projects/ets2-tire-wear.png)](https://github.com/Rhaiderr/ets2-tire-wear) | [![BR Brasil - Clima Real](images/projects/ets2-brbrasil-climate.png)](https://github.com/Rhaiderr/ets2-brbrasil-climate) |
 | Visual tire wear and blowouts for ETS2 and ATS. | Regional summer dashboard temperatures for ETS2 + BR Brasil. |
 
 *Illustrative cover artwork; see each project for requirements and compatibility.*
+
+![ETS2 & ATS Truck Dirt](images/projects/ets2-truck-dirt.png)
+
+*Truck Dirt promotional artwork.*
 
 ## Support my work
 

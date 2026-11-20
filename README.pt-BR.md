@@ -2,26 +2,15 @@
 
 [English](README.md) | **Português (Brasil)**
 
-[![Baixar ets2-truck-dirt.zip](https://img.shields.io/github/v/release/Rhaiderr/ets2-truck-dirt?label=Baixar%20ets2-truck-dirt.zip&style=for-the-badge&logo=github&color=2ea44f)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-apoie-yellow?style=for-the-badge&logo=buymeacoffee&logoColor=white)](https://buymeacoffee.com/leonardoarouck)
+Pegue uma estrada de terra e veja a poeira subir das rodas para a cabine. No **Truck Dirt**, caminhão, carreta e carga acumulam poeira, lama e sujeira de estrada conforme o piso e o clima. No fim da viagem, pare num posto e lave o conjunto com **F8**.
 
-**[⬇ Baixar a versão mais recente (zip)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)** · [todas as versões](https://github.com/Rhaiderr/ets2-truck-dirt/releases) · [Mais mods no Mod Hub](https://rhaiderr.github.io/mod-hub/)
+**Compatibilidade:** Euro Truck Simulator 2 **1.62** e American Truck Simulator **1.62** testados em modo individual, no Windows 10/11 de 64 bits com DirectX 11.
 
-![ETS2 & ATS Truck Dirt](images/projects/ets2-truck-dirt.png)
-
-*Arte promocional ilustrativa, não é uma captura do jogo.*
-
-> Plugin de realismo (mod) para **Euro Truck Simulator 2** e **American Truck Simulator** (ETS2 / ATS): o seu caminhão, as suas carretas e a carga ficam sujos enquanto você dirige, com poeira, lama, spray da pista, sal e fuligem de estrada, conforme o chão e o clima. Feito sobre o SCS Telemetry SDK.
-
-**Instalar:** copie **tudo** o que está na pasta `plugins` do zip para `<pasta do jogo>\bin\win_x64\plugins\` (ETS2 ou ATS) e abra o jogo ([detalhes](#instalação)).
-
-> **Versão beta.** Testada no ETS2 1.62 e no ATS 1.62, em single player, com e sem o mod gráfico SnowyMoon. Faça backup do seu perfil se quiser segurança extra.
+**[Baixar Truck Dirt (ZIP)](https://github.com/Rhaiderr/ets2-truck-dirt/releases/latest/download/ets2-truck-dirt.zip)** · [Todas as versões](https://github.com/Rhaiderr/ets2-truck-dirt/releases) · [Instalação](#instalação) · [Mod Hub](https://rhaiderr.github.io/mod-hub/#truck-dirt)
 
 ![Um Volvo VNL com a frente suja de estrada puxando uma prancha com uma pá carregadeira JCB limpa](docs/img/readme/2026-10-31-ats-vnl2025-frente-suja-carga-limpa.jpg)
 
-*ATS: a frente do Volvo VNL coberta pela poeira e pela fuligem da estrada; a pá carregadeira na prancha acabou de ser carregada e ainda está limpa.*
-
-No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o plugin, ele **vai sujando aos poucos**, do jeito que um caminhão de verdade suja: primeiro o para-choque, as rodas, as caixas de roda e as saias; depois as laterais e a traseira; por último uma película fina até no alto da cabine. Uma estrada de terra seca levanta poeira, a chuva joga lama, o asfalto molhado deixa um spray acinzentado e a estrada vai formando aquela película oleosa de fuligem. A chuva lava aos poucos, e no posto você pode lavar tudo com uma tecla.
+*No American Truck Simulator, o Volvo VNL já está coberto de poeira. A pá carregadeira acabou de ser embarcada e ainda está limpa.*
 
 ## O que ele faz
 
@@ -39,7 +28,7 @@ No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o
 - **42 idiomas**, seguindo o idioma do jogo.
 - **Nada do jogo é alterado:** nenhum `.scs` nem save. A sujeira é desenhada por cima da imagem do próprio jogo, com a luz, os reflexos e as sombras dele.
 
-### No jogo
+## No jogo
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-vnl2025-lowboy-terra-frente.webp" alt="Volvo VNL branco com poeira e fuligem numa estrada de terra" width="49%">
@@ -53,13 +42,15 @@ No jogo, o caminhão sai de qualquer estrada de terra brilhando como novo. Com o
   <img src="docs/img/readme/2026-10-31-ats-vnl2025-lowboy-jcb-entardecer.webp" alt="O conjunto com a pá carregadeira no entardecer" width="49%">
 </p>
 
+### Lavando o Volvo no posto
+
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-1-f8-no-posto.webp" alt="Parado numa bomba de combustível no ATS: o aviso do F8 com o preço da lavagem" width="32%">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-2-lavando.png" alt="A tela da lavagem com o caminhão, o preço e a barra de progresso" width="32%">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-3-limpo.webp" alt="Depois da lavagem: o caminhão está limpo" width="32%">
 </p>
 
-*Lavagem no posto (ATS): pare numa bomba, puxe o freio de mão e aperte **F8**; a tela da lavagem roda e o caminhão sai limpo. O preço sai do seu banco no jogo (`charge = 0` deixa de graça).*
+*Da esquerda para a direita, a sequência no ATS mostra o aviso de lavagem, a barra de progresso e a confirmação. Pare numa bomba, puxe o freio de mão e aperte **F8**. O valor sai da sua conta no jogo (`charge = 0` deixa a lavagem gratuita).*
 
 <p align="center">
   <img src="docs/img/readme/2026-10-31-ats-lavagem-4-conjunto-limpo-na-bomba.webp" alt="O Volvo VNL lavado com a prancha numa bomba da Green Petrol, visto de fora" width="66%">
@@ -143,12 +134,18 @@ Abra uma [issue](https://github.com/Rhaiderr/ets2-truck-dirt/issues) com:
 
 ## Conheça meus outros mods
 
+Para sentir a perda de eficiência dos freios numa descida, veja o [Brake Fade](https://github.com/Rhaiderr/ets2-ats-brake-fade#português-brasil).
+
 | [ETS2 & ATS Tire Wear](https://github.com/Rhaiderr/ets2-tire-wear) | [BR Brasil - Clima Real](https://github.com/Rhaiderr/ets2-brbrasil-climate) |
 | --- | --- |
 | [![ETS2 & ATS Tire Wear](images/projects/ets2-tire-wear.png)](https://github.com/Rhaiderr/ets2-tire-wear) | [![BR Brasil - Clima Real](images/projects/ets2-brbrasil-climate.png)](https://github.com/Rhaiderr/ets2-brbrasil-climate) |
 | Desgaste visual e estouro de pneus para ETS2 e ATS. | Temperaturas regionais de verão no painel para ETS2 + BR Brasil. |
 
 *Capas ilustrativas; confira os requisitos e a compatibilidade em cada projeto.*
+
+![ETS2 & ATS Truck Dirt](images/projects/ets2-truck-dirt.png)
+
+*Arte promocional do Truck Dirt.*
 
 ## Apoie meu trabalho
 
